@@ -3217,6 +3217,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "moli-tutu"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "arboard",
+ "aws-config",
+ "aws-credential-types",
+ "aws-sdk-s3",
+ "base64 0.22.1",
+ "clipboard",
+ "image 0.24.9",
+ "mime_guess",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "sha256",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-fs",
+ "tauri-plugin-opener",
+ "thiserror 1.0.69",
+ "tokio",
+ "uuid",
+]
+
+[[package]]
 name = "moxcms"
 version = "0.7.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5313,32 +5339,6 @@ dependencies = [
  "webview2-com",
  "window-vibrancy",
  "windows 0.61.3",
-]
-
-[[package]]
-name = "tauri-app"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "arboard",
- "aws-config",
- "aws-credential-types",
- "aws-sdk-s3",
- "base64 0.22.1",
- "clipboard",
- "image 0.24.9",
- "mime_guess",
- "rusqlite",
- "serde",
- "serde_json",
- "sha256",
- "tauri",
- "tauri-build",
- "tauri-plugin-fs",
- "tauri-plugin-opener",
- "thiserror 1.0.69",
- "tokio",
- "uuid",
 ]
 
 [[package]]
