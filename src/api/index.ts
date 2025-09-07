@@ -93,6 +93,18 @@ export class ImageHostingAPI {
     }
   }
 
+  static async readFileFromPath(filePath: string): Promise<Uint8Array | null> {
+    console.log('[API] Reading file from path:', filePath);
+    try {
+      const result = await invoke<number[] | null>("read_file_from_path", { filePath });
+      console.log('[API] File read result:', result ? `${result.length} bytes` : 'no data');
+      return result ? new Uint8Array(result) : null;
+    } catch (error) {
+      console.error('[API] Failed to read file from path:', error);
+      throw error;
+    }
+  }
+
   static async convertFileToUint8Array(file: File): Promise<Uint8Array> {
     console.log('[API] Converting file to Uint8Array:', {
       name: file.name,

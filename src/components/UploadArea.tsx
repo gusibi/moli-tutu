@@ -1,8 +1,9 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { Upload, Image as ImageIcon } from "lucide-react";
 import { cn } from "../lib/utils";
 import { ImageHostingAPI } from "../api";
 import { UploadResult } from "../types";
+import { listen } from "@tauri-apps/api/event";
 
 interface UploadAreaProps {
   onUploadSuccess: (result: UploadResult) => void;
@@ -82,41 +83,66 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
     [onUploadSuccess, onUploadError]
   );
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    console.log("[UploadArea] Drag over detected");
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    console.log("[UploadArea] === DRAG ENTER DETECTED ===");
+    console.log("[UploadArea] Event:", e);
+    console.log("[UploadArea] DataTransfer:", e.dataTransfer);
+    console.log("[UploadArea] DataTransfer types:", e.dataTransfer?.types);
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(true);
+    console.log("[UploadArea] isDragOver set to true");
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    console.log("[UploadArea] === DRAG OVER DETECTED ===");
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'copy';
+      console.log("[UploadArea] dropEffect set to copy");
+    }
   }, []);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
-    console.log("[UploadArea] Drag leave detected");
+    console.log("[UploadArea] === DRAG LEAVE DETECTED ===");
+    console.log("[UploadArea] Event target:", e.target);
+    console.log("[UploadArea] Current target:", e.currentTarget);
     e.preventDefault();
     e.stopPropagation();
     
     // Only set isDragOver to false if we're leaving the main container
-    // Check if the related target is outside the drop zone
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX;
     const y = e.clientY;
     
+    console.log("[UploadArea] Mouse position:", { x, y });
+    console.log("[UploadArea] Container bounds:", rect);
+    
     if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      console.log("[UploadArea] Mouse outside container, setting isDragOver to false");
       setIsDragOver(false);
     }
   }, []);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
-      console.log("[UploadArea] Drop event detected");
+      console.log("[UploadArea] === DROP EVENT DETECTED ===");
+      console.log("[UploadArea] Event:", e);
+      console.log("[UploadArea] DataTransfer:", e.dataTransfer);
+      console.log("[UploadArea] DataTransfer files:", e.dataTransfer?.files);
       e.preventDefault();
       e.stopPropagation();
       setIsDragOver(false);
       
       const files = e.dataTransfer.files;
-      console.log(`[UploadArea] Files dropped: ${files.length}`);
+      console.log(`[UploadArea] Files dropped: ${files?.length || 0}`);
       
-      if (files.length > 0) {
+      if (files && files.length > 0) {
         console.log("[UploadArea] Processing dropped files...");
+        for (let i = 0; i < files.length; i++) {
+          console.log(`[UploadArea] File ${i}:`, files[i]);
+        }
         handleFiles(files);
       } else {
         console.log("[UploadArea] No files in drop event");
@@ -139,164 +165,108 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
     [handleFiles]
   );
 
-  // Add drag event listeners to handle drag and drop
-  React.useEffect(() => {
-    console.log("[UploadArea] Setting up drag event listeners...");
+  // Add Tauri-specific drag and drop event listeners
+  useEffect(() => {
+    console.log("[UploadArea] Setting up Tauri drag and drop listeners...");
     
-    // Try multiple approaches for Tauri compatibility
-    const dropZone = document.querySelector('[data-upload-drop-zone]') as HTMLElement;
-    const wholeDocument = document.documentElement;
-    const bodyElement = document.body;
+    let unlistenDragOver: (() => void) | null = null;
+    let unlistenDrop: (() => void) | null = null;
     
-    if (!dropZone) {
-      console.error("[UploadArea] Drop zone element not found!");
-      return;
-    }
-    
-    console.log("[UploadArea] Drop zone element found:", dropZone);
-    
-    // Prevent default drag behaviors on document and body
-    const preventDefaults = (e: DragEvent) => {
-      console.log("[UploadArea] Preventing default for:", e.type, "on", e.target);
-      e.preventDefault();
-      e.stopPropagation();
-    };
-    
-    const handleDragEnter = (e: DragEvent) => {
-      console.log("[UploadArea] === DRAG ENTER EVENT ===", e);
-      console.log("[UploadArea] Event target:", e.target);
-      console.log("[UploadArea] Current target:", e.currentTarget);
-      console.log("[UploadArea] Event type:", e.type);
-      console.log("[UploadArea] DataTransfer:", e.dataTransfer);
-      console.log("[UploadArea] DataTransfer types:", e.dataTransfer?.types);
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragOver(true);
-      console.log("[UploadArea] isDragOver set to true");
-    };
-    
-    const handleDragOver = (e: DragEvent) => {
-      console.log("[UploadArea] === DRAG OVER EVENT ===");
-      console.log("[UploadArea] DataTransfer effectAllowed:", e.dataTransfer?.effectAllowed);
-      console.log("[UploadArea] DataTransfer dropEffect:", e.dataTransfer?.dropEffect);
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.dataTransfer) {
-        e.dataTransfer.dropEffect = 'copy';
-      }
-      setIsDragOver(true);
-    };
-    
-    const handleDragLeave = (e: DragEvent) => {
-      console.log("[UploadArea] === DRAG LEAVE EVENT ===", e);
-      console.log("[UploadArea] Event target:", e.target);
-      console.log("[UploadArea] Related target:", e.relatedTarget);
-      e.preventDefault();
-      e.stopPropagation();
-      
-      // Only hide drag state if we're leaving the drop zone completely
-      setTimeout(() => {
-        const rect = dropZone.getBoundingClientRect();
-        // Use current mouse position or assume we left
-        console.log("[UploadArea] Setting isDragOver to false after drag leave");
-        setIsDragOver(false);
-      }, 100);
-    };
-    
-    const handleDrop = (e: DragEvent) => {
-      console.log("[UploadArea] === DROP EVENT ===", e);
-      console.log("[UploadArea] Event target:", e.target);
-      console.log("[UploadArea] DataTransfer:", e.dataTransfer);
-      console.log("[UploadArea] DataTransfer files:", e.dataTransfer?.files);
-      console.log("[UploadArea] Files length:", e.dataTransfer?.files?.length);
-      
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragOver(false);
-      console.log("[UploadArea] isDragOver set to false");
-      
-      const files = e.dataTransfer?.files;
-      if (files && files.length > 0) {
-        console.log("[UploadArea] Files detected, details:");
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          console.log(`[UploadArea] File ${i}:`, {
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            lastModified: file.lastModified
-          });
-        }
-        console.log("[UploadArea] Calling handleFiles with", files.length, "files");
-        handleFiles(files);
-      } else {
-        console.warn("[UploadArea] No files in drop event or files is null/undefined");
+    const setupTauriListeners = async () => {
+      try {
+        // Listen for drag over events
+        unlistenDragOver = await listen('tauri://drag-over', (event) => {
+          console.log("[UploadArea] === TAURI DRAG OVER EVENT ===", event);
+          setIsDragOver(true);
+        });
+        
+        // Listen for drop events
+        unlistenDrop = await listen('tauri://drag-drop', (event) => {
+          console.log("[UploadArea] === TAURI DROP EVENT ===", event);
+          console.log("[UploadArea] Event payload:", event.payload);
+          
+          setIsDragOver(false);
+          
+          // Handle the dropped files - payload structure is { paths: string[], position: { x: number, y: number } }
+          const payload = event.payload as { paths: string[], position: { x: number, y: number } };
+          if (payload && payload.paths && payload.paths.length > 0) {
+            console.log("[UploadArea] Files dropped via Tauri:", payload.paths);
+            
+            // Convert file paths to File objects
+            const processDroppedFiles = async () => {
+              try {
+                for (const filePath of payload.paths) {
+                  console.log("[UploadArea] Processing dropped file:", filePath);
+                  
+                  // Check if it's an image file by extension
+                  const isImage = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(filePath);
+                  if (!isImage) {
+                    console.log("[UploadArea] Skipping non-image file:", filePath);
+                    continue;
+                  }
+                  
+                  // Read the file using Tauri's fs API
+                  console.log("[UploadArea] Reading file data...");
+                  const fileData = await ImageHostingAPI.readFileFromPath(filePath);
+                  if (fileData) {
+                    const fileName = filePath.split('/').pop() || 'dropped-file';
+                    console.log("[UploadArea] File read successfully, uploading:", fileName, "Size:", fileData.length, "bytes");
+                    
+                    setIsUploading(true);
+                    try {
+                      const result = await ImageHostingAPI.uploadImage(fileData, fileName);
+                      console.log("[UploadArea] Upload result:", result);
+                      if (result.success) {
+                        console.log("[UploadArea] Upload successful!");
+                        onUploadSuccess(result);
+                      } else {
+                        console.error("[UploadArea] Upload failed:", result.error);
+                        onUploadError(result.error || "上传失败");
+                      }
+                    } catch (error) {
+                      console.error("[UploadArea] Upload error:", error);
+                      onUploadError(error instanceof Error ? error.message : "上传失败");
+                    } finally {
+                      setIsUploading(false);
+                    }
+                  } else {
+                    console.error("[UploadArea] Failed to read file data");
+                    onUploadError("无法读取文件数据");
+                  }
+                }
+              } catch (error) {
+                console.error("[UploadArea] Error processing dropped files:", error);
+                onUploadError("处理拖拽文件时出错");
+              }
+            };
+            
+            processDroppedFiles();
+          } else {
+            console.log("[UploadArea] No files in drop event or invalid payload structure");
+          }
+        });
+        
+        console.log("[UploadArea] Tauri drag and drop listeners set up successfully");
+      } catch (error) {
+        console.error("[UploadArea] Failed to set up Tauri listeners:", error);
       }
     };
     
-    // Event handlers for debugging
-    const events = ['dragstart', 'drag', 'dragenter', 'dragover', 'dragleave', 'drop', 'dragend'];
-    
-    const debugHandler = (eventType: string) => (e: DragEvent) => {
-      console.log(`[UploadArea] ${eventType.toUpperCase()} on`, e.target, e);
-      if (eventType === 'dragenter' || eventType === 'dragover') {
-        e.preventDefault();
-        if (e.dataTransfer) {
-          e.dataTransfer.dropEffect = 'copy';
-        }
-        setIsDragOver(true);
-      } else if (eventType === 'drop') {
-        handleDrop(e);
-      } else if (eventType === 'dragleave') {
-        // Only set to false if leaving the main container
-        if (e.target === dropZone) {
-          setTimeout(() => setIsDragOver(false), 100);
-        }
-      }
-    };
-    
-    // Add comprehensive event listeners
-    console.log("[UploadArea] Adding event listeners to multiple elements...");
-    
-    // Add to drop zone
-    events.forEach(eventType => {
-      dropZone.addEventListener(eventType, debugHandler(eventType), true);
-    });
-    
-    // Add to document to catch all events
-    events.forEach(eventType => {
-      document.addEventListener(eventType, (e) => {
-        console.log(`[UploadArea] Document ${eventType}:`, e.target);
-        if (eventType === 'dragover' || eventType === 'dragenter') {
-          e.preventDefault();
-        }
-      }, true);
-    });
-    
-    // Add to window for good measure
-    window.addEventListener('dragover', (e) => {
-      console.log('[UploadArea] Window dragover:', e);
-      e.preventDefault();
-    }, true);
-    
-    window.addEventListener('drop', (e) => {
-      console.log('[UploadArea] Window drop:', e);
-      e.preventDefault();
-    }, true);
-    
-    console.log("[UploadArea] All drag event listeners attached successfully");
+    setupTauriListeners();
     
     // Cleanup
     return () => {
-      console.log("[UploadArea] Cleaning up drag event listeners...");
-      
-      events.forEach(eventType => {
-        dropZone.removeEventListener(eventType, debugHandler(eventType), true);
-      });
-      
-      console.log("[UploadArea] Drag event listeners removed");
+      console.log("[UploadArea] Cleaning up Tauri listeners...");
+      if (unlistenDragOver) {
+        unlistenDragOver();
+      }
+      if (unlistenDrop) {
+        unlistenDrop();
+      }
     };
-  }, [handleFiles]);
+  }, [handleFiles, onUploadSuccess, onUploadError]);
+
+
 
   const handlePasteFromClipboard = useCallback(async () => {
     console.log("[UploadArea] Clipboard paste initiated");
@@ -337,6 +307,12 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
     <div className="w-full max-w-2xl mx-auto">
       <div
         data-upload-drop-zone
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onMouseEnter={() => console.log("[UploadArea] Mouse entered drop zone")}
+        onMouseLeave={() => console.log("[UploadArea] Mouse left drop zone")}
         className={cn(
           "relative border-2 border-dashed rounded-lg p-8 text-center transition-colors",
           isDragOver
@@ -344,6 +320,7 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
             : "border-gray-300 hover:border-gray-400",
           isUploading && "opacity-50 pointer-events-none"
         )}
+        style={{ minHeight: '200px' }}
       >
         <input
           type="file"

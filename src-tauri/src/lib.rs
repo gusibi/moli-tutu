@@ -1,6 +1,7 @@
 use std::sync::Mutex;
 use tauri::{Manager, State};
 use uuid::Uuid;
+use base64;
 
 mod types;
 mod r2_uploader;
@@ -200,10 +201,145 @@ async fn get_upload_history(
 
 #[tauri::command]
 fn get_clipboard_image() -> Result<Option<Vec<u8>>, String> {
-    println!("[Backend] Getting clipboard image (not implemented yet)");
-    // For now, return None as clipboard image support requires more complex implementation
-    // This can be implemented later with proper clipboard handling
-    Ok(None)
+    println!("[Backend] Getting clipboard image...");
+    
+    use arboard::Clipboard;
+    
+    // Try to get clipboard context
+    let mut clipboard = match Clipboard::new() {
+        Ok(clipboard) => clipboard,
+        Err(e) => {
+            println!("[Backend] Failed to create clipboard context: {}", e);
+            return Err(format!("Failed to access clipboard: {}", e));
+        }
+    };
+    
+    // First, try to get image directly from clipboard
+    match clipboard.get_image() {
+        Ok(image_data) => {
+            println!("[Backend] Found image in clipboard: {}x{}", image_data.width, image_data.height);
+            
+            // Convert RGBA data to PNG format
+            use image::{ImageBuffer, RgbaImage, ImageFormat};
+            use std::io::Cursor;
+            
+            let img: RgbaImage = match ImageBuffer::from_raw(
+                image_data.width as u32,
+                image_data.height as u32,
+                image_data.bytes.into_owned(),
+            ) {
+                Some(img) => img,
+                None => {
+                    println!("[Backend] Failed to create image buffer from clipboard data");
+                    return Err("Failed to process clipboard image data".to_string());
+                }
+            };
+            
+            // Encode as PNG
+            let mut png_data = Vec::new();
+            let mut cursor = Cursor::new(&mut png_data);
+            
+            match img.write_to(&mut cursor, ImageFormat::Png) {
+                Ok(_) => {
+                    println!("[Backend] Successfully converted clipboard image to PNG: {} bytes", png_data.len());
+                    return Ok(Some(png_data));
+                },
+                Err(e) => {
+                    println!("[Backend] Failed to encode image as PNG: {}", e);
+                    return Err(format!("Failed to encode image: {}", e));
+                }
+            }
+        },
+        Err(e) => {
+            println!("[Backend] No image in clipboard or failed to get image: {}", e);
+        }
+    }
+    
+    // Fallback: try to get text and see if it's a file path or base64 data
+    match clipboard.get_text() {
+        Ok(contents) => {
+            println!("[Backend] Clipboard text contents length: {}", contents.len());
+            
+            // Check if it looks like a base64 encoded image
+            if contents.starts_with("data:image/") {
+                println!("[Backend] Found data URL in clipboard");
+                
+                // Extract base64 part after the comma
+                if let Some(comma_pos) = contents.find(',') {
+                    let base64_data = &contents[comma_pos + 1..];
+                    use base64::{Engine as _, engine::general_purpose};
+                    match general_purpose::STANDARD.decode(base64_data) {
+                        Ok(image_data) => {
+                            println!("[Backend] Successfully decoded base64 image: {} bytes", image_data.len());
+                            return Ok(Some(image_data));
+                        },
+                        Err(e) => {
+                            println!("[Backend] Failed to decode base64: {}", e);
+                        }
+                    }
+                }
+            }
+            
+            // Check if it's a file path to an image
+            if contents.len() < 1000 && (contents.ends_with(".png") || contents.ends_with(".jpg") || contents.ends_with(".jpeg") || contents.ends_with(".gif") || contents.ends_with(".webp")) {
+                println!("[Backend] Found image file path in clipboard: {}", contents);
+                
+                use std::path::Path;
+                let path = Path::new(&contents);
+                if path.exists() && path.is_file() {
+                    match std::fs::read(path) {
+                        Ok(data) => {
+                            println!("[Backend] Successfully read image file: {} bytes", data.len());
+                            return Ok(Some(data));
+                        },
+                        Err(e) => {
+                            println!("[Backend] Failed to read image file: {}", e);
+                        }
+                    }
+                }
+            }
+            
+            println!("[Backend] No image data found in clipboard text");
+            Ok(None)
+        },
+        Err(e) => {
+            println!("[Backend] Failed to get clipboard text: {}", e);
+            Ok(None)
+        }
+    }
+}
+
+#[tauri::command]
+async fn read_file_from_path(file_path: String) -> Result<Option<Vec<u8>>, String> {
+    println!("[Backend] Reading file from path: {}", file_path);
+    
+    use std::path::Path;
+    
+    let path = Path::new(&file_path);
+    
+    // Check if file exists
+    if !path.exists() {
+        println!("[Backend] File does not exist: {}", file_path);
+        return Ok(None);
+    }
+    
+    // Check if it's a file (not a directory)
+    if !path.is_file() {
+        println!("[Backend] Path is not a file: {}", file_path);
+        return Ok(None);
+    }
+    
+    // Read the file
+    match std::fs::read(path) {
+        Ok(data) => {
+            println!("[Backend] File read successfully: {} bytes", data.len());
+            Ok(Some(data))
+        },
+        Err(e) => {
+            println!("[Backend] Failed to read file: {}", e);
+            Err(format!("Failed to read file: {}", e))
+        }
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -243,7 +379,8 @@ pub fn run() {
             get_r2_config,
             upload_image,
             get_upload_history,
-            get_clipboard_image
+            get_clipboard_image,
+            read_file_from_path
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
