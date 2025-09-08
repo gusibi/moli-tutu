@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from "react";
-import { Upload, Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon, CloudUpload } from "lucide-react";
 import { cn } from "../lib/utils";
 import { ImageHostingAPI } from "../api";
 import { UploadResult } from "../types";
@@ -304,71 +304,74 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
   }, [onUploadSuccess, onUploadError]);
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <div
+    <div className="w-full">
+      {/* 拖拽上传区域 */}
+      <div 
         data-upload-drop-zone
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onMouseEnter={() => console.log("[UploadArea] Mouse entered drop zone")}
-        onMouseLeave={() => console.log("[UploadArea] Mouse left drop zone")}
         className={cn(
-          "relative border-2 border-dashed rounded-box p-8 text-center transition-all duration-300",
-          isDragOver
-            ? "border-primary bg-primary/5 shadow-md"
-            : "border-base-300 hover:border-base-400 hover:shadow-sm",
+          "border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-indigo-400 transition-colors cursor-pointer",
+          isDragOver && "border-indigo-400 bg-indigo-50",
           isUploading && "opacity-50 pointer-events-none"
         )}
-        style={{ minHeight: '200px' }}
       >
-        <input
-          type="file"
-          accept="image/*"
+        <CloudUpload className={cn(
+          "mx-auto text-6xl mb-4",
+          isDragOver ? "text-indigo-500" : "text-gray-400"
+        )} />
+        <p className="text-lg text-gray-600 mb-2">
+          {isUploading ? "上传中..." : isDragOver ? "在这里放下图片" : "拖拽图片到这里或点击选择"}
+        </p>
+        <p className="text-sm text-gray-500">支持 JPG、PNG、GIF 格式，最大 10MB</p>
+        
+        <input 
+          type="file" 
+          accept="image/*" 
           onChange={handleFileSelect}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+          className="hidden" 
+          multiple 
           disabled={isUploading}
-          multiple
         />
         
-        <div className="space-y-6 pointer-events-none relative z-0">
-          <div className="mx-auto w-20 h-20 bg-base-200 rounded-full flex items-center justify-center transition-transform duration-300 hover:scale-110">
-            {isUploading ? (
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              <Upload className="w-10 h-10 text-base-content/50 transition-transform duration-300 group-hover:scale-110" />
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <p className="text-xl font-medium text-base-content transition-colors duration-300">
-              {isUploading ? "上传中..." : isDragOver ? "在这里放下图片" : "拖拽图片到这里或点击上传"}
-            </p>
-            <p className="text-sm text-base-content/70">
-              支持 PNG, JPG, GIF, WebP 格式
-            </p>
-          </div>
-          
-          {!isUploading && (
-            <div className="text-base-content/50 text-sm mt-4">
-              或拖放文件到此处
-              <span className="block mt-1">单击以浏览文件</span>
+        {!isUploading && (
+          <button 
+            onClick={() => {
+              const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+              input?.click();
+            }}
+            className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            选择文件
+          </button>
+        )}
+        
+        {isUploading && (
+          <div className="mt-6">
+            <div className="flex justify-between text-sm text-gray-600 mb-2">
+              <span>上传进度</span>
+              <span>处理中...</span>
             </div>
-          )}
-        </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="bg-indigo-600 h-2 rounded-full animate-pulse" style={{width: '100%'}}></div>
+            </div>
+          </div>
+        )}
       </div>
       
-      <div className="mt-8 flex justify-center">
+      <div className="mt-6 flex justify-center">
         <button
           onClick={handlePasteFromClipboard}
           disabled={isUploading}
           className={cn(
-            "btn btn-primary btn-sm gap-2 btn-outline shadow-sm hover:shadow transition-all duration-300 px-4 py-2 min-h-10 h-10",
+            "inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors",
             isUploading && "opacity-50 cursor-not-allowed"
           )}
         >
-          <ImageIcon className="w-4 h-4 transition-transform duration-300 hover:scale-110" />
-          <span>从剪贴板粘贴</span>
+          <ImageIcon className="w-4 h-4" />
+          从剪贴板粘贴
         </button>
       </div>
     </div>

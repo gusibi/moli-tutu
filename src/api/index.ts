@@ -7,13 +7,13 @@ export class ImageHostingAPI {
       accessKeyId: config.access_key_id ? `${config.access_key_id.substring(0, 6)}...` : 'not set',
       secretAccessKey: config.secret_access_key ? 'set' : 'not set',
       endpoint: config.endpoint,
-      bucket: config.bucket,
-      publicUrl: config.public_url
+      bucket: config.bucket_name,
+      publicUrl: config.public_url_base
     });
     try {
       const result = await invoke("save_r2_config", { config });
       console.log('[API] R2 config saved successfully');
-      return result;
+      return result as void;
     } catch (error) {
       console.error('[API] Failed to save R2 config:', error);
       throw error;
@@ -25,7 +25,7 @@ export class ImageHostingAPI {
     try {
       const result = await invoke("get_r2_config");
       console.log('[API] R2 config retrieved:', result ? 'config exists' : 'no config found');
-      return result;
+      return result as R2Config | null;
     } catch (error) {
       console.error('[API] Failed to get R2 config:', error);
       throw error;
@@ -52,20 +52,29 @@ export class ImageHostingAPI {
       
       console.log('[API] Upload invoke completed:', {
         duration: `${endTime - startTime}ms`,
-        success: result.success,
-        url: result.url,
-        error: result.error,
-        fromCache: result.from_cache
+        success: (result as any).success,
+        url: (result as any).url,
+        error: (result as any).error,
+        fromCache: (result as any).from_cache
       });
       
-      return result;
+      return {
+        success: (result as any).success,
+        url: (result as any).url,
+        error: (result as any).error,
+        from_cache: (result as any).from_cache
+      };
     } catch (error) {
       console.error('[API] Upload invoke failed:', {
         error,
         message: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined
       });
-      throw error;
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Upload failed',
+        from_cache: false
+      };
     }
   }
 
@@ -73,10 +82,33 @@ export class ImageHostingAPI {
     console.log('[API] Getting upload history...');
     try {
       const result = await invoke("get_upload_history");
-      console.log('[API] Upload history retrieved:', result ? `${result.length} records` : 'no records');
-      return result;
+      const records = result as UploadRecord[] || [];
+      console.log('[API] Upload history retrieved:', `${records.length} records`);
+      return records;
     } catch (error) {
       console.error('[API] Failed to get upload history:', error);
+      return [];
+    }
+  }
+
+  static async clearUploadHistory(): Promise<void> {
+    console.log('[API] Clearing upload history...');
+    try {
+      await invoke("clear_upload_history");
+      console.log('[API] Upload history cleared successfully');
+    } catch (error) {
+      console.error('[API] Failed to clear upload history:', error);
+      throw error;
+    }
+  }
+
+  static async deleteUploadRecord(id: string): Promise<void> {
+    console.log('[API] Deleting upload record:', id);
+    try {
+      await invoke("delete_upload_record", { id });
+      console.log('[API] Upload record deleted successfully');
+    } catch (error) {
+      console.error('[API] Failed to delete upload record:', error);
       throw error;
     }
   }

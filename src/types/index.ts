@@ -13,6 +13,7 @@ export interface UploadRecord {
   file_size: number;
   url: string;
   upload_time: number;
+  from_cache?: boolean;
 }
 
 export interface UploadResult {
@@ -20,4 +21,4 @@ export interface UploadResult {
   url?: string;
   error?: string;
   from_cache: boolean;
-}"
+}

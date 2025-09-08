@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .nav-btn {
+    @apply px-4 py-2 text-sm font-medium transition-colors rounded-lg;
+  }
+  
+  .nav-btn.active {
+    @apply text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600;
+  }
+  
+  .nav-btn:not(.active) {
+    @apply text-gray-600 hover:text-gray-900 hover:bg-gray-100;
+  }
+}

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云图床 - 图片托管服务</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                        dark: '#1f2937',
+                        light: '#f9fafb'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .drag-area {
+            transition: all 0.3s ease;
+        }
+        .drag-area.active {
+            border: 2px dashed #6366f1;
+            background-color: #eef2ff;
+        }
+        .upload-item {
+            transition: transform 0.2s;
+        }
+        .upload-item:hover {
+            transform: translateY(-2px);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex">
+    <!-- 侧边栏 -->
+    <div class="w-64 bg-white shadow-md h-screen fixed hidden md:block">
+        <div class="p-6">
+            <h1 class="text-xl font-bold text-gray-800 flex items-center">
+                <i class="fas fa-cloud-upload-alt mr-2 text-primary"></i>
+                云图床
+            </h1>
+            <p class="text-sm text-gray-500 mt-2">高效稳定的图片托管服务</p>
+        </div>
+        <nav class="mt-6">
+            <a href="#" class="tab-link block py-3 px-6 text-white bg-primary rounded-r-lg">
+                <i class="fas fa-upload mr-3"></i>图片上传
+            </a>
+            <a href="#" class="tab-link block py-3 px-6 text-gray-600 hover:bg-gray-100 rounded-r-lg">
+                <i class="fas fa-history mr-3"></i>上传记录
+            </a>
+            <a href="#" class="tab-link block py-3 px-6 text-gray-600 hover:bg-gray-100 rounded-r-lg">
+                <i class="fas fa-cog mr-3"></i>R2 配置
+            </a>
+        </nav>
+        <div class="absolute bottom-0 w-full p-4 border-t border-gray-200">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium">用户名</p>
+                    <p class="text-xs text-gray-500">已用：1.2GB/5GB</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 移动端顶部导航 -->
+    <div class="w-full bg-white shadow-sm p-4 fixed top-0 flex justify-between items-center md:hidden z-10">
+        <h1 class="text-lg font-bold text-gray-800">
+            <i class="fas fa-cloud-upload-alt mr-2 text-primary"></i>云图床
+        </h1>
+        <button id="mobile-menu" class="p-2 rounded-md text-gray-600">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+    </div>
+
+    <!-- 移动端侧边栏菜单 -->
+    <div id="mobile-sidebar" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden">
+        <div class="absolute right-0 top-0 h-full w-3/4 bg-white shadow-lg">
+            <div class="p-4 flex justify-between items-center border-b">
+                <h2 class="text-lg font-bold">菜单</h2>
+                <button id="close-menu" class="p-2 rounded-md text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <nav class="mt-4">
+                <a href="#" class="tab-link block py-3 px-6 text-white bg-primary rounded-r-lg">
+                    <i class="fas fa-upload mr-3"></i>图片上传
+                </a>
+                <a href="#" class="tab-link block py-3 px-6 text-gray-600 hover:bg-gray-100 rounded-r-lg">
+                    <i class="fas fa-history mr-3"></i>上传记录
+                </a>
+                <a href="#" class="tab-link block py-3 px-6 text-gray-600 hover:bg-gray-100 rounded-r-lg">
+                    <i class="fas fa-cog mr-3"></i>R2 配置
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="flex-1 md:ml-64 mt-16 md:mt-0 p-6">
+        <!-- 图片上传区域 -->
+        <div id="upload-tab" class="tab-content active">
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">上传图片</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- 拖拽上传区域 -->
+                    <div class="drag-area border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition-colors hover:border-primary">
+                        <div class="flex flex-col items-center justify-center h-full">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                            <p class="text-gray-600 mb-2">拖放图片到此处上传</p>
+                            <p class="text-sm text-gray-500">支持 JPG, PNG, GIF, WEBP 格式</p>
+                        </div>
+                        <input type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" multiple accept="image/*">
+                    </div>
+
+                    <!-- 其他上传方式 -->
+                    <div class="flex flex-col space-y-4">
+                        <!-- 文件选择上传 -->
+                        <div class="flex-1 bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <h3 class="font-medium text-gray-700 mb-3">选择文件上传</h3>
+                            <button class="w-full py-3 px-4 bg-primary text-white rounded-lg font-medium hover:bg-secondary transition-colors">
+                                <i class="fas fa-folder-open mr-2"></i>浏览文件
+                            </button>
+                            <input type="file" class="hidden" multiple accept="image/*">
+                        </div>
+
+                        <!-- 粘贴上传 -->
+                        <div class="flex-1 bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <h3 class="font-medium text-gray-700 mb-3">粘贴图片上传</h3>
+                            <div class="p-4 border border-dashed border-gray-300 rounded-lg text-center bg-white">
+                                <i class="fas fa-clipboard text-gray-400 text-2xl mb-2"></i>
+                                <p class="text-sm text-gray-600">复制图片后在此区域按 Ctrl+V 粘贴上传</p>
+                            </div>
+                        </div>
+
+                        <!-- URL上传 -->
+                        <div class="flex-1 bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <h3 class="font-medium text-gray-700 mb-3">从URL上传</h3>
+                            <div class="flex">
+                                <input type="text" placeholder="输入图片URL" class="flex-1 py-2 px-4 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <button class="py-2 px-4 bg-primary text-white rounded-r-lg font-medium hover:bg-secondary transition-colors">
+                                    上传
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 上传进度区域 -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">上传队列</h2>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-image text-gray-400"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">landscape.jpg</p>
+                                <p class="text-sm text-gray-500">2.4 MB</p>
+                            </div>
+                        </div>
+                        <div class="w-1/4 bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-primary h-2.5 rounded-full" style="width: 75%"></div>
+                        </div>
+                        <div class="text-sm text-gray-500">75%</div>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-image text-gray-400"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">portrait.png</p>
+                                <p class="text-sm text-gray-500">1.1 MB</p>
+                            </div>
+                        </div>
+                        <div class="w-1/4 bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-green-500 h-2.5 rounded-full" style="width: 100%"></div>
+                        </div>
+                        <div class="text-sm text-green-500">完成</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 上传记录区域 -->
+        <div id="history-tab" class="tab-content">
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">上传记录</h2>
+                    <div class="flex space-x-2">
+                        <select class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option>全部类型</option>
+                            <option>JPG</option>
+                            <option>PNG</option>
+                            <option>GIF</option>
+                        </select>
+                        <div class="relative">
+                            <input type="text" placeholder="搜索..." class="border border-gray-300 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <!-- 图片记录项 -->
+                    <div class="upload-item bg-gray-50 rounded-lg overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
+                        <div class="h-40 bg-gray-200 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover">
+                        </div>
+                        <div class="p-3">
+                            <p class="text-sm font-medium truncate">landscape.jpg</p>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-xs text-gray-500">2023-07-15</span>
+                                <div class="flex space-x-2">
+                                    <button class="text-gray-500 hover:text-primary">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button class="text-gray-500 hover:text-red-500">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="upload-item bg-gray-50 rounded-lg overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
+                        <div class="h-40 bg-gray-200 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover">
+                        </div>
+                        <div class="p-3">
+                            <p class="text-sm font-medium truncate">mountain.png</p>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-xs text-gray-500">2023-07-14</span>
+                                <div class="flex space-x-2">
+                                    <button class="text-gray-500 hover:text-primary">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button class="text-gray-500 hover:text-red-500">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="upload-item bg-gray-50 rounded-lg overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
+                        <div class="h-40 bg-gray-200 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover">
+                        </div>
+                        <div class="p-3">
+                            <p class="text-sm font-medium truncate">cityscape.gif</p>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-xs text-gray-500">2023-07-13</span>
+                                <div class="flex space-x-2">
+                                    <button class="text-gray-500 hover:text-primary">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button class="text-gray-500 hover:text-red-500">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="upload-item bg-gray-50 rounded-lg overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
+                        <div class="h-40 bg-gray-200 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover">
+                        </div>
+                        <div class="p-3">
+                            <p class="text-sm font-medium truncate">beach.webp</p>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-xs text-gray-500">2023-07-12</span>
+                                <div class="flex space-x-2">
+                                    <button class="text-gray-500 hover:text-primary">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button class="text-gray-500 hover:text-red-500">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-center">
+                    <nav class="flex items-center space-x-2">
+                        <a href="#" class="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">上一页</a>
+                        <a href="#" class="px-3 py-1 rounded bg-primary text-white">1</a>
+                        <a href="#" class="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">2</a>
+                        <a href="#" class="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">3</a>
+                        <a href="#" class="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">下一页</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- R2 配置区域 -->
+        <div id="config-tab" class="tab-content">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-6">R2 存储配置</h2>
+
+                <form class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">访问密钥 ID</label>
+                            <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="输入您的访问密钥 ID">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">秘密访问密钥</label>
+                            <input type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="输入您的秘密访问密钥">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">存储桶名称</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="输入存储桶名称">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">端点 URL</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="https://">
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" id="custom-domain" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                        <label for="custom-domain" class="ml-2 block text-sm text-gray-700">使用自定义域名</label>
+                    </div>
+
+                    <div id="domain-field" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">自定义域名</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="https://">
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-200">
+                        <button type="submit" class="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-secondary transition-colors">保存配置</button>
+                        <button type="button" class="ml-4 px-6 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50">测试连接</button>
+                    </div>
+                </form>
+
+                <div class="mt-8 bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-blue-800 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i>配置说明
+                    </h3>
+                    <ul class="mt-2 text-sm text-blue-700 list-disc pl-5 space-y-1">
+                        <li>R2 是 Cloudflare 提供的对象存储服务</li>
+                        <li>您需要在 Cloudflare 控制台创建 R2 存储桶并获取访问凭证</li>
+                        <li>配置正确后，上传的图片将直接存储到您的 R2 存储桶中</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 简单的交互功能实现
+        document.addEventListener('DOMContentLoaded', function() {
+            // 选项卡切换
+            const tabLinks = document.querySelectorAll('.tab-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabLinks.forEach((link, index) => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 移除所有活动状态
+                    tabLinks.forEach(l => l.classList.remove('bg-primary', 'text-white'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // 添加当前活动状态
+                    this.classList.add('bg-primary', 'text-white');
+                    
+                    // 显示对应内容
+                    const tabId = this.getAttribute('href').substring(1) + '-tab';
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+
+            // 移动端菜单
+            const mobileMenuBtn = document.getElementById('mobile-menu');
+            const mobileSidebar = document.getElementById('mobile-sidebar');
+            const closeMenuBtn = document.getElementById('close-menu');
+            
+            mobileMenuBtn.addEventListener('click', function() {
+                mobileSidebar.classList.remove('hidden');
+            });
+            
+            closeMenuBtn.addEventListener('click', function() {
+                mobileSidebar.classList.add('hidden');
+            });
+
+            // 拖拽区域效果
+            const dragArea = document.querySelector('.drag-area');
+            
+            dragArea.addEventListener('dragover', function() {
+                this.classList.add('active');
+            });
+            
+            dragArea.addEventListener('dragleave', function() {
+                this.classList.remove('active');
+            });
+            
+            dragArea.addEventListener('drop', function() {
+                this.classList.remove('active');
+                // 这里可以添加文件处理逻辑
+            });
+
+            // 自定义域名切换
+            const customDomainCheckbox = document.getElementById('custom-domain');
+            const domainField = document.getElementById('domain-field');
+            
+            customDomainCheckbox.addEventListener('change', function() {
+                if(this.checked) {
+                    domainField.classList.remove('hidden');
+                } else {
+                    domainField.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
