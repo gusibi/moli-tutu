@@ -314,10 +314,10 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
         onMouseEnter={() => console.log("[UploadArea] Mouse entered drop zone")}
         onMouseLeave={() => console.log("[UploadArea] Mouse left drop zone")}
         className={cn(
-          "relative border-2 border-dashed rounded-lg p-8 text-center transition-colors",
+          "relative border-2 border-dashed rounded-box p-8 text-center transition-all duration-300",
           isDragOver
-            ? "border-blue-500 bg-blue-50"
-            : "border-gray-300 hover:border-gray-400",
+            ? "border-primary bg-primary/5 shadow-md"
+            : "border-base-300 hover:border-base-400 hover:shadow-sm",
           isUploading && "opacity-50 pointer-events-none"
         )}
         style={{ minHeight: '200px' }}
@@ -331,37 +331,44 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
           multiple
         />
         
-        <div className="space-y-4 pointer-events-none relative z-0">
-          <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+        <div className="space-y-6 pointer-events-none relative z-0">
+          <div className="mx-auto w-20 h-20 bg-base-200 rounded-full flex items-center justify-center transition-transform duration-300 hover:scale-110">
             {isUploading ? (
-              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
             ) : (
-              <Upload className="w-8 h-8 text-gray-400" />
+              <Upload className="w-10 h-10 text-base-content/50 transition-transform duration-300 group-hover:scale-110" />
             )}
           </div>
           
-          <div>
-            <p className="text-lg font-medium text-gray-900">
+          <div className="space-y-2">
+            <p className="text-xl font-medium text-base-content transition-colors duration-300">
               {isUploading ? "上传中..." : isDragOver ? "在这里放下图片" : "拖拽图片到这里或点击上传"}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-base-content/70">
               支持 PNG, JPG, GIF, WebP 格式
             </p>
           </div>
+          
+          {!isUploading && (
+            <div className="text-base-content/50 text-sm mt-4">
+              或拖放文件到此处
+              <span className="block mt-1">单击以浏览文件</span>
+            </div>
+          )}
         </div>
       </div>
       
-      <div className="mt-4 flex justify-center">
+      <div className="mt-8 flex justify-center">
         <button
           onClick={handlePasteFromClipboard}
           disabled={isUploading}
           className={cn(
-            "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary",
+            "btn btn-primary btn-sm gap-2 btn-outline shadow-sm hover:shadow transition-all duration-300 px-4 py-2 min-h-10 h-10",
             isUploading && "opacity-50 cursor-not-allowed"
           )}
         >
-          <ImageIcon className="w-4 h-4 mr-2" />
-          Paste from Clipboard
+          <ImageIcon className="w-4 h-4 transition-transform duration-300 hover:scale-110" />
+          <span>从剪贴板粘贴</span>
         </button>
       </div>
     </div>
