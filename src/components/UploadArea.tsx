@@ -1,6 +1,5 @@
 import React, { useCallback, useState, useEffect } from "react";
 import { Image as ImageIcon, CloudUpload } from "lucide-react";
-import { cn } from "../lib/utils";
 import { ImageHostingAPI } from "../api";
 import { UploadResult } from "../types";
 import { listen } from "@tauri-apps/api/event";
@@ -304,7 +303,7 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
   }, [onUploadSuccess, onUploadError]);
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-6">
       {/* 拖拽上传区域 */}
       <div 
         data-upload-drop-zone
@@ -312,20 +311,25 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={cn(
-          "border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-indigo-400 transition-colors cursor-pointer",
-          isDragOver && "border-indigo-400 bg-indigo-50",
-          isUploading && "opacity-50 pointer-events-none"
-        )}
+        className={`
+          border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all
+          ${isDragOver 
+            ? "border-primary bg-primary/10" 
+            : "border-base-300 hover:border-primary/50"
+          }
+          ${isUploading ? "opacity-50 pointer-events-none" : ""}
+        `}
       >
-        <CloudUpload className={cn(
-          "mx-auto text-6xl mb-4",
-          isDragOver ? "text-indigo-500" : "text-gray-400"
-        )} />
-        <p className="text-lg text-gray-600 mb-2">
-          {isUploading ? "上传中..." : isDragOver ? "在这里放下图片" : "拖拽图片到这里或点击选择"}
-        </p>
-        <p className="text-sm text-gray-500">支持 JPG、PNG、GIF 格式，最大 10MB</p>
+        <CloudUpload className={`mx-auto w-16 h-16 mb-4 ${
+          isDragOver ? "text-primary" : "text-base-content/40"
+        }`} />
+        
+        <div className="space-y-2">
+          <p className="text-lg font-medium text-base-content">
+            {isUploading ? "上传中..." : isDragOver ? "在这里放下图片" : "拖拽图片到这里或点击选择"}
+          </p>
+          <p className="text-sm text-base-content/60">支持 JPG、PNG、GIF 格式，最大 10MB</p>
+        </div>
         
         <input 
           type="file" 
@@ -342,36 +346,32 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
               const input = document.querySelector('input[type="file"]') as HTMLInputElement;
               input?.click();
             }}
-            className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="btn btn-primary mt-4"
           >
-            选择文件
+            <span className="text-primary-content">选择文件</span>
           </button>
         )}
         
         {isUploading && (
-          <div className="mt-6">
-            <div className="flex justify-between text-sm text-gray-600 mb-2">
-              <span>上传进度</span>
-              <span>处理中...</span>
+          <div className="mt-6 space-y-2">
+            <div className="flex justify-between text-sm text-base-content/70">
+              <span className="text-base-content/70">上传进度</span>
+              <span className="text-base-content/70">处理中...</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-indigo-600 h-2 rounded-full animate-pulse" style={{width: '100%'}}></div>
-            </div>
+            <progress className="progress progress-primary w-full"></progress>
           </div>
         )}
       </div>
       
-      <div className="mt-6 flex justify-center">
+      {/* 剪贴板粘贴按钮 */}
+      <div className="flex justify-center">
         <button
           onClick={handlePasteFromClipboard}
           disabled={isUploading}
-          className={cn(
-            "inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors",
-            isUploading && "opacity-50 cursor-not-allowed"
-          )}
+          className={`btn btn-outline btn-sm gap-2 ${isUploading ? 'btn-disabled' : ''}`}
         >
-          <ImageIcon className="w-4 h-4" />
-          从剪贴板粘贴
+          <ImageIcon className="w-4 h-4 text-base-content" />
+          <span className="text-base-content">从剪贴板粘贴</span>
         </button>
       </div>
     </div>

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Copy, Trash2, Search, RefreshCw, ChevronLeft, ChevronRight, Image as ImageIcon } from "lucide-react";
-// import { Button } from "./ui/button";
 import { UploadRecord } from "../types";
 import { ImageHostingAPI } from "../api";
-import { cn } from "../lib/utils";
 
 interface UploadHistoryProps {
   refreshTrigger: number;
@@ -97,145 +95,151 @@ export const UploadHistory: React.FC<UploadHistoryProps> = ({ refreshTrigger }) 
   const paginatedHistory = filteredHistory.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <div className="space-y-4">
-      {/* Search and Actions */}
-      <div className="mb-4 flex justify-between items-center">
-        <div className="flex space-x-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="搜索文件名..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+    <div className="space-y-6">
+      {/* 搜索和操作栏 */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+        <div className="flex gap-2">
+          <div className="form-control">
+            <div className="input-group">
+              <input
+                type="text"
+                placeholder="搜索文件名..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="input input-bordered"
+              />
+              <button
+                onClick={handleRefresh}
+                disabled={isLoading}
+                className={`btn btn-square ${isLoading ? 'loading' : ''}`}
+              >
+                {!isLoading && <RefreshCw className="w-4 h-4 text-base-content" />}
+              </button>
+            </div>
           </div>
-          <button
-            onClick={handleRefresh}
-            disabled={isLoading}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-          >
-            <Search className="w-4 h-4" />
-          </button>
         </div>
+        
         <button
           onClick={handleClearHistory}
-          className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+          className="btn btn-error btn-outline btn-sm gap-2"
         >
-          <Trash2 className="w-4 h-4 mr-2 inline" />
-          清空记录
+          <Trash2 className="w-4 h-4 text-error" />
+          <span className="text-error">清空记录</span>
         </button>
       </div>
 
-      {/* Upload History Table */}
-      <div className="overflow-x-auto">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="flex items-center gap-2 text-gray-600">
-              <RefreshCw className="w-4 h-4 animate-spin" />
-              <span>加载中...</span>
+      {/* 上传历史表格 */}
+      <div className="card bg-base-100 shadow-sm">
+        <div className="card-body p-0">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="flex items-center gap-2 text-base-content">
+                <span className="loading loading-spinner loading-sm"></span>
+                <span>加载中...</span>
+              </div>
             </div>
-          </div>
-        ) : filteredHistory.length === 0 ? (
-          <div className="text-center py-8">
-            <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {searchTerm ? "未找到匹配的记录" : "暂无上传记录"}
-            </h3>
-            <p className="text-gray-500">
-              {searchTerm ? "尝试使用不同的关键词搜索" : "开始上传您的第一张图片吧！"}
-            </p>
-          </div>
-        ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">缩略图</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">文件名</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">大小</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">上传时间</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedHistory.map((item) => (
-                <tr 
-                  key={item.id} 
-                  className="border-b border-gray-100 hover:bg-gray-50"
-                >
-                  <td className="py-3 px-4">
-                    <div className="w-12 h-12 rounded overflow-hidden bg-gray-100 flex items-center justify-center">
-                      {item.url ? (
-                        <img
-                          src={item.url}
-                          alt={item.original_filename}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                            const parent = target.parentElement;
-                            if (parent) {
-                              parent.innerHTML = '<svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path></svg>';
-                            }
-                          }}
-                        />
-                      ) : (
-                        <ImageIcon className="w-6 h-6 text-gray-400" />
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 text-sm text-gray-900">
-                    <div className="truncate max-w-xs" title={item.original_filename}>
-                      {item.original_filename}
-                    </div>
-                    {item.from_cache && (
-                      <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded mt-1">
-                        缓存
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-3 px-4 text-sm text-gray-600">
-                    {formatFileSize(item.file_size)}
-                  </td>
-                  <td className="py-3 px-4 text-sm text-gray-600">
-                    {formatDate(item.upload_time)}
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleCopyUrl(item.url)}
-                        className="text-indigo-600 hover:text-indigo-800"
-                        title="复制链接"
-                      >
-                        <Copy className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteItem(item.id)}
-                        className="text-red-600 hover:text-red-800"
-                        title="删除记录"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+          ) : filteredHistory.length === 0 ? (
+            <div className="text-center py-12">
+              <ImageIcon className="w-16 h-16 mx-auto mb-4 text-base-content/40" />
+              <h3 className="text-lg font-medium mb-2 text-base-content">
+                {searchTerm ? "未找到匹配的记录" : "暂无上传记录"}
+              </h3>
+              <p className="text-base-content/60">
+                {searchTerm ? "尝试使用不同的关键词搜索" : "开始上传您的第一张图片吧！"}
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="table table-zebra">
+                <thead>
+                  <tr>
+                    <th>缩略图</th>
+                    <th>文件名</th>
+                    <th>大小</th>
+                    <th>上传时间</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedHistory.map((item) => (
+                    <tr key={item.id}>
+                      <td>
+                        <div className="avatar">
+                          <div className="w-12 h-12 rounded">
+                            {item.url ? (
+                              <img
+                                src={item.url}
+                                alt={item.original_filename}
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const parent = target.parentElement;
+                                  if (parent) {
+                                    parent.innerHTML = '<div class="w-full h-full bg-base-200 flex items-center justify-center"><svg class="w-6 h-6 opacity-40" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path></svg></div>';
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-base-200 flex items-center justify-center">
+                                <ImageIcon className="w-6 h-6 text-base-content/40" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="max-w-xs">
+                          <div className="font-medium truncate text-base-content" title={item.original_filename}>
+                            {item.original_filename}
+                          </div>
+                          {item.from_cache && (
+                            <div className="badge badge-info badge-sm mt-1">缓存</div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="text-sm text-base-content/70">
+                        {formatFileSize(item.file_size)}
+                      </td>
+                      <td className="text-sm text-base-content/70">
+                        {formatDate(item.upload_time)}
+                      </td>
+                      <td>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleCopyUrl(item.url)}
+                            className="btn btn-ghost btn-xs"
+                            title="复制链接"
+                          >
+                            <Copy className="w-4 h-4 text-base-content" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteItem(item.id)}
+                            className="btn btn-ghost btn-xs text-error"
+                            title="删除记录"
+                          >
+                            <Trash2 className="w-4 h-4 text-error" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Pagination */}
+      {/* 分页 */}
       {totalPages > 1 && (
-        <div className="mt-6 flex justify-center">
-          <nav className="flex space-x-2">
+        <div className="flex justify-center">
+          <div className="join">
             <button
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
+              className="join-item btn btn-sm"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4 text-base-content" />
             </button>
             
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -244,12 +248,9 @@ export const UploadHistory: React.FC<UploadHistoryProps> = ({ refreshTrigger }) 
                 <button
                   key={pageNum}
                   onClick={() => setCurrentPage(pageNum)}
-                  className={cn(
-                    "px-3 py-2 rounded",
-                    currentPage === pageNum 
-                      ? "bg-indigo-600 text-white" 
-                      : "text-gray-700 hover:bg-gray-100"
-                  )}
+                  className={`join-item btn btn-sm ${
+                    currentPage === pageNum ? 'btn-active' : ''
+                  }`}
                 >
                   {pageNum}
                 </button>
@@ -259,11 +260,11 @@ export const UploadHistory: React.FC<UploadHistoryProps> = ({ refreshTrigger }) 
             <button
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
+              className="join-item btn btn-sm"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4 text-base-content" />
             </button>
-          </nav>
+          </div>
         </div>
       )}
     </div>
