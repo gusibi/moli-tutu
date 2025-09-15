@@ -7,11 +7,13 @@ import { listen } from "@tauri-apps/api/event";
 interface UploadAreaProps {
   onUploadSuccess: (result: UploadResult) => void;
   onUploadError: (error: string) => void;
+  isActive?: boolean;
 }
 
 export const UploadArea: React.FC<UploadAreaProps> = ({
   onUploadSuccess,
   onUploadError,
+  isActive = true,
 }) => {
   console.log("[UploadArea] Component initializing...");
   const [isDragOver, setIsDragOver] = useState(false);
@@ -83,6 +85,10 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
   );
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
+    if (!isActive) {
+      console.log("[UploadArea] Ignoring drag enter - component not active");
+      return;
+    }
     console.log("[UploadArea] === DRAG ENTER DETECTED ===");
     console.log("[UploadArea] Event:", e);
     console.log("[UploadArea] DataTransfer:", e.dataTransfer);
@@ -91,9 +97,13 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
     e.stopPropagation();
     setIsDragOver(true);
     console.log("[UploadArea] isDragOver set to true");
-  }, []);
+  }, [isActive]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
+    if (!isActive) {
+      console.log("[UploadArea] Ignoring drag over - component not active");
+      return;
+    }
     console.log("[UploadArea] === DRAG OVER DETECTED ===");
     e.preventDefault();
     e.stopPropagation();
@@ -101,9 +111,13 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
       e.dataTransfer.dropEffect = 'copy';
       console.log("[UploadArea] dropEffect set to copy");
     }
-  }, []);
+  }, [isActive]);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
+    if (!isActive) {
+      console.log("[UploadArea] Ignoring drag leave - component not active");
+      return;
+    }
     console.log("[UploadArea] === DRAG LEAVE DETECTED ===");
     console.log("[UploadArea] Event target:", e.target);
     console.log("[UploadArea] Current target:", e.currentTarget);
@@ -122,10 +136,14 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
       console.log("[UploadArea] Mouse outside container, setting isDragOver to false");
       setIsDragOver(false);
     }
-  }, []);
+  }, [isActive]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
+      if (!isActive) {
+        console.log("[UploadArea] Ignoring drop - component not active");
+        return;
+      }
       console.log("[UploadArea] === DROP EVENT DETECTED ===");
       console.log("[UploadArea] Event:", e);
       console.log("[UploadArea] DataTransfer:", e.dataTransfer);
@@ -147,7 +165,7 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
         console.log("[UploadArea] No files in drop event");
       }
     },
-    [handleFiles]
+    [handleFiles, isActive]
   );
 
   const handleFileSelect = useCallback(
@@ -166,6 +184,14 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
 
   // Add Tauri-specific drag and drop event listeners
   useEffect(() => {
+    console.log("[UploadArea] useEffect triggered, isActive:", isActive);
+    
+    // 只有在组件激活时才设置监听器
+    if (!isActive) {
+      console.log("[UploadArea] Component not active, skipping Tauri listeners setup");
+      return;
+    }
+    
     console.log("[UploadArea] Setting up Tauri drag and drop listeners...");
     
     let unlistenDragOver: (() => void) | null = null;
@@ -175,12 +201,23 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
       try {
         // Listen for drag over events
         unlistenDragOver = await listen('tauri://drag-over', (event) => {
+          // 再次检查是否激活，防止在非激活状态下处理事件
+          if (!isActive) {
+            console.log("[UploadArea] Ignoring drag-over event - component not active");
+            return;
+          }
           console.log("[UploadArea] === TAURI DRAG OVER EVENT ===", event);
           setIsDragOver(true);
         });
         
         // Listen for drop events
         unlistenDrop = await listen('tauri://drag-drop', (event) => {
+          // 再次检查是否激活，防止在非激活状态下处理事件
+          if (!isActive) {
+            console.log("[UploadArea] Ignoring drop event - component not active");
+            return;
+          }
+          
           console.log("[UploadArea] === TAURI DROP EVENT ===", event);
           console.log("[UploadArea] Event payload:", event.payload);
           
@@ -258,12 +295,14 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
       console.log("[UploadArea] Cleaning up Tauri listeners...");
       if (unlistenDragOver) {
         unlistenDragOver();
+        unlistenDragOver = null;
       }
       if (unlistenDrop) {
         unlistenDrop();
+        unlistenDrop = null;
       }
     };
-  }, [handleFiles, onUploadSuccess, onUploadError]);
+  }, [isActive]); // 只依赖 isActive，当它变化时重新设置监听器
 
 
 
@@ -366,7 +405,7 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
             ) : isDragOver ? (
               <span className="animate-bounce">✨ 在这里放下图片 ✨</span>
             ) : (
-              "拖拽图片到这里或点击选择"
+              "拖拽图片到这里或点击选择 开始上传"
             )}
           </p>
           <p className={`text-sm transition-all duration-300 ${

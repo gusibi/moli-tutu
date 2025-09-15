@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
-import { CheckCircle, XCircle, AlertCircle, CloudUpload, History, Settings, Upload, Copy, Image as ImageIcon, Sun, Moon } from "lucide-react";
+import { CheckCircle, XCircle, AlertCircle, CloudUpload, History, Settings, Upload, Copy, Image as ImageIcon, Sun, Moon, ChevronDown, Zap } from "lucide-react";
 import { UploadArea } from "./components/UploadArea";
 import { ConfigDialog } from "./components/ConfigDialog";
 import { UploadHistory } from "./components/UploadHistory";
 import { ThemeSelector } from "./components/ThemeSelector";
+import { ImageCompressor } from "./components/ImageCompressor";
+import { CompressHistory } from "./components/CompressHistory";
 import { UploadResult, UploadRecord } from "./types";
 import { ImageHostingAPI } from "./api";
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'upload' | 'history' | 'config'>('upload');
+  const [activeTab, setActiveTab] = useState<'upload' | 'history' | 'config' | 'compress' | 'compress-history'>('upload');
   const [configExists, setConfigExists] = useState(false);
   const [notification, setNotification] = useState<{
     message: string;
@@ -132,29 +134,97 @@ function App() {
               onThemeChange={handleThemeChange} 
             /> */}
             
-            {/* 导航标签 */}
-            <div className="tabs tabs-boxed">
-              <button
-                onClick={() => setActiveTab('upload')}
-                className={`tab gap-2 ${activeTab === 'upload' ? 'tab-active' : ''}`}
-              >
-                <Upload className="w-4 h-4 text-base-content" />
-                <span className="text-base-content">上传</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('history')}
-                className={`tab gap-2 ${activeTab === 'history' ? 'tab-active' : ''}`}
-              >
-                <History className="w-4 h-4 text-base-content" />
-                <span className="text-base-content">上传记录</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('config')}
-                className={`tab gap-2 ${activeTab === 'config' ? 'tab-active' : ''}`}
-              >
-                <Settings className="w-4 h-4 text-base-content" />
-                <span className="text-base-content">R2 配置</span>
-              </button>
+            {/* 导航菜单 */}
+            <div className="flex items-center gap-2">
+              {/* 上传功能下拉菜单 */}
+              <div className="dropdown dropdown-end">
+                <div 
+                  tabIndex={0} 
+                  role="button" 
+                  className={`btn btn-ghost gap-2 ${(activeTab === 'upload' || activeTab === 'history') ? 'btn-active' : ''}`}
+                >
+                  <Upload className="w-4 h-4 text-base-content" />
+                  <span className="text-base-content">上传</span>
+                  <ChevronDown className="w-4 h-4 text-base-content" />
+                </div>
+                <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+                  <li>
+                    <button
+                      onClick={() => setActiveTab('upload')}
+                      className={`gap-2 ${activeTab === 'upload' ? 'active' : ''}`}
+                    >
+                      <Upload className="w-4 h-4" />
+                      上传图片
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => setActiveTab('history')}
+                      className={`gap-2 ${activeTab === 'history' ? 'active' : ''}`}
+                    >
+                      <History className="w-4 h-4" />
+                      上传记录
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+              {/* 图片压缩下拉菜单 */}
+              <div className="dropdown dropdown-end">
+                <div 
+                  tabIndex={0} 
+                  role="button" 
+                  className={`btn btn-ghost gap-2 ${(activeTab === 'compress' || activeTab === 'compress-history') ? 'btn-active' : ''}`}
+                >
+                  <Zap className="w-4 h-4 text-base-content" />
+                  <span className="text-base-content">压缩</span>
+                  <ChevronDown className="w-4 h-4 text-base-content" />
+                </div>
+                <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+                  <li>
+                    <button
+                      onClick={() => setActiveTab('compress')}
+                      className={`gap-2 ${activeTab === 'compress' ? 'active' : ''}`}
+                    >
+                      <Zap className="w-4 h-4" />
+                      图片压缩
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => setActiveTab('compress-history')}
+                      className={`gap-2 ${activeTab === 'compress-history' ? 'active' : ''}`}
+                    >
+                      <History className="w-4 h-4" />
+                      压缩记录
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+              {/* 设置下拉菜单 */}
+              <div className="dropdown dropdown-end">
+                <div 
+                  tabIndex={0} 
+                  role="button" 
+                  className={`btn btn-ghost gap-2 ${activeTab === 'config' ? 'btn-active' : ''}`}
+                >
+                  <Settings className="w-4 h-4 text-base-content" />
+                  <span className="text-base-content">设置</span>
+                  <ChevronDown className="w-4 h-4 text-base-content" />
+                </div>
+                <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+                  <li>
+                    <button
+                      onClick={() => setActiveTab('config')}
+                      className={`gap-2 ${activeTab === 'config' ? 'active' : ''}`}
+                    >
+                      <CloudUpload className="w-4 h-4" />
+                      R2 配置
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -173,6 +243,7 @@ function App() {
                   <UploadArea
                     onUploadSuccess={handleUploadSuccess}
                     onUploadError={handleUploadError}
+                    isActive={activeTab === 'upload'}
                   />
                   
                   {/* 粘贴上传提示 */}
@@ -284,6 +355,23 @@ function App() {
         {/* 上传记录 */}
         {activeTab === 'history' && (
           <UploadHistory refreshTrigger={refreshTrigger} />
+        )}
+
+        {/* 图片压缩 */}
+        {activeTab === 'compress' && (
+          <div className="card bg-base-100 shadow-sm">
+            <div className="card-body">
+              <h2 className="card-title text-2xl justify-center mb-6 text-base-content">图片压缩</h2>
+              <div className="max-w-6xl mx-auto">
+                <ImageCompressor />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 压缩记录 */}
+        {activeTab === 'compress-history' && (
+          <CompressHistory />
         )}
 
         {/* R2 配置 */}
