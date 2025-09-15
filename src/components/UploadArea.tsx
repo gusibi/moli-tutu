@@ -312,23 +312,70 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={`
-          border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all
+          relative border-2 border-dashed rounded-lg p-12 text-center cursor-pointer 
+          transition-all duration-300 ease-in-out overflow-hidden
           ${isDragOver 
-            ? "border-primary bg-primary/10" 
-            : "border-base-300 hover:border-primary/50"
+            ? "border-primary bg-primary/10 scale-105 shadow-lg shadow-primary/20" 
+            : "border-base-300 hover:border-primary/50 hover:scale-102"
           }
           ${isUploading ? "opacity-50 pointer-events-none" : ""}
         `}
+        style={{
+          background: isDragOver 
+            ? `radial-gradient(circle at center, rgba(var(--p), 0.1) 0%, rgba(var(--p), 0.05) 50%, transparent 100%)`
+            : undefined
+        }}
       >
-        <CloudUpload className={`mx-auto w-16 h-16 mb-4 ${
-          isDragOver ? "text-primary" : "text-base-content/40"
+        {/* 动画边框效果 */}
+        {isDragOver && (
+          <div className="absolute inset-0 rounded-lg">
+            <div className="absolute inset-0 rounded-lg border-2 border-primary animate-pulse"></div>
+            <div className="absolute inset-2 rounded-lg border border-primary/50 animate-ping"></div>
+          </div>
+        )}
+        
+        {/* 星星粒子效果 */}
+        {isDragOver && (
+          <>
+            <div className="absolute top-4 left-4 w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+            <div className="absolute top-8 right-8 w-1 h-1 bg-primary/70 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            <div className="absolute bottom-6 left-8 w-1.5 h-1.5 bg-primary/80 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+            <div className="absolute bottom-4 right-6 w-1 h-1 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.6s' }}></div>
+            <div className="absolute top-1/2 left-6 w-1 h-1 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '0.8s' }}></div>
+            <div className="absolute top-1/3 right-4 w-1.5 h-1.5 bg-primary/70 rounded-full animate-bounce" style={{ animationDelay: '1s' }}></div>
+          </>
+        )}
+
+        <CloudUpload className={`mx-auto w-16 h-16 mb-4 transition-all duration-300 relative z-10 ${
+          isDragOver 
+            ? "text-primary scale-110 animate-pulse" 
+            : "text-base-content/40 hover:text-primary/70"
         }`} />
         
-        <div className="space-y-2">
-          <p className="text-lg font-medium text-base-content">
-            {isUploading ? "上传中..." : isDragOver ? "在这里放下图片" : "拖拽图片到这里或点击选择"}
+        <div className="space-y-2 relative z-10">
+          <p className={`text-lg font-medium transition-all duration-300 ${
+            isDragOver 
+              ? "text-primary scale-105 animate-pulse" 
+              : "text-base-content"
+          }`}>
+            {isUploading ? (
+              <span className="inline-flex items-center gap-2">
+                <span className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></span>
+                上传中...
+              </span>
+            ) : isDragOver ? (
+              <span className="animate-bounce">✨ 在这里放下图片 ✨</span>
+            ) : (
+              "拖拽图片到这里或点击选择"
+            )}
           </p>
-          <p className="text-sm text-base-content/60">支持 JPG、PNG、GIF 格式，最大 10MB</p>
+          <p className={`text-sm transition-all duration-300 ${
+            isDragOver 
+              ? "text-primary/80 scale-105" 
+              : "text-base-content/60"
+          }`}>
+            支持 JPG、PNG、GIF 格式，最大 10MB
+          </p>
         </div>
         
         <input 
@@ -346,19 +393,26 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
               const input = document.querySelector('input[type="file"]') as HTMLInputElement;
               input?.click();
             }}
-            className="btn btn-primary mt-4"
+            className={`btn btn-primary mt-4 transition-all duration-300 relative z-10 ${
+              isDragOver 
+                ? "scale-110 shadow-lg shadow-primary/30 animate-pulse" 
+                : "hover:scale-105 hover:shadow-md"
+            }`}
           >
             <span className="text-primary-content">选择文件</span>
           </button>
         )}
         
         {isUploading && (
-          <div className="mt-6 space-y-2">
+          <div className="mt-6 space-y-2 animate-fade-in relative z-10">
             <div className="flex justify-between text-sm text-base-content/70">
-              <span className="text-base-content/70">上传进度</span>
-              <span className="text-base-content/70">处理中...</span>
+              <span className="text-base-content/70 animate-pulse">上传进度</span>
+              <span className="text-base-content/70 animate-bounce">处理中...</span>
             </div>
-            <progress className="progress progress-primary w-full"></progress>
+            <div className="relative">
+              <progress className="progress progress-primary w-full animate-pulse"></progress>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+            </div>
           </div>
         )}
       </div>

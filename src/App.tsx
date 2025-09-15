@@ -127,10 +127,10 @@ function App() {
             </button>
             
             {/* 主题选择器 */}
-            <ThemeSelector 
+            {/* <ThemeSelector 
               currentTheme={theme} 
               onThemeChange={handleThemeChange} 
-            />
+            /> */}
             
             {/* 导航标签 */}
             <div className="tabs tabs-boxed">
