@@ -1,6 +1,8 @@
 import React, { useCallback, useState, useEffect } from "react";
 import { Image as ImageIcon, Zap } from "lucide-react";
 import { ImageEditor } from "./ImageEditor";
+import { listen } from "@tauri-apps/api/event";
+import { ImageHostingAPI } from "../api";
 
 interface CompressConfig {
   format: 'mozjpeg' | 'webp' | 'avif' | 'oxipng';
@@ -28,7 +30,32 @@ interface CompressedResult {
   compressedUrl: string;
 }
 
-export const ImageCompressor: React.FC = () => {
+interface ImageCompressorProps {
+  isActive?: boolean;
+}
+
+const getMimeTypeFromPath = (path: string): string => {
+  const ext = path.split('.').pop()?.toLowerCase() || '';
+  switch (ext) {
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'png':
+      return 'image/png';
+    case 'gif':
+      return 'image/gif';
+    case 'webp':
+      return 'image/webp';
+    case 'svg':
+      return 'image/svg+xml';
+    case 'bmp':
+      return 'image/bmp';
+    default:
+      return 'application/octet-stream';
+  }
+};
+
+export const ImageCompressor: React.FC<ImageCompressorProps> = ({ isActive = false }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [originalImage, setOriginalImage] = useState<File | null>(null);
@@ -50,8 +77,29 @@ export const ImageCompressor: React.FC = () => {
     dithering: 1,
   });
 
-  const handleFiles = useCallback(async (files: FileList) => {
-    const file = files[0];
+  const handleFiles = useCallback(async (files: FileList | string[]) => {
+    let file: File | null = null;
+
+    if (files instanceof FileList) {
+      file = files[0];
+    } else if (Array.isArray(files) && files.length > 0 && typeof files[0] === 'string') {
+      const filePath = files[0];
+      try {
+        const fileData = await ImageHostingAPI.readFileFromPath(filePath);
+        if (!fileData) {
+          throw new Error("File data is null");
+        }
+        const fileName = filePath.split(/[\\/]/).pop() || 'dropped-file';
+        const mimeType = getMimeTypeFromPath(filePath);
+        const blob = new Blob([fileData], { type: mimeType });
+        file = new File([blob], fileName, { type: mimeType });
+      } catch (error) {
+        console.error("Error reading dropped file:", error);
+        alert("无法读取拖拽的文件");
+        return;
+      }
+    }
+
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
@@ -63,47 +111,6 @@ export const ImageCompressor: React.FC = () => {
     setCompressedResult(null);
     setHasProcessed(false);
   }, []);
-
-  const handleDragEnter = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log("[ImageCompressor] Drag enter - setting compression mode");
-    setIsDragOver(true);
-  }, []);
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.dataTransfer) {
-      e.dataTransfer.dropEffect = 'copy';
-    }
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX;
-    const y = e.clientY;
-    
-    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
-      setIsDragOver(false);
-    }
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(false);
-    
-    console.log("[ImageCompressor] Drop event captured - processing for compression");
-    
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      handleFiles(files);
-    }
-  }, [handleFiles]);
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -274,6 +281,40 @@ export const ImageCompressor: React.FC = () => {
     }
   }, [originalImage, hasProcessed, isProcessing, compressImage]);
 
+  useEffect(() => {
+    if (!isActive) {
+      return;
+    }
+
+    let unlistenDrag: (() => void) | undefined;
+    let unlistenDrop: (() => void) | undefined;
+    let unlistenCancel: (() => void) | undefined;
+
+    const setupListeners = async () => {
+      unlistenDrag = await listen("tauri://drag-over", () => {
+        setIsDragOver(true);
+      });
+      unlistenDrop = await listen("tauri://drag-drop", (event) => {
+        setIsDragOver(false);
+        const payload = event.payload as { paths: string[] };
+        if (payload.paths && payload.paths.length > 0) {
+          handleFiles(payload.paths);
+        }
+      });
+      unlistenCancel = await listen("tauri://drag-cancelled", () => {
+        setIsDragOver(false);
+      });
+    };
+
+    setupListeners();
+
+    return () => {
+      unlistenDrag?.();
+      unlistenDrop?.();
+      unlistenCancel?.();
+    };
+  }, [isActive, handleFiles]);
+
   // 配置更改时重新压缩
   useEffect(() => {
     if (originalImage && hasProcessed && !isProcessing) {
@@ -315,21 +356,16 @@ export const ImageCompressor: React.FC = () => {
   return (
     <div className="w-full space-y-6">
       {/* 拖拽上传区域 */}
-      <div 
+      <div
         data-compress-drop-zone="true"
-        onDragEnter={handleDragEnter}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
         className={`
           relative border-2 border-dashed rounded-lg p-12 text-center cursor-pointer 
-          transition-all duration-300 ease-in-out overflow-hidden z-50
-          ${isDragOver 
-            ? "border-primary bg-primary/10 scale-105 shadow-lg shadow-primary/20" 
+          transition-all duration-300 ease-in-out overflow-hidden
+          ${isDragOver
+            ? "border-primary bg-primary/10 scale-105 shadow-lg shadow-primary/20"
             : "border-base-300 hover:border-primary/50 hover:scale-102"
           }
         `}
-        style={{ position: 'relative', zIndex: 1000 }}
       >
         {/* 动画边框效果 */}
         {isDragOver && (

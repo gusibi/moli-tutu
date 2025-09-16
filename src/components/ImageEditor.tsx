@@ -147,17 +147,17 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
   ]);
 
   return (
-    <div className="fixed inset-0 bg-base-200 z-10">
+    <div className="fixed inset-0 top-16 bg-base-200">
       {/* 顶部操作栏 */}
-      <div className="absolute top-0 left-0 right-0 z-30 bg-base-100/95 backdrop-blur-sm border-b border-base-300">
+      <div className="absolute top-0 left-0 right-0 z-30 bg-base-100 border-b border-base-300">
         <div className="flex justify-between items-center px-6 py-4">
           <h3 className="text-lg font-semibold text-base-content">图片压缩编辑器</h3>
           <div className="flex gap-2">
             <button
               onClick={onReset}
-              className="btn btn-ghost btn-sm gap-2"
+              className="btn btn-ghost btn-sm gap-2 text-base-content"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-4 h-4 text-base-content" />
               重新选择
             </button>
             {compressedResult && (
@@ -165,7 +165,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                 onClick={onDownload}
                 className="btn btn-primary btn-sm gap-2"
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-4 h-4 text-primary-content" />
                 下载压缩图片
               </button>
             )}
@@ -193,7 +193,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
               draggable={false}
             />
             {/* 原图标签 */}
-            <div className="absolute top-4 left-4 bg-base-100/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
+            <div className="absolute top-4 left-4 bg-base-100 border border-base-300 px-3 py-1 rounded-full text-sm font-medium text-base-content shadow-lg">
               原图 ({formatFileSize(originalImage.size)})
             </div>
           </div>
@@ -212,7 +212,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                   draggable={false}
                 />
                 {/* 压缩后标签 */}
-                <div className="absolute top-4 right-4 bg-primary/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium text-primary-content">
+                <div className="absolute top-4 right-4 bg-primary px-3 py-1 rounded-full text-sm font-medium text-primary-content shadow-lg">
                   压缩后 ({formatFileSize(compressedResult.compressedSize)})
                 </div>
               </>
@@ -247,17 +247,17 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
 
           {/* 拖拽提示 */}
           {!compressedResult && !isProcessing && (
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-base-100/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm text-base-content/70">
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-base-100 border border-base-300 px-4 py-2 rounded-full text-sm text-base-content shadow-lg">
               调整设置查看压缩效果
             </div>
           )}
 
           {/* 悬浮配置面板 */}
           <div className="absolute bottom-6 right-6 z-40">
-            <div className="card bg-base-100/95 backdrop-blur-sm shadow-xl w-80 max-h-[calc(100vh-200px)] overflow-y-auto">
+            <div className="card bg-base-100 shadow-xl w-80 max-h-[calc(100vh-200px)] overflow-y-auto">
               <div className="card-body p-4">
-                <h4 className="card-title text-sm gap-2 mb-3">
-                  <SettingsIcon className="w-4 h-4" />
+                <h4 className="card-title text-sm gap-2 mb-3 text-base-content">
+                  <SettingsIcon className="w-4 h-4 text-base-content" />
                   压缩设置
                 </h4>
                 
@@ -265,10 +265,10 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                   {/* 格式选择 */}
                   <div className="form-control">
                     <label className="label py-1">
-                      <span className="label-text text-xs">输出格式</span>
+                      <span className="label-text text-xs text-base-content">输出格式</span>
                     </label>
                     <select
-                      className="select select-bordered select-xs"
+                      className="select select-bordered select-xs bg-base-100 text-base-content"
                       value={config.format}
                       onChange={(e) => setConfig(prev => ({ ...prev, format: e.target.value as any }))}
                     >
@@ -282,7 +282,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                   {config.format !== 'oxipng' && (
                     <div className="form-control">
                       <label className="label py-1">
-                        <span className="label-text text-xs">质量: {config.quality}%</span>
+                        <span className="label-text text-xs text-base-content">质量: {config.quality}%</span>
                       </label>
                       <input
                         type="range"
@@ -298,7 +298,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                   {/* 尺寸调整 */}
                   <div className="form-control">
                     <label className="label cursor-pointer py-1">
-                      <span className="label-text text-xs">调整尺寸</span>
+                      <span className="label-text text-xs text-base-content">调整尺寸</span>
                       <input
                         type="checkbox"
                         className="toggle toggle-primary toggle-xs"
@@ -313,10 +313,10 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                       {/* 缩放方法 */}
                       <div className="form-control">
                         <label className="label py-1">
-                          <span className="label-text text-xs">方法</span>
+                          <span className="label-text text-xs text-base-content">方法</span>
                         </label>
                         <select
-                          className="select select-bordered select-xs"
+                          className="select select-bordered select-xs bg-base-100 text-base-content"
                           value={config.resizeMethod}
                           onChange={(e) => setConfig(prev => ({ ...prev, resizeMethod: e.target.value as any }))}
                         >
@@ -335,10 +335,10 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                       {/* 预设尺寸 */}
                       <div className="form-control">
                         <label className="label py-1">
-                          <span className="label-text text-xs">预设</span>
+                          <span className="label-text text-xs text-base-content">预设</span>
                         </label>
                         <select
-                          className="select select-bordered select-xs"
+                          className="select select-bordered select-xs bg-base-100 text-base-content"
                           value={config.resizePreset}
                           onChange={(e) => setConfig(prev => ({ ...prev, resizePreset: e.target.value as any }))}
                         >
@@ -351,13 +351,13 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                       </div>
 
                       {/* 显示当前尺寸信息 */}
-                      <div className="bg-base-200 p-2 rounded text-xs">
+                      <div className="bg-base-200 p-2 rounded text-xs border border-base-300">
                         <div className="flex justify-between items-center mb-1">
-                          <span className="text-base-content/70">原始尺寸:</span>
-                          <span className="font-medium">{imageDimensions.width} × {imageDimensions.height}</span>
+                          <span className="text-base-content">原始尺寸:</span>
+                          <span className="font-medium text-base-content">{imageDimensions.width} × {imageDimensions.height}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-base-content/70">调整后:</span>
+                          <span className="text-base-content">调整后:</span>
                           <span className="font-medium text-primary">
                             {calculatedDimensions}
                           </span>
@@ -368,11 +368,11 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                       <div className="grid grid-cols-2 gap-2">
                         <div className="form-control">
                           <label className="label py-1">
-                            <span className="label-text text-xs">宽度</span>
+                            <span className="label-text text-xs text-base-content">宽度</span>
                           </label>
                           <input
                             type="number"
-                            className="input input-bordered input-xs"
+                            className="input input-bordered input-xs bg-base-100 text-base-content"
                             value={config.resizeWidth || ''}
                             disabled={config.resizePreset !== 'custom'}
                             onChange={(e) => setConfig(prev => ({ ...prev, resizeWidth: parseInt(e.target.value) || 0 }))}
@@ -381,7 +381,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                         </div>
                         <div className="form-control">
                           <label className="label py-1">
-                            <span className="label-text text-xs">高度</span>
+                            <span className="label-text text-xs text-base-content">高度</span>
                           </label>
                           <input
                             type="number"
@@ -398,7 +398,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                       <div className="space-y-2">
                         <div className="form-control">
                           <label className="label cursor-pointer py-1">
-                            <span className="label-text text-xs">预乘透明通道</span>
+                            <span className="label-text text-xs text-base-content">预乘透明通道</span>
                             <input
                               type="checkbox"
                               className="checkbox checkbox-primary checkbox-xs"
@@ -410,7 +410,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
 
                         <div className="form-control">
                           <label className="label cursor-pointer py-1">
-                            <span className="label-text text-xs">线性 RGB</span>
+                            <span className="label-text text-xs text-base-content">线性 RGB</span>
                             <input
                               type="checkbox"
                               className="checkbox checkbox-primary checkbox-xs"
@@ -422,7 +422,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
 
                         <div className="form-control">
                           <label className="label cursor-pointer py-1">
-                            <span className="label-text text-xs">保持宽高比</span>
+                            <span className="label-text text-xs text-base-content">保持宽高比</span>
                             <input
                               type="checkbox"
                               className="checkbox checkbox-primary checkbox-xs"
@@ -440,7 +440,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                     <div className="space-y-3">
                       <div className="form-control">
                         <label className="label cursor-pointer py-1">
-                          <span className="label-text text-xs">减少调色板</span>
+                          <span className="label-text text-xs text-base-content">减少调色板</span>
                           <input
                             type="checkbox"
                             className="toggle toggle-primary toggle-xs"
@@ -455,7 +455,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                           {/* 颜色数量 */}
                           <div className="form-control">
                             <label className="label py-1">
-                              <span className="label-text text-xs">颜色数量: {config.paletteColors}</span>
+                              <span className="label-text text-xs text-base-content">颜色数量: {config.paletteColors}</span>
                             </label>
                             <input
                               type="range"
@@ -465,7 +465,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                               onChange={(e) => setConfig(prev => ({ ...prev, paletteColors: parseInt(e.target.value) }))}
                               className="range range-primary range-xs"
                             />
-                            <div className="w-full flex justify-between text-xs px-2 text-base-content/50">
+                            <div className="w-full flex justify-between text-xs px-2 text-base-content/70">
                               <span>2</span>
                               <span>256</span>
                             </div>
@@ -474,7 +474,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                           {/* 抖动 */}
                           <div className="form-control">
                             <label className="label py-1">
-                              <span className="label-text text-xs">抖动: {config.dithering}</span>
+                              <span className="label-text text-xs text-base-content">抖动: {config.dithering}</span>
                             </label>
                             <input
                               type="range"
@@ -485,7 +485,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                               onChange={(e) => setConfig(prev => ({ ...prev, dithering: parseFloat(e.target.value) }))}
                               className="range range-primary range-xs"
                             />
-                            <div className="w-full flex justify-between text-xs px-2 text-base-content/50">
+                            <div className="w-full flex justify-between text-xs px-2 text-base-content/70">
                               <span>0</span>
                               <span>10</span>
                             </div>
@@ -499,17 +499,17 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                   <div className="divider my-2"></div>
                   <div className="space-y-1 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-base-content/70">原始大小:</span>
-                      <span className="font-medium">{formatFileSize(originalImage.size)}</span>
+                      <span className="text-base-content">原始大小:</span>
+                      <span className="font-medium text-base-content">{formatFileSize(originalImage.size)}</span>
                     </div>
                     {compressedResult && (
                       <>
                         <div className="flex justify-between">
-                          <span className="text-base-content/70">压缩后:</span>
-                          <span className="font-medium">{formatFileSize(compressedResult.compressedSize)}</span>
+                          <span className="text-base-content">压缩后:</span>
+                          <span className="font-medium text-base-content">{formatFileSize(compressedResult.compressedSize)}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-base-content/70">压缩率:</span>
+                          <span className="text-base-content">压缩率:</span>
                           <div className={`badge ${compressedResult.compressionRatio > 0 ? 'badge-success' : 'badge-warning'} badge-xs`}>
                             {compressedResult.compressionRatio > 0 ? '↓' : '↑'} {Math.abs(compressedResult.compressionRatio).toFixed(1)}%
                           </div>
@@ -520,8 +520,8 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
 
                   {isProcessing && (
                     <div className="mt-3">
-                      <div className="flex items-center gap-2 text-xs text-base-content/70">
-                        <span className="loading loading-spinner loading-xs"></span>
+                      <div className="flex items-center gap-2 text-xs text-base-content">
+                        <span className="loading loading-spinner loading-xs text-primary"></span>
                         处理中...
                       </div>
                       <progress className="progress progress-primary w-full mt-1 h-1"></progress>

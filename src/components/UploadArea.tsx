@@ -184,125 +184,66 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
 
   // Add Tauri-specific drag and drop event listeners
   useEffect(() => {
-    console.log("[UploadArea] useEffect triggered, isActive:", isActive);
-    
-    // 只有在组件激活时才设置监听器
     if (!isActive) {
-      console.log("[UploadArea] Component not active, skipping Tauri listeners setup");
       return;
     }
-    
+
     console.log("[UploadArea] Setting up Tauri drag and drop listeners...");
-    
-    let unlistenDragOver: (() => void) | null = null;
-    let unlistenDrop: (() => void) | null = null;
-    
-    const setupTauriListeners = async () => {
-      try {
-        // Listen for drag over events
-        unlistenDragOver = await listen('tauri://drag-over', (event) => {
-          // 再次检查是否激活，防止在非激活状态下处理事件
-          if (!isActive) {
-            console.log("[UploadArea] Ignoring drag-over event - component not active");
-            return;
-          }
-          console.log("[UploadArea] === TAURI DRAG OVER EVENT ===", event);
-          setIsDragOver(true);
-        });
-        
-        // Listen for drop events
-        unlistenDrop = await listen('tauri://drag-drop', (event) => {
-          // 再次检查是否激活，防止在非激活状态下处理事件
-          if (!isActive) {
-            console.log("[UploadArea] Ignoring drop event - component not active");
-            return;
-          }
-          
-          console.log("[UploadArea] === TAURI DROP EVENT ===", event);
-          console.log("[UploadArea] Event payload:", event.payload);
-          
-          setIsDragOver(false);
-          
-          // Handle the dropped files - payload structure is { paths: string[], position: { x: number, y: number } }
-          const payload = event.payload as { paths: string[], position: { x: number, y: number } };
-          if (payload && payload.paths && payload.paths.length > 0) {
-            console.log("[UploadArea] Files dropped via Tauri:", payload.paths);
-            
-            // Convert file paths to File objects
-            const processDroppedFiles = async () => {
-              try {
-                for (const filePath of payload.paths) {
-                  console.log("[UploadArea] Processing dropped file:", filePath);
-                  
-                  // Check if it's an image file by extension
-                  const isImage = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(filePath);
-                  if (!isImage) {
-                    console.log("[UploadArea] Skipping non-image file:", filePath);
-                    continue;
-                  }
-                  
-                  // Read the file using Tauri's fs API
-                  console.log("[UploadArea] Reading file data...");
-                  const fileData = await ImageHostingAPI.readFileFromPath(filePath);
-                  if (fileData) {
-                    const fileName = filePath.split('/').pop() || 'dropped-file';
-                    console.log("[UploadArea] File read successfully, uploading:", fileName, "Size:", fileData.length, "bytes");
-                    
-                    setIsUploading(true);
-                    try {
-                      const result = await ImageHostingAPI.uploadImage(fileData, fileName);
-                      console.log("[UploadArea] Upload result:", result);
-                      if (result.success) {
-                        console.log("[UploadArea] Upload successful!");
-                        onUploadSuccess(result);
-                      } else {
-                        console.error("[UploadArea] Upload failed:", result.error);
-                        onUploadError(result.error || "上传失败");
-                      }
-                    } catch (error) {
-                      console.error("[UploadArea] Upload error:", error);
-                      onUploadError(error instanceof Error ? error.message : "上传失败");
-                    } finally {
-                      setIsUploading(false);
-                    }
-                  } else {
-                    console.error("[UploadArea] Failed to read file data");
-                    onUploadError("无法读取文件数据");
-                  }
-                }
-              } catch (error) {
-                console.error("[UploadArea] Error processing dropped files:", error);
-                onUploadError("处理拖拽文件时出错");
-              }
-            };
-            
-            processDroppedFiles();
+
+    const processDroppedFiles = async (paths: string[]) => {
+      for (const filePath of paths) {
+        const isImage = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(filePath);
+        if (!isImage) {
+          console.log("[UploadArea] Skipping non-image file:", filePath);
+          continue;
+        }
+
+        setIsUploading(true);
+        try {
+          const fileData = await ImageHostingAPI.readFileFromPath(filePath);
+          if (fileData) {
+            const fileName = filePath.split('/').pop() || 'dropped-file';
+            const result = await ImageHostingAPI.uploadImage(fileData, fileName);
+            if (result.success) {
+              onUploadSuccess(result);
+            } else {
+              onUploadError(result.error || "上传失败");
+            }
           } else {
-            console.log("[UploadArea] No files in drop event or invalid payload structure");
+            onUploadError("无法读取文件数据");
           }
-        });
-        
-        console.log("[UploadArea] Tauri drag and drop listeners set up successfully");
-      } catch (error) {
-        console.error("[UploadArea] Failed to set up Tauri listeners:", error);
+        } catch (error) {
+          onUploadError(error instanceof Error ? error.message : "处理拖拽文件时出错");
+        } finally {
+          setIsUploading(false);
+        }
       }
     };
-    
-    setupTauriListeners();
-    
-    // Cleanup
+
+    const unlistenPromises = [
+      listen('tauri://drag-over', () => {
+        setIsDragOver(true);
+      }),
+      listen('tauri://drag-drop', (event) => {
+        setIsDragOver(false);
+        const payload = event.payload as { paths: string[] };
+        if (payload.paths && payload.paths.length > 0) {
+          processDroppedFiles(payload.paths);
+        }
+      }),
+      listen('tauri://drag-cancelled', () => {
+        setIsDragOver(false);
+      })
+    ];
+
     return () => {
       console.log("[UploadArea] Cleaning up Tauri listeners...");
-      if (unlistenDragOver) {
-        unlistenDragOver();
-        unlistenDragOver = null;
-      }
-      if (unlistenDrop) {
-        unlistenDrop();
-        unlistenDrop = null;
-      }
+      Promise.all(unlistenPromises).then((unlisteners) => {
+        unlisteners.forEach((unlisten) => unlisten());
+        console.log("[UploadArea] Tauri listeners cleaned up.");
+      });
     };
-  }, [isActive]); // 只依赖 isActive，当它变化时重新设置监听器
+  }, [isActive, onUploadSuccess, onUploadError]);
 
 
 

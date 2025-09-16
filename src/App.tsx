@@ -363,7 +363,7 @@ function App() {
             <div className="card-body">
               <h2 className="card-title text-2xl justify-center mb-6 text-base-content">图片压缩</h2>
               <div className="max-w-6xl mx-auto">
-                <ImageCompressor />
+                <ImageCompressor isActive={activeTab === 'compress'} />
               </div>
             </div>
           </div>
