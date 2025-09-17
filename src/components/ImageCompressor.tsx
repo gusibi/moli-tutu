@@ -3,35 +3,17 @@ import { Image as ImageIcon, Zap } from "lucide-react";
 import { ImageEditor } from "./ImageEditor";
 import { listen } from "@tauri-apps/api/event";
 import { ImageHostingAPI } from "../api";
+import { saveCompressRecord, restoreImagesFromRecord } from "../utils/compressStorage";
+import { CompressConfig, CompressedResult, CompressRecord } from "../types/compress";
 
-interface CompressConfig {
-  format: 'mozjpeg' | 'webp' | 'avif' | 'oxipng';
-  quality: number;
-  resize: boolean;
-  resizeMethod: 'lanczos3' | 'mitchell' | 'catmull-rom' | 'triangle' | 'hqx' | 'browser-pixelated' | 'browser-low' | 'browser-medium' | 'browser-high';
-  resizePreset: '100%' | '75%' | '50%' | '25%' | 'custom';
-  resizeWidth?: number;
-  resizeHeight?: number;
-  premultiplyAlpha: boolean;
-  linearRGB: boolean;
-  maintainAspectRatio: boolean;
-  reducePalette: boolean;
-  paletteColors: number;
-  dithering: number;
-}
 
-interface CompressedResult {
-  originalSize: number;
-  compressedSize: number;
-  compressionRatio: number;
-  originalBlob: Blob;
-  compressedBlob: Blob;
-  originalUrl: string;
-  compressedUrl: string;
-}
 
 interface ImageCompressorProps {
   isActive?: boolean;
+  onUploadSuccess?: (result: any) => void;
+  onUploadError?: (error: string) => void;
+  restoreRecord?: CompressRecord | null;
+  onRecordRestored?: () => void;
 }
 
 const getMimeTypeFromPath = (path: string): string => {
@@ -55,12 +37,54 @@ const getMimeTypeFromPath = (path: string): string => {
   }
 };
 
-export const ImageCompressor: React.FC<ImageCompressorProps> = ({ isActive = false }) => {
+export const ImageCompressor: React.FC<ImageCompressorProps> = ({ 
+  isActive = false, 
+  onUploadSuccess, 
+  onUploadError,
+  restoreRecord,
+  onRecordRestored
+}) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [originalImage, setOriginalImage] = useState<File | null>(null);
   const [compressedResult, setCompressedResult] = useState<CompressedResult | null>(null);
   const [hasProcessed, setHasProcessed] = useState(false);
+  const [fileSource, setFileSource] = useState<'file' | 'clipboard' | 'drag'>('file'); // 跟踪文件来源
+
+  // 恢复记录的 effect
+  useEffect(() => {
+    if (restoreRecord && onRecordRestored) {
+      const restoreImages = async () => {
+        try {
+          const images = await restoreImagesFromRecord(restoreRecord);
+          if (images) {
+            setOriginalImage(images.originalFile);
+            setConfig(restoreRecord.config);
+            setFileSource(restoreRecord.sourceType || 'file'); // 设置文件来源
+            setCompressedResult({
+              originalSize: restoreRecord.originalSize,
+              compressedSize: restoreRecord.compressedSize,
+              compressionRatio: restoreRecord.compressionRatio,
+              originalBlob: images.originalFile,
+              compressedBlob: images.compressedBlob,
+              originalUrl: URL.createObjectURL(images.originalFile),
+              compressedUrl: URL.createObjectURL(images.compressedBlob),
+            });
+            setHasProcessed(true);
+            console.log('已恢复压缩记录:', restoreRecord.originalName);
+          } else {
+            console.warn('无法恢复图片数据');
+            alert('无法恢复图片数据，请重新选择文件');
+          }
+        } catch (error) {
+          console.error('恢复记录失败:', error);
+          alert('恢复记录失败');
+        }
+      };
+      restoreImages();
+      onRecordRestored();
+    }
+  }, [restoreRecord, onRecordRestored]);
   const [config, setConfig] = useState<CompressConfig>({
     format: 'mozjpeg',
     quality: 75,
@@ -82,6 +106,7 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({ isActive = fal
 
     if (files instanceof FileList) {
       file = files[0];
+      setFileSource('file'); // 选择的文件
     } else if (Array.isArray(files) && files.length > 0 && typeof files[0] === 'string') {
       const filePath = files[0];
       try {
@@ -93,6 +118,7 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({ isActive = fal
         const mimeType = getMimeTypeFromPath(filePath);
         const blob = new Blob([fileData], { type: mimeType });
         file = new File([blob], fileName, { type: mimeType });
+        setFileSource('drag'); // 拖拽的文件
       } catch (error) {
         console.error("Error reading dropped file:", error);
         alert("无法读取拖拽的文件");
@@ -129,6 +155,7 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({ isActive = fal
             const blob = await clipboardItem.getType(type);
             const file = new File([blob], `clipboard-${Date.now()}.${type.split('/')[1]}`, { type });
             setOriginalImage(file);
+            setFileSource('clipboard'); // 剪贴板文件
             setCompressedResult(null);
             setHasProcessed(false);
             return;
@@ -228,7 +255,7 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({ isActive = fal
       const originalBlob = new Blob([await originalImage.arrayBuffer()], { type: originalImage.type });
       const compressionRatio = ((originalBlob.size - compressedBlob.size) / originalBlob.size) * 100;
 
-      setCompressedResult({
+      const result: CompressedResult = {
         originalSize: originalBlob.size,
         compressedSize: compressedBlob.size,
         compressionRatio,
@@ -236,7 +263,17 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({ isActive = fal
         compressedBlob,
         originalUrl: URL.createObjectURL(originalBlob),
         compressedUrl: URL.createObjectURL(compressedBlob),
-      });
+      };
+
+      setCompressedResult(result);
+
+      // 保存压缩记录到本地存储
+      try {
+        await saveCompressRecord(originalImage, compressedBlob, config, compressionRatio, fileSource);
+        console.log('压缩记录已保存，来源:', fileSource);
+      } catch (error) {
+        console.error('保存压缩记录失败:', error);
+      }
 
       // 清理
       URL.revokeObjectURL(imageUrl);
@@ -249,19 +286,90 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({ isActive = fal
     } finally {
       setIsProcessing(false);
     }
-  }, [originalImage, config, isProcessing]);
+  }, [originalImage, config, isProcessing, fileSource]);
 
-  const downloadCompressed = useCallback(() => {
-    if (!compressedResult) return;
+  const downloadCompressed = useCallback(async () => {
+    console.log('Download button clicked');
+    if (!compressedResult) {
+      console.log('No compressed result available');
+      return;
+    }
 
-    const link = document.createElement('a');
-    link.href = compressedResult.compressedUrl;
-    const extension = config.format === 'mozjpeg' ? 'jpg' : config.format;
-    link.download = `compressed-${Date.now()}.${extension}`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }, [compressedResult, config.format]);
+    console.log('Compressed result:', compressedResult);
+    console.log('Compressed URL:', compressedResult.compressedUrl);
+
+    try {
+      // 方法1: 使用 Blob URL
+      const extension = config.format === 'mozjpeg' ? 'jpg' : config.format === 'oxipng' ? 'png' : config.format;
+      const originalName = originalImage?.name.split('.')[0] || 'compressed';
+      const filename = `${originalName}_compressed.${extension}`;
+      
+      // 创建新的 Blob URL 确保有效性
+      const blobUrl = URL.createObjectURL(compressedResult.compressedBlob);
+      
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      link.style.display = 'none';
+      
+      document.body.appendChild(link);
+      console.log('Triggering download with filename:', filename);
+      
+      // 使用 setTimeout 确保链接被正确处理
+      setTimeout(() => {
+        link.click();
+        
+        // 清理
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(blobUrl);
+          
+          // 显示下载成功提示
+          const downloadPath = navigator.userAgent.includes('Mac') ? '~/Downloads' : 
+                              navigator.userAgent.includes('Windows') ? '%USERPROFILE%\\Downloads' : 
+                              '~/Downloads';
+          
+          alert(`✅ 下载成功！
+
+文件名: ${filename}
+存储位置: ${downloadPath}
+
+💡 提示: 具体路径可能因浏览器设置而异`);
+        }, 100);
+      }, 10);
+      
+    } catch (error) {
+      console.error('Download failed:', error);
+      
+      // 方法2: 备用下载方法 - 使用 FileSaver API 风格
+      try {
+        const extension = config.format === 'mozjpeg' ? 'jpg' : config.format === 'oxipng' ? 'png' : config.format;
+        const originalName = originalImage?.name.split('.')[0] || 'compressed';
+        const filename = `${originalName}_compressed.${extension}`;
+        
+        // 创建 URL 并直接打开
+        const url = URL.createObjectURL(compressedResult.compressedBlob);
+        const newWindow = window.open(url, '_blank');
+        
+        if (!newWindow) {
+          // 如果弹窗被阻止，提示用户
+          alert('请允许弹窗以下载文件，或者右键点击图片选择"另存为"');
+        } else {
+          // 显示下载提示
+          alert('✅ 文件已在新窗口中打开，请右键选择"另存为"进行下载');
+        }
+        
+        // 延迟清理 URL
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 5000);
+        
+      } catch (fallbackError) {
+        console.error('Fallback download also failed:', fallbackError);
+        alert('下载失败，请尝试右键点击压缩后的图片选择"另存为"');
+      }
+    }
+  }, [compressedResult, config.format, originalImage]);
 
   const resetAll = useCallback(() => {
     setOriginalImage(null);
@@ -349,6 +457,8 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({ isActive = fal
         isProcessing={isProcessing}
         onReset={resetAll}
         onDownload={downloadCompressed}
+        onUploadSuccess={onUploadSuccess}
+        onUploadError={onUploadError}
       />
     );
   }

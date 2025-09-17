@@ -1,5 +1,7 @@
 import React, { useState, useRef, useCallback, useMemo } from "react";
-import { Download, RotateCcw, Settings as SettingsIcon } from "lucide-react";
+import { Download, RotateCcw, Settings as SettingsIcon, CloudUpload } from "lucide-react";
+import { ImageHostingAPI } from "../api";
+import { UploadResult } from "../types";
 
 interface CompressConfig {
   format: 'mozjpeg' | 'webp' | 'avif' | 'oxipng';
@@ -35,6 +37,8 @@ interface ImageEditorProps {
   isProcessing: boolean;
   onReset: () => void;
   onDownload: () => void;
+  onUploadSuccess?: (result: UploadResult) => void;
+  onUploadError?: (error: string) => void;
 }
 
 export const ImageEditor: React.FC<ImageEditorProps> = ({
@@ -45,10 +49,13 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
   isProcessing,
   onReset,
   onDownload,
+  onUploadSuccess,
+  onUploadError,
 }) => {
   const [splitPosition, setSplitPosition] = useState(50); // 分割线位置百分比
   const [isDragging, setIsDragging] = useState(false);
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
+  const [isUploading, setIsUploading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // 获取图片尺寸
@@ -109,6 +116,41 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
+  // 上传压缩图片的处理函数
+  const handleUploadCompressed = useCallback(async () => {
+    if (!compressedResult || !onUploadSuccess || !onUploadError) {
+      return;
+    }
+
+    setIsUploading(true);
+    
+    try {
+      // 从 Blob 创建 File 对象
+      const compressedFile = new File(
+        [compressedResult.compressedBlob], 
+        `compressed_${originalImage.name}`,
+        { type: compressedResult.compressedBlob.type }
+      );
+      
+      // 转换为 Uint8Array
+      const fileData = await ImageHostingAPI.convertFileToUint8Array(compressedFile);
+      
+      // 上传图片
+      const result = await ImageHostingAPI.uploadImage(fileData, compressedFile.name);
+      
+      if (result.success) {
+        onUploadSuccess(result);
+      } else {
+        onUploadError(result.error || "上传失败");
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "上传失败";
+      onUploadError(errorMessage);
+    } finally {
+      setIsUploading(false);
+    }
+  }, [compressedResult, originalImage.name, onUploadSuccess, onUploadError]);
+
   // 使用 useMemo 优化尺寸计算，避免闪烁
   const calculatedDimensions = useMemo(() => {
     const originalWidth = imageDimensions.width;
@@ -161,13 +203,34 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
               重新选择
             </button>
             {compressedResult && (
-              <button
-                onClick={onDownload}
-                className="btn btn-primary btn-sm gap-2"
-              >
-                <Download className="w-4 h-4 text-primary-content" />
-                下载压缩图片
-              </button>
+              <>
+                <button
+                  onClick={onDownload}
+                  className="btn btn-primary btn-sm gap-2"
+                >
+                  <Download className="w-4 h-4 text-primary-content" />
+                  下载压缩图片
+                </button>
+                {onUploadSuccess && onUploadError && (
+                  <button
+                    onClick={handleUploadCompressed}
+                    disabled={isUploading}
+                    className="btn btn-secondary btn-sm gap-2"
+                  >
+                    {isUploading ? (
+                      <>
+                        <span className="loading loading-spinner loading-xs"></span>
+                        上传中...
+                      </>
+                    ) : (
+                      <>
+                        <CloudUpload className="w-4 h-4 text-secondary-content" />
+                        上传压缩图片
+                      </>
+                    )}
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>

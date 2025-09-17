@@ -1,58 +1,56 @@
 import React, { useState, useEffect } from "react";
-import { History, Download, Eye, Trash2, Image as ImageIcon } from "lucide-react";
+import { History, Download, Eye, Trash2, Image as ImageIcon, Edit3, Trash } from "lucide-react";
+import { CompressRecord } from "../types/compress";
+import { 
+  getCompressRecords, 
+  deleteCompressRecord, 
+  restoreImagesFromRecord,
+  clearAllCompressRecords,
+  testLocalStorage 
+} from "../utils/compressStorage";
 
-interface CompressRecord {
-  id: string;
-  originalName: string;
-  originalSize: number;
-  compressedSize: number;
-  compressionRatio: number;
-  format: string;
-  quality?: number;
-  compressTime: number;
-  originalUrl?: string;
-  compressedUrl?: string;
+interface CompressHistoryProps {
+  onPreviewRecord?: (record: CompressRecord) => void;
 }
 
-export const CompressHistory: React.FC = () => {
+export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecord }) => {
   const [records, setRecords] = useState<CompressRecord[]>([]);
   const [selectedRecord, setSelectedRecord] = useState<CompressRecord | null>(null);
+  const [previewImages, setPreviewImages] = useState<{
+    originalUrl: string;
+    compressedUrl: string;
+  } | null>(null);
+  const [deleteConfirmRecord, setDeleteConfirmRecord] = useState<CompressRecord | null>(null);
+  const [showClearAllConfirm, setShowClearAllConfirm] = useState(false);
 
-  // 模拟数据 - 实际项目中应该从本地存储或API获取
+  // 从本地存储加载压缩记录
   useEffect(() => {
-    const mockRecords: CompressRecord[] = [
-      {
-        id: '1',
-        originalName: 'photo1.jpg',
-        originalSize: 2048000,
-        compressedSize: 512000,
-        compressionRatio: 75,
-        format: 'JPEG',
-        quality: 80,
-        compressTime: Date.now() - 3600000,
-      },
-      {
-        id: '2',
-        originalName: 'screenshot.png',
-        originalSize: 1536000,
-        compressedSize: 384000,
-        compressionRatio: 75,
-        format: 'WebP',
-        quality: 85,
-        compressTime: Date.now() - 7200000,
-      },
-      {
-        id: '3',
-        originalName: 'banner.png',
-        originalSize: 3072000,
-        compressedSize: 921600,
-        compressionRatio: 70,
-        format: 'AVIF',
-        quality: 75,
-        compressTime: Date.now() - 86400000,
-      },
-    ];
-    setRecords(mockRecords);
+    const loadRecords = () => {
+      // 测试 localStorage
+      const isStorageWorking = testLocalStorage();
+      if (!isStorageWorking) {
+        console.error('localStorage 不可用！');
+        alert('localStorage 不可用，请检查浏览器设置');
+        return;
+      }
+      
+      const storedRecords = getCompressRecords();
+      console.log('加载压缩记录:', storedRecords.length, '条记录');
+      setRecords(storedRecords);
+    };
+    
+    loadRecords();
+    
+    // 监听存储变化
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'compress_history') {
+        console.log('检测到存储变化，重新加载记录');
+        loadRecords();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const formatFileSize = (bytes: number) => {
@@ -73,20 +71,189 @@ export const CompressHistory: React.FC = () => {
     });
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('确定要删除这条压缩记录吗？')) {
-      setRecords(prev => prev.filter(record => record.id !== id));
+  const handleDelete = async (id: string, event?: React.MouseEvent) => {
+    console.log('用户点击删除按钮，记录ID:', id);
+    
+    // 防止事件冒泡
+    event?.preventDefault();
+    event?.stopPropagation();
+    
+    // 找到要删除的记录
+    const recordToDelete = records.find(record => record.id === id);
+    if (!recordToDelete) {
+      console.error('未找到要删除的记录:', id);
+      alert('记录不存在');
+      return;
+    }
+    
+    // 显示确认对话框
+    setDeleteConfirmRecord(recordToDelete);
+  };
+  
+  const confirmDelete = async () => {
+    if (!deleteConfirmRecord) return;
+    
+    const id = deleteConfirmRecord.id;
+    console.log('用户确认删除，开始执行删除操作...');
+    
+    try {
+      await deleteCompressRecord(id);
+      
+      console.log('更新React状态...');
+      setRecords(prev => {
+        const newRecords = prev.filter(record => record.id !== id);
+        console.log('记录删除成功:', id, '剩余记录数:', newRecords.length);
+        return newRecords;
+      });
+      
+      // 如果删除的是当前预览的记录，关闭预览
+      if (selectedRecord && selectedRecord.id === id) {
+        console.log('关闭当前预览的记录');
+        setSelectedRecord(null);
+        if (previewImages) {
+          URL.revokeObjectURL(previewImages.originalUrl);
+          URL.revokeObjectURL(previewImages.compressedUrl);
+          setPreviewImages(null);
+        }
+      }
+      
+      console.log('删除操作完成');
+    } catch (error) {
+      console.error('删除记录失败:', error);
+      alert(`删除失败：${error instanceof Error ? error.message : '未知错误'}`);
+    } finally {
+      setDeleteConfirmRecord(null);
+    }
+  };
+  
+  const cancelDelete = () => {
+    console.log('用户取消了删除操作');
+    setDeleteConfirmRecord(null);
+  };
+
+  const handleClearAll = async () => {
+    console.log('用户点击清空按钮');
+    setShowClearAllConfirm(true);
+  };
+  
+  const confirmClearAll = async () => {
+    console.log('用户确认清空所有记录');
+    try {
+      await clearAllCompressRecords();
+      setRecords([]);
+      // 关闭预览窗口
+      if (selectedRecord) {
+        setSelectedRecord(null);
+        if (previewImages) {
+          URL.revokeObjectURL(previewImages.originalUrl);
+          URL.revokeObjectURL(previewImages.compressedUrl);
+          setPreviewImages(null);
+        }
+      }
+      console.log('清空操作完成');
+    } catch (error) {
+      console.error('清空记录失败:', error);
+      alert('清空失败，请重试');
+    } finally {
+      setShowClearAllConfirm(false);
+    }
+  };
+  
+  const cancelClearAll = () => {
+    console.log('用户取消清空操作');
+    setShowClearAllConfirm(false);
+  };
+
+  const handlePreview = async (record: CompressRecord) => {
+    console.log('开始预览记录:', record.id, record.originalName);
+    setSelectedRecord(record);
+    
+    // 先清理之前的图片URL
+    if (previewImages) {
+      URL.revokeObjectURL(previewImages.originalUrl);
+      URL.revokeObjectURL(previewImages.compressedUrl);
+      setPreviewImages(null);
+    }
+    
+    // 恢复图片数据用于预览
+    try {
+      const images = await restoreImagesFromRecord(record);
+      if (images) {
+        const originalUrl = URL.createObjectURL(images.originalFile);
+        const compressedUrl = URL.createObjectURL(images.compressedBlob);
+        setPreviewImages({ originalUrl, compressedUrl });
+        console.log('图片预览数据恢复成功');
+      } else {
+        console.warn('无法恢复图片数据 - 可能是大文件或数据损坏');
+        setPreviewImages(null);
+      }
+    } catch (error) {
+      console.error('恢复图片数据时发生错误:', error);
+      setPreviewImages(null);
     }
   };
 
-  const handlePreview = (record: CompressRecord) => {
-    setSelectedRecord(record);
+  const handleEditRecord = (record: CompressRecord) => {
+    console.log('尝试编辑记录:', record.id, record.originalName);
+    // 调用父组件的回调，跳转到编辑页面
+    if (onPreviewRecord) {
+      console.log('调用父组件回调');
+      onPreviewRecord(record);
+    } else {
+      console.warn('父组件回调函数不存在');
+      alert('编辑功能不可用，请检查父组件配置');
+    }
   };
 
-  const handleDownload = (record: CompressRecord) => {
-    // 实际项目中应该从存储中获取压缩后的文件
-    alert(`下载功能开发中: ${record.originalName}`);
+  const handleDownload = async (record: CompressRecord) => {
+    console.log('尝试下载压缩图片:', record.originalName);
+    try {
+      const images = await restoreImagesFromRecord(record);
+      if (images) {
+        const extension = record.config.format === 'mozjpeg' ? 'jpg' : 
+                         record.config.format === 'oxipng' ? 'png' : 
+                         record.config.format;
+        const filename = `${record.originalName.split('.')[0]}_compressed.${extension}`;
+        
+        const blobUrl = URL.createObjectURL(images.compressedBlob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = filename;
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(blobUrl);
+          
+          const downloadPath = navigator.userAgent.includes('Mac') ? '~/Downloads' : 
+                              navigator.userAgent.includes('Windows') ? '%USERPROFILE%\\Downloads' : 
+                              '~/Downloads';
+          
+          console.log('下载成功:', filename);
+          alert(`✅ 下载成功！\n\n文件名: ${filename}\n存储位置: ${downloadPath}`);
+        }, 100);
+      } else {
+        console.warn('无法恢复图片数据');
+        alert('无法恢复图片数据，请重新压缩');
+      }
+    } catch (error) {
+      console.error('下载失败:', error);
+      alert('下载失败，请重试');
+    }
   };
+
+  // 清理预览图片URL
+  useEffect(() => {
+    return () => {
+      if (previewImages) {
+        URL.revokeObjectURL(previewImages.originalUrl);
+        URL.revokeObjectURL(previewImages.compressedUrl);
+      }
+    };
+  }, [previewImages]);
 
   if (records.length === 0) {
     return (
@@ -147,8 +314,43 @@ export const CompressHistory: React.FC = () => {
         <div className="card-body">
           <div className="flex justify-between items-center mb-4">
             <h2 className="card-title text-base-content">压缩记录</h2>
-            <div className="text-sm text-base-content/60">
-              共 {records.length} 条记录
+            <div className="flex items-center gap-2">
+              <div className="text-sm text-base-content/60">
+                共 {records.length} 条记录
+              </div>
+              {records.length > 0 && (
+                <>
+                  <button
+                    onClick={() => {
+                      console.log('调试信息:');
+                      console.log('- 当前记录数:', records.length);
+                      console.log('- localStorage 测试:', testLocalStorage());
+                      const rawData = localStorage.getItem('compress_history');
+                      console.log('- localStorage 原始数据:', rawData);
+                      if (rawData) {
+                        try {
+                          const parsed = JSON.parse(rawData);
+                          console.log('- 解析后的数据:', parsed);
+                        } catch (e) {
+                          console.log('- 解析错误:', e);
+                        }
+                      }
+                    }}
+                    className="btn btn-ghost btn-xs text-info"
+                    title="调试信息"
+                  >
+                    调试
+                  </button>
+                  <button
+                    onClick={handleClearAll}
+                    className="btn btn-ghost btn-xs text-error hover:bg-error/10"
+                    title="清空所有记录"
+                  >
+                    <Trash className="w-4 h-4" />
+                    清空
+                  </button>
+                </>
+              )}
             </div>
           </div>
           
@@ -199,11 +401,11 @@ export const CompressHistory: React.FC = () => {
                     </td>
                     <td>
                       <div className="badge badge-outline badge-sm">
-                        {record.format}
+                        {record.config.format.toUpperCase()}
                       </div>
                     </td>
                     <td className="text-base-content/70">
-                      {record.quality ? `${record.quality}%` : '-'}
+                      {record.config.format !== 'oxipng' ? `${record.config.quality}%` : '-'}
                     </td>
                     <td className="text-sm text-base-content/70">
                       {formatDate(record.compressTime)}
@@ -211,23 +413,30 @@ export const CompressHistory: React.FC = () => {
                     <td>
                       <div className="flex gap-1">
                         <button
+                          onClick={() => handleEditRecord(record)}
+                          className="btn btn-ghost btn-xs text-primary hover:bg-primary/10"
+                          title="编辑 - 恢复到编辑器"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => handlePreview(record)}
                           className="btn btn-ghost btn-xs"
-                          title="预览"
+                          title="预览详情"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDownload(record)}
                           className="btn btn-ghost btn-xs"
-                          title="下载"
+                          title="下载压缩图片"
                         >
                           <Download className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(record.id)}
+                          onClick={(e) => handleDelete(record.id, e)}
                           className="btn btn-ghost btn-xs text-error hover:bg-error/10"
-                          title="删除"
+                          title="删除记录"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -240,6 +449,68 @@ export const CompressHistory: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 清空确认模态框 */}
+      {showClearAllConfirm && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg mb-4">确认清空</h3>
+            <p className="mb-4">
+              确定要清空所有压缩记录吗？
+            </p>
+            <p className="text-sm text-base-content/60 mb-6">
+              此操作不可恢复，所有记录和相关的临时文件都将被删除。
+            </p>
+            <div className="modal-action">
+              <button
+                onClick={confirmClearAll}
+                className="btn btn-error gap-2"
+              >
+                <Trash className="w-4 h-4" />
+                确认清空
+              </button>
+              <button
+                onClick={cancelClearAll}
+                className="btn"
+              >
+                取消
+              </button>
+            </div>
+          </div>
+          <div className="modal-backdrop" onClick={cancelClearAll}></div>
+        </div>
+      )}
+
+      {/* 删除确认模态框 */}
+      {deleteConfirmRecord && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg mb-4">确认删除</h3>
+            <p className="mb-4">
+              确定要删除压缩记录 <span className="font-semibold">{deleteConfirmRecord.originalName}</span> 吗？
+            </p>
+            <p className="text-sm text-base-content/60 mb-6">
+              此操作不可恢复，相关的临时文件也将被删除。
+            </p>
+            <div className="modal-action">
+              <button
+                onClick={confirmDelete}
+                className="btn btn-error gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                确认删除
+              </button>
+              <button
+                onClick={cancelDelete}
+                className="btn"
+              >
+                取消
+              </button>
+            </div>
+          </div>
+          <div className="modal-backdrop" onClick={cancelDelete}></div>
+        </div>
+      )}
 
       {/* 预览模态框 */}
       {selectedRecord && (
@@ -268,12 +539,12 @@ export const CompressHistory: React.FC = () => {
                       </div>
                       <div className="flex justify-between">
                         <span>输出格式:</span>
-                        <span>{selectedRecord.format}</span>
+                        <span>{selectedRecord.config.format.toUpperCase()}</span>
                       </div>
-                      {selectedRecord.quality && (
+                      {selectedRecord.config.format !== 'oxipng' && (
                         <div className="flex justify-between">
                           <span>质量:</span>
-                          <span>{selectedRecord.quality}%</span>
+                          <span>{selectedRecord.config.quality}%</span>
                         </div>
                       )}
                       <div className="flex justify-between">
@@ -290,12 +561,47 @@ export const CompressHistory: React.FC = () => {
                 <div className="card bg-base-200">
                   <div className="card-body p-4">
                     <h4 className="font-semibold mb-2">图片预览</h4>
-                    <div className="aspect-square bg-base-100 rounded-lg flex items-center justify-center">
-                      <div className="text-center text-base-content/40">
-                        <ImageIcon className="w-16 h-16 mx-auto mb-2" />
-                        <p>预览功能开发中</p>
+                    {previewImages ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="text-center">
+                            <h5 className="text-sm font-medium mb-2">原始图片</h5>
+                            <div className="bg-white rounded-lg p-2 shadow-inner">
+                              <img 
+                                src={previewImages.originalUrl} 
+                                alt="原始图片" 
+                                className="max-w-full max-h-32 mx-auto object-contain"
+                              />
+                            </div>
+                            <p className="text-xs text-base-content/60 mt-1">
+                              {formatFileSize(selectedRecord.originalSize)}
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <h5 className="text-sm font-medium mb-2">压缩后</h5>
+                            <div className="bg-white rounded-lg p-2 shadow-inner">
+                              <img 
+                                src={previewImages.compressedUrl} 
+                                alt="压缩后图片" 
+                                className="max-w-full max-h-32 mx-auto object-contain"
+                              />
+                            </div>
+                            <p className="text-xs text-base-content/60 mt-1">
+                              {formatFileSize(selectedRecord.compressedSize)} 
+                              <span className="text-success ml-1">(-{selectedRecord.compressionRatio.toFixed(1)}%)</span>
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="aspect-square bg-base-100 rounded-lg flex items-center justify-center">
+                        <div className="text-center text-base-content/40">
+                          <ImageIcon className="w-12 h-12 mx-auto mb-2" />
+                          <p className="text-sm">无图片数据</p>
+                          <p className="text-xs mt-1">大文件不保存预览数据</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

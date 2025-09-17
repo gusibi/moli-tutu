@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
-import { CheckCircle, XCircle, AlertCircle, CloudUpload, History, Settings, Upload, Copy, Image as ImageIcon, Sun, Moon, ChevronDown, Zap } from "lucide-react";
-import { UploadArea } from "./components/UploadArea";
-import { ConfigDialog } from "./components/ConfigDialog";
-import { UploadHistory } from "./components/UploadHistory";
-import { ThemeSelector } from "./components/ThemeSelector";
-import { ImageCompressor } from "./components/ImageCompressor";
-import { CompressHistory } from "./components/CompressHistory";
+import { CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import Navigation from "./components/Navigation";
+import MainContent from "./components/MainContent";
 import { UploadResult, UploadRecord } from "./types";
 import { ImageHostingAPI } from "./api";
 
@@ -105,298 +101,27 @@ function App() {
       )}
 
       {/* 导航栏 */}
-      <div className="navbar bg-base-100 shadow-sm">
-        <div className="navbar-start">
-          <div className="flex items-center gap-3">
-            <CloudUpload className="w-8 h-8 text-primary" />
-            <h1 className="text-xl font-bold text-base-content">Moli TuTu</h1>
-          </div>
-        </div>
-        
-        <div className="navbar-end">
-          <div className="flex items-center gap-4">
-            {/* 简单的明暗主题切换 */}
-            <button
-              onClick={() => handleThemeChange(theme === 'light' ? 'dark' : 'light')}
-              className="btn btn-ghost btn-circle"
-              title={theme === 'light' ? '切换到暗色主题' : '切换到亮色主题'}
-            >
-              {theme === 'light' ? (
-                <Moon className="w-5 h-5 text-base-content" />
-              ) : (
-                <Sun className="w-5 h-5 text-base-content" />
-              )}
-            </button>
-            
-            {/* 主题选择器 */}
-            {/* <ThemeSelector 
-              currentTheme={theme} 
-              onThemeChange={handleThemeChange} 
-            /> */}
-            
-            {/* 导航菜单 */}
-            <div className="flex items-center gap-2">
-              {/* 上传功能下拉菜单 */}
-              <div className="dropdown dropdown-end">
-                <div 
-                  tabIndex={0} 
-                  role="button" 
-                  className={`btn btn-ghost gap-2 ${(activeTab === 'upload' || activeTab === 'history') ? 'btn-active' : ''}`}
-                >
-                  <Upload className="w-4 h-4 text-base-content" />
-                  <span className="text-base-content">上传</span>
-                  <ChevronDown className="w-4 h-4 text-base-content" />
-                </div>
-                <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-                  <li>
-                    <button
-                      onClick={() => setActiveTab('upload')}
-                      className={`gap-2 ${activeTab === 'upload' ? 'active' : ''}`}
-                    >
-                      <Upload className="w-4 h-4" />
-                      上传图片
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => setActiveTab('history')}
-                      className={`gap-2 ${activeTab === 'history' ? 'active' : ''}`}
-                    >
-                      <History className="w-4 h-4" />
-                      上传记录
-                    </button>
-                  </li>
-                </ul>
-              </div>
+      <Navigation
+        theme={theme}
+        activeTab={activeTab}
+        onThemeChange={handleThemeChange}
+        onTabChange={setActiveTab}
+      />
 
-              {/* 图片压缩下拉菜单 */}
-              <div className="dropdown dropdown-end">
-                <div 
-                  tabIndex={0} 
-                  role="button" 
-                  className={`btn btn-ghost gap-2 ${(activeTab === 'compress' || activeTab === 'compress-history') ? 'btn-active' : ''}`}
-                >
-                  <Zap className="w-4 h-4 text-base-content" />
-                  <span className="text-base-content">压缩</span>
-                  <ChevronDown className="w-4 h-4 text-base-content" />
-                </div>
-                <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-                  <li>
-                    <button
-                      onClick={() => setActiveTab('compress')}
-                      className={`gap-2 ${activeTab === 'compress' ? 'active' : ''}`}
-                    >
-                      <Zap className="w-4 h-4" />
-                      图片压缩
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => setActiveTab('compress-history')}
-                      className={`gap-2 ${activeTab === 'compress-history' ? 'active' : ''}`}
-                    >
-                      <History className="w-4 h-4" />
-                      压缩记录
-                    </button>
-                  </li>
-                </ul>
-              </div>
-
-              {/* 设置下拉菜单 */}
-              <div className="dropdown dropdown-end">
-                <div 
-                  tabIndex={0} 
-                  role="button" 
-                  className={`btn btn-ghost gap-2 ${activeTab === 'config' ? 'btn-active' : ''}`}
-                >
-                  <Settings className="w-4 h-4 text-base-content" />
-                  <span className="text-base-content">设置</span>
-                  <ChevronDown className="w-4 h-4 text-base-content" />
-                </div>
-                <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-                  <li>
-                    <button
-                      onClick={() => setActiveTab('config')}
-                      className={`gap-2 ${activeTab === 'config' ? 'active' : ''}`}
-                    >
-                      <CloudUpload className="w-4 h-4" />
-                      R2 配置
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* 主内容区 */}
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* 上传区域 */}
-        {activeTab === 'upload' && (
-          <div className="space-y-8">
-            {/* 上传组件 */}
-            <div className="card bg-base-100 shadow-sm">
-              <div className="card-body">
-                <div className="max-w-2xl mx-auto">
-                  <h2 className="card-title text-2xl justify-center mb-6 text-base-content">上传图片到 R2</h2>
-                  <UploadArea
-                    onUploadSuccess={handleUploadSuccess}
-                    onUploadError={handleUploadError}
-                    isActive={activeTab === 'upload'}
-                  />
-                  
-                  {/* 粘贴上传提示 */}
-                  <div className="alert alert-info mt-6">
-                    <AlertCircle className="w-4 h-4 text-info" />
-                    <span>提示：您也可以直接复制图片后按 Ctrl+V 上传</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+      <MainContent
+        activeTab={activeTab}
+        uploadHistory={uploadHistory}
+        refreshTrigger={refreshTrigger}
+        configExists={configExists}
+        onUploadSuccess={handleUploadSuccess}
+        onUploadError={handleUploadError}
+        onShowNotification={showNotification}
+        onConfigSaved={handleConfigSaved}
+        onTabChange={setActiveTab}
+      />
 
-            {/* 最近上传的图片列表 */}
-            <div className="card bg-base-100 shadow-sm">
-              <div className="card-body">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="card-title text-base-content">最近上传</h3>
-                  <button
-                    onClick={() => setActiveTab('history')}
-                    className="btn btn-ghost btn-sm"
-                  >
-                    <span className="text-base-content">查看全部 →</span>
-                  </button>
-                </div>
-                
-                {uploadHistory.length === 0 ? (
-                  <div className="text-center py-12">
-                    <ImageIcon className="w-16 h-16 mx-auto mb-4 text-base-content/40" />
-                    <p className="text-base-content/60">暂无上传记录</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="table table-zebra">
-                      <thead>
-                        <tr>
-                          <th>缩略图</th>
-                          <th>文件名</th>
-                          <th>大小</th>
-                          <th>上传时间</th>
-                          <th>操作</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {uploadHistory.slice(0, 10).map((item: UploadRecord) => (
-                          <tr key={item.id}>
-                            <td>
-                              <div className="avatar">
-                                <div className="w-12 h-12 rounded">
-                                  <img
-                                    src={item.url}
-                                    alt={item.original_filename}
-                                    onError={(e) => {
-                                      const target = e.target as HTMLImageElement;
-                                      target.style.display = 'none';
-                                      const parent = target.parentElement;
-                                      if (parent) {
-                                        parent.innerHTML = `
-                                          <div class="w-full h-full bg-base-200 flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                          </div>
-                                        `;
-                                      }
-                                    }}
-                                  />
-                                </div>
-                              </div>
-                            </td>
-                            <td>
-                              <div className="max-w-xs truncate text-base-content" title={item.original_filename}>
-                                {item.original_filename}
-                              </div>
-                            </td>
-                            <td className="text-sm text-base-content/70">
-                              {(item.file_size / 1024).toFixed(1)} KB
-                            </td>
-                            <td className="text-sm text-base-content/70">
-                              {new Date(item.upload_time * 1000).toLocaleDateString('zh-CN', {
-                                year: 'numeric',
-                                month: '2-digit',
-                                day: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </td>
-                            <td>
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(item.url);
-                                  showNotification('链接已复制到剪贴板', 'success');
-                                }}
-                                className="btn btn-ghost btn-xs"
-                                title="复制链接"
-                              >
-                                <Copy className="w-4 h-4 text-base-content" />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 上传记录 */}
-        {activeTab === 'history' && (
-          <UploadHistory refreshTrigger={refreshTrigger} />
-        )}
-
-        {/* 图片压缩 */}
-        {activeTab === 'compress' && (
-          <div className="card bg-base-100 shadow-sm">
-            <div className="card-body">
-              <h2 className="card-title text-2xl justify-center mb-6 text-base-content">图片压缩</h2>
-              <div className="max-w-6xl mx-auto">
-                <ImageCompressor isActive={activeTab === 'compress'} />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 压缩记录 */}
-        {activeTab === 'compress-history' && (
-          <CompressHistory />
-        )}
-
-        {/* R2 配置 */}
-        {activeTab === 'config' && (
-          <div className="card bg-base-100 shadow-sm">
-            <div className="card-body">
-              <h2 className="card-title text-2xl mb-6 text-base-content">R2 配置</h2>
-              
-              {!configExists && (
-                <div className="alert alert-info mb-6">
-                  <AlertCircle className="w-4 h-4 text-info" />
-                  <span>请先配置您的 Cloudflare R2 设置以启用图片上传功能。</span>
-                </div>
-              )}
-              
-              <ConfigDialog onConfigSaved={handleConfigSaved} />
-              
-              <div className="alert alert-warning mt-8">
-                <AlertCircle className="w-4 h-4 text-warning" />
-                <span>注意：请确保您的 R2 配置信息正确，错误的配置可能导致上传失败。</span>
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
     </div>
   );
 }
