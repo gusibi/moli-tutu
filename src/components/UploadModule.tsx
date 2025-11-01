@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AlertCircle, ImageIcon, Copy } from 'lucide-react';
 import { UploadArea } from './UploadArea';
-import { UploadRecord } from '../types';
+import { UploadRecord, UploadResult } from '../types';
+import { ImageHostingAPI } from '../api';
 
 interface UploadModuleProps {
   uploadHistory: UploadRecord[];
-  onUploadSuccess: (record: UploadRecord) => void;
+  onUploadSuccess: (result: UploadResult) => void;
   onUploadError: (error: string) => void;
   onShowNotification: (message: string, type: 'success' | 'error' | 'info') => void;
   onViewAllHistory: () => void;
@@ -18,9 +19,85 @@ const UploadModule: React.FC<UploadModuleProps> = ({
   onShowNotification,
   onViewAllHistory
 }) => {
+  const [urlInput, setUrlInput] = useState('');
+  const [isUrlUploading, setIsUrlUploading] = useState(false);
   const handleCopyUrl = (url: string) => {
     navigator.clipboard.writeText(url);
     onShowNotification('链接已复制到剪贴板', 'success');
+  };
+
+  const handleUploadFromUrl = async () => {
+    const raw = urlInput.trim();
+    if (!raw) {
+      onShowNotification('请输入有效的图片 URL', 'error');
+      return;
+    }
+    let parsed: URL;
+    try {
+      parsed = new URL(raw);
+    } catch {
+      onShowNotification('URL 格式不正确', 'error');
+      return;
+    }
+    if (!(parsed.protocol === 'http:' || parsed.protocol === 'https:')) {
+      onShowNotification('仅支持 http/https URL', 'error');
+      return;
+    }
+
+    setIsUrlUploading(true);
+    try {
+      const resp = await fetch(parsed.toString());
+      if (!resp.ok) {
+        onUploadError(`获取 URL 失败: ${resp.status} ${resp.statusText}`);
+        return;
+      }
+      const contentType = resp.headers.get('content-type') || '';
+      if (!contentType.startsWith('image/')) {
+        // 某些站点不返回正确 content-type，这里不强制，但警告
+        // onShowNotification('提示：该 URL 的 Content-Type 非 image/*，尝试继续上传', 'info');
+      }
+      const buffer = await resp.arrayBuffer();
+      const data = new Uint8Array(buffer);
+
+      // 生成文件名
+      const pathname = parsed.pathname.split('?')[0];
+      let baseName = pathname.split('/').pop() || `image-${Date.now()}`;
+      const hasExt = /\.[a-zA-Z0-9]+$/.test(baseName);
+      const extFromType = (() => {
+        if (contentType.startsWith('image/')) {
+          const sub = contentType.split('/')[1];
+          switch (sub) {
+            case 'jpeg':
+            case 'jpg':
+              return 'jpg';
+            case 'png':
+            case 'gif':
+            case 'webp':
+            case 'bmp':
+              return sub;
+            case 'svg+xml':
+              return 'svg';
+            default:
+              return 'jpg';
+          }
+        }
+        return 'jpg';
+      })();
+      const filename = hasExt ? baseName : `${baseName}.${extFromType}`;
+
+      const result = await ImageHostingAPI.uploadImage(data, filename);
+      if (result.success) {
+        onUploadSuccess(result);
+        onShowNotification('URL 上传成功', 'success');
+      } else {
+        onUploadError(result.error || '上传失败');
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      onUploadError(`处理 URL 时出错: ${msg}`);
+    } finally {
+      setIsUrlUploading(false);
+    }
   };
 
   return (
@@ -35,11 +112,33 @@ const UploadModule: React.FC<UploadModuleProps> = ({
               onUploadError={onUploadError}
               isActive={true}
             />
+
+            {/* URL 上传 */}
+            <div className="mt-4 flex gap-2">
+              <input
+                type="text"
+                className="input input-bordered flex-1"
+                placeholder="粘贴图片 URL（支持 http/https），回车或点击上传"
+                value={urlInput}
+                onChange={(e) => setUrlInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleUploadFromUrl();
+                }}
+                disabled={isUrlUploading}
+              />
+              <button
+                onClick={handleUploadFromUrl}
+                className="btn btn-primary"
+                disabled={isUrlUploading || !urlInput.trim()}
+              >
+                <span className="text-primary-content">{isUrlUploading ? '上传中…' : '上传 URL'}</span>
+              </button>
+            </div>
             
             {/* 粘贴上传提示 */}
             <div className="alert alert-info mt-6">
               <AlertCircle className="w-4 h-4 text-info" />
-              <span>提示：您也可以直接复制图片后按 Ctrl+V 上传</span>
+              <span>提示：可拖拽、选择文件、粘贴图片或粘贴 URL 上传</span>
             </div>
           </div>
         </div>

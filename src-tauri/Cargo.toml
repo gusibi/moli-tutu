@@ -1,9 +1,12 @@
 [package]
 name = "moli-tutu"
-version = "0.1.0"
+version = "0.2.0"
 description = "Moli TuTu - Image Hosting Application"
 authors = ["gusi"]
 edition = "2021"
+license = "MIT"
+repository = "https://github.com/gusi/MoliTutu"
+homepage = "https://github.com/gusi/MoliTutu"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

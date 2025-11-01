@@ -36,40 +36,38 @@ function App() {
     document.documentElement.setAttribute('data-theme', savedTheme);
   }, []);
 
-  // 检查配置是否存在
+  // 异步检查配置和加载历史记录
   useEffect(() => {
-    const checkConfig = async () => {
-      try {
-        const config = await ImageHostingAPI.getR2Config();
-        setConfigExists(!!config);
-      } catch (error) {
-        console.error('Failed to check config:', error);
-      }
+    // 使用 setTimeout 让页面先渲染，然后异步执行校验
+    const asyncInit = () => {
+      setTimeout(async () => {
+        // 异步检查配置
+        try {
+          const config = await ImageHostingAPI.getR2Config();
+          setConfigExists(!!config);
+        } catch (error) {
+          console.error('Failed to check config:', error);
+        }
+        
+        // 异步加载上传历史
+        try {
+          const history = await ImageHostingAPI.getUploadHistory();
+          setUploadHistory(history);
+        } catch (error) {
+          console.error('Failed to load upload history:', error);
+        }
+      }, 0); // 使用 0ms 延迟，让页面先渲染
     };
-    checkConfig();
+    
+    asyncInit();
   }, []);
 
-  // 加载上传历史
-  useEffect(() => {
-    const loadHistory = async () => {
-      try {
-        const history = await ImageHostingAPI.getUploadHistory();
-        setUploadHistory(history);
-      } catch (error) {
-        console.error('Failed to load upload history:', error);
-      }
-    };
-    loadHistory();
-  }, []);
-
-  const handleUploadSuccess = (result: UploadResult) => {
-    if (result.success && result.url) {
-      showNotification('图片上传成功！', 'success');
-      // 重新加载历史记录
-      ImageHostingAPI.getUploadHistory().then(setUploadHistory);
-      // 触发历史记录组件刷新
-      setRefreshTrigger(prev => prev + 1);
-    }
+  const handleUploadSuccess = (_result: UploadResult) => {
+    showNotification('图片上传成功！', 'success');
+    // 重新加载历史记录
+    ImageHostingAPI.getUploadHistory().then(setUploadHistory);
+    // 触发历史记录组件刷新
+    setRefreshTrigger(prev => prev + 1);
   };
 
   const handleUploadError = (error: string) => {

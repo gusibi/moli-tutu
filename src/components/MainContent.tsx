@@ -6,7 +6,7 @@ import { ImageCompressor } from './ImageCompressor';
 import { CompressHistory } from './CompressHistory';
 import { ConfigDialog } from './ConfigDialog';
 import { restoreImagesFromRecord } from '../utils/compressStorage';
-import { UploadRecord } from '../types';
+import { UploadRecord, UploadResult } from '../types';
 import { CompressRecord } from '../types/compress';
 
 interface MainContentProps {
@@ -14,7 +14,7 @@ interface MainContentProps {
   uploadHistory: UploadRecord[];
   refreshTrigger: number;
   configExists: boolean;
-  onUploadSuccess: (record: UploadRecord) => void;
+  onUploadSuccess: (result: UploadResult) => void;
   onUploadError: (error: string) => void;
   onShowNotification: (message: string, type: 'success' | 'error' | 'info') => void;
   onConfigSaved: () => void;
@@ -86,7 +86,7 @@ const MainContent: React.FC<MainContentProps> = ({
       {activeTab === 'config' && (
         <div className="card bg-base-100 shadow-sm">
           <div className="card-body">
-            <h2 className="card-title text-2xl mb-6 text-base-content">R2 配置</h2>
+            <h2 className="card-title text-2xl mb-6 text-base-content">图床配置</h2>
             
             {!configExists && (
               <div className="alert alert-info mb-6">
@@ -99,7 +99,7 @@ const MainContent: React.FC<MainContentProps> = ({
             
             <div className="alert alert-warning mt-8">
               <AlertCircle className="w-4 h-4 text-warning" />
-              <span>注意：请确保您的 R2 配置信息正确，错误的配置可能导致上传失败。</span>
+              <span>注意：请确保您的 配置信息正确，错误的配置可能导致上传失败。</span>
             </div>
           </div>
         </div>

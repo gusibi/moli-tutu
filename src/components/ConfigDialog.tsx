@@ -61,10 +61,11 @@ export const ConfigDialog: React.FC<ConfigDialogProps> = ({ onConfigSaved }) => 
     <>
       {/* 触发按钮 */}
       <button 
-        className="btn btn-circle btn-ghost"
+        className="btn btn-ghost gap-2"
         onClick={() => setOpen(true)}
       >
         <Settings className="h-5 w-5" />
+        R2 配置
       </button>
 
       {/* 模态框 */}

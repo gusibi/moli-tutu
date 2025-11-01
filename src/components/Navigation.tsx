@@ -148,7 +148,7 @@ const Navigation: React.FC<NavigationProps> = ({
                     className={`gap-2 ${activeTab === 'config' ? 'active' : ''}`}
                   >
                     <CloudUpload className="w-4 h-4" />
-                    R2 配置
+                    图床配置
                   </button>
                 </li>
               </ul>
