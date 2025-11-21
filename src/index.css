@@ -2,93 +2,148 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom styles */
+:root {
+  --sidebar-width: 240px;
+  --titlebar-height: 38px;
+}
+
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-base-100 text-base-content overflow-hidden selection:bg-primary selection:text-primary-content;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer components {
-  .nav-btn {
-    @apply px-4 py-2 text-sm font-medium transition-colors rounded-lg;
+  .sidebar-item {
+    @apply flex items-center gap-3 px-3 py-2 mx-2 rounded-md text-sm font-medium transition-all duration-200;
   }
-  
-  .nav-btn.active {
-    @apply text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600;
+
+  .sidebar-item.active {
+    @apply bg-primary text-primary-content shadow-sm;
   }
-  
-  .nav-btn:not(.active) {
-    @apply text-gray-600 hover:text-gray-900 hover:bg-gray-100;
+
+  .sidebar-item:not(.active) {
+    @apply text-base-content hover:bg-base-200 hover:text-base-content hover:opacity-100;
+    opacity: 0.7;
+  }
+
+  .mac-window {
+    @apply flex h-screen w-screen overflow-hidden bg-base-100;
+  }
+
+  .mac-sidebar {
+    @apply flex flex-col h-full bg-base-200 backdrop-blur-xl border-r border-base-300 pt-[var(--titlebar-height)];
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    background-color: rgba(var(--b2), 0.5);
+  }
+
+  .mac-content {
+    @apply flex-1 flex flex-col h-full overflow-hidden bg-base-100 relative;
+  }
+
+  .mac-titlebar {
+    @apply h-[var(--titlebar-height)] w-full flex items-center px-4 select-none absolute top-0 left-0 z-50;
   }
 }
 
 @layer utilities {
-  /* 自定义动画类 */
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-in-out;
+  .drag-region {
+    -webkit-app-region: drag;
   }
-  
-  .animate-shimmer {
-    animation: shimmer 2s infinite;
+
+  .no-drag {
+    -webkit-app-region: no-drag;
   }
-  
-  .scale-102 {
-    transform: scale(1.02);
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
   }
-  
-  /* 关键帧动画 */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
   }
-  
-  @keyframes shimmer {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(100%);
-    }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-base-300 rounded-full border-[2px] border-transparent bg-clip-content;
   }
-  
-  /* 拖拽区域特殊效果 */
-  [data-upload-drop-zone] {
-    position: relative;
-    overflow: hidden;
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-base-content;
+    opacity: 0.2;
   }
-  
-  [data-upload-drop-zone]::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg, transparent, rgba(var(--p), 0.1), transparent);
-    border-radius: inherit;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
+
+  .glass {
+    @apply bg-base-100 backdrop-blur-lg border-b border-base-200;
+    background-color: rgba(var(--b1), 0.7);
   }
-  
-  [data-upload-drop-zone]:hover::before {
-    opacity: 1;
-    animation: rotate 3s linear infinite;
+
+  /* Animation Delays */
+  .delay-0 {
+    animation-delay: 0s;
   }
-  
-  @keyframes rotate {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
+
+  .delay-200 {
+    animation-delay: 0.2s;
+  }
+
+  .delay-400 {
+    animation-delay: 0.4s;
+  }
+
+  .delay-600 {
+    animation-delay: 0.6s;
+  }
+
+  .delay-800 {
+    animation-delay: 0.8s;
+  }
+
+  .delay-1000 {
+    animation-delay: 1s;
+  }
+
+  /* Upload Area Background */
+  .bg-upload-drag {
+    background: radial-gradient(circle at center, rgba(var(--p), 0.1) 0%, rgba(var(--p), 0.05) 50%, transparent 100%);
+  }
+
+  /* Upload Animation Dots */
+  .upload-dot {
+    @apply absolute rounded-full animate-bounce bg-primary;
+  }
+
+  .upload-dot-1 {
+    @apply top-4 left-4 w-2 h-2 delay-0;
+  }
+
+  .upload-dot-2 {
+    @apply top-8 right-8 w-1 h-1 delay-200;
+    background-color: rgba(var(--p), 0.7);
+  }
+
+  .upload-dot-3 {
+    @apply bottom-6 left-8 w-1.5 h-1.5 delay-400;
+    background-color: rgba(var(--p), 0.8);
+  }
+
+  .upload-dot-4 {
+    @apply bottom-4 right-6 w-1 h-1 delay-600;
+    background-color: rgba(var(--p), 0.6);
+  }
+
+  .upload-dot-5 {
+    @apply top-1/2 left-6 w-1 h-1 delay-800;
+    background-color: rgba(var(--p), 0.5);
+  }
+
+  .upload-dot-6 {
+    @apply top-1/3 right-4 w-1.5 h-1.5 delay-1000;
+    background-color: rgba(var(--p), 0.7);
   }
 }

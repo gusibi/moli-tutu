@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { CheckCircle, XCircle, AlertCircle } from "lucide-react";
-import Navigation from "./components/Navigation";
+import { Sidebar } from "./components/Sidebar";
 import MainContent from "./components/MainContent";
 import { UploadResult, UploadRecord } from "./types";
 import { ImageHostingAPI } from "./api";
@@ -48,7 +48,7 @@ function App() {
         } catch (error) {
           console.error('Failed to check config:', error);
         }
-        
+
         // 异步加载上传历史
         try {
           const history = await ImageHostingAPI.getUploadHistory();
@@ -58,7 +58,7 @@ function App() {
         }
       }, 0); // 使用 0ms 延迟，让页面先渲染
     };
-    
+
     asyncInit();
   }, []);
 
@@ -79,47 +79,52 @@ function App() {
     showNotification('配置保存成功！', 'success');
   };
 
-
-
   return (
-    <div className="min-h-screen bg-base-200">
-      {/* 通知组件 */}
-      {notification && (
-        <div className="toast toast-top toast-end z-50">
-          <div className={`alert ${
-            notification.type === 'success' ? 'alert-success' :
-            notification.type === 'error' ? 'alert-error' : 'alert-info'
-          }`}>
-            {notification.type === 'success' && <CheckCircle className="w-5 h-5 text-success" />}
-            {notification.type === 'error' && <XCircle className="w-5 h-5 text-error" />}
-            {notification.type === 'info' && <AlertCircle className="w-5 h-5 text-info" />}
-            <span>{notification.message}</span>
-          </div>
-        </div>
-      )}
-
-      {/* 导航栏 */}
-      <Navigation
+    <div className="mac-window">
+      {/* Sidebar */}
+      <Sidebar
         theme={theme}
         activeTab={activeTab}
         onThemeChange={handleThemeChange}
         onTabChange={setActiveTab}
       />
 
+      {/* Main Content Area */}
+      <div className="mac-content">
+        {/* Title Bar Drag Region */}
+        <div className="mac-titlebar drag-region">
+          {/* Title bar content if needed, currently empty for clean look */}
+        </div>
 
-      {/* 主内容区 */}
-      <MainContent
-        activeTab={activeTab}
-        uploadHistory={uploadHistory}
-        refreshTrigger={refreshTrigger}
-        configExists={configExists}
-        onUploadSuccess={handleUploadSuccess}
-        onUploadError={handleUploadError}
-        onShowNotification={showNotification}
-        onConfigSaved={handleConfigSaved}
-        onTabChange={setActiveTab}
-      />
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 pt-12">
+          <MainContent
+            activeTab={activeTab}
+            uploadHistory={uploadHistory}
+            refreshTrigger={refreshTrigger}
+            configExists={configExists}
+            onUploadSuccess={handleUploadSuccess}
+            onUploadError={handleUploadError}
+            onShowNotification={showNotification}
+            onConfigSaved={handleConfigSaved}
+            onTabChange={setActiveTab}
+          />
+        </div>
 
+        {/* Notifications */}
+        {notification && (
+          <div className="toast toast-top toast-end z-50 mt-12 mr-4">
+            <div className={`alert ${notification.type === 'success' ? 'alert-success' :
+                notification.type === 'error' ? 'alert-error' : 'alert-info'
+              } shadow-lg`}>
+              {notification.type === 'success' && <CheckCircle className="w-5 h-5" />}
+              {notification.type === 'error' && <XCircle className="w-5 h-5" />}
+              {notification.type === 'info' && <AlertCircle className="w-5 h-5" />}
+              <span>{notification.message}</span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

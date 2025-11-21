@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Copy, Trash2, Search, RefreshCw, ChevronLeft, ChevronRight, Image as ImageIcon } from "lucide-react";
+import { Copy, Trash2, RefreshCw, ChevronLeft, ChevronRight, Image as ImageIcon } from "lucide-react";
 import { UploadRecord } from "../types";
 import { ImageHostingAPI } from "../api";
 
@@ -118,7 +118,7 @@ export const UploadHistory: React.FC<UploadHistoryProps> = ({ refreshTrigger }) 
             </div>
           </div>
         </div>
-        
+
         <button
           onClick={handleClearHistory}
           className="btn btn-error btn-outline btn-sm gap-2"
@@ -128,7 +128,7 @@ export const UploadHistory: React.FC<UploadHistoryProps> = ({ refreshTrigger }) 
         </button>
       </div>
 
-      {/* 上传历史表格 */}
+      {/* 上传历史列表 */}
       <div className="card bg-base-100 shadow-sm">
         <div className="card-body p-0">
           {isLoading ? (
@@ -149,83 +149,74 @@ export const UploadHistory: React.FC<UploadHistoryProps> = ({ refreshTrigger }) 
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="table table-zebra">
-                <thead>
-                  <tr>
-                    <th>缩略图</th>
-                    <th>文件名</th>
-                    <th>大小</th>
-                    <th>上传时间</th>
-                    <th>操作</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedHistory.map((item) => (
-                    <tr key={item.id}>
-                      <td>
-                        <div className="avatar">
-                          <div className="w-12 h-12 rounded">
-                            {item.url ? (
-                              <img
-                                src={item.url}
-                                alt={item.original_filename}
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                  const parent = target.parentElement;
-                                  if (parent) {
-                                    parent.innerHTML = '<div class="w-full h-full bg-base-200 flex items-center justify-center"><svg class="w-6 h-6 opacity-40" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path></svg></div>';
-                                  }
-                                }}
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-base-200 flex items-center justify-center">
-                                <ImageIcon className="w-6 h-6 text-base-content/40" />
-                              </div>
-                            )}
+            <ul className="list bg-base-100 rounded-box shadow-md">
+              <li className="p-4 pb-2 text-xs font-bold tracking-wide text-base-content/60 uppercase border-b border-base-200 flex items-center">
+                <div className="w-16">缩略图</div>
+                <div className="flex-1 px-4">文件名</div>
+                <div className="w-24 text-right">大小</div>
+                <div className="w-32 text-right px-4">上传时间</div>
+                <div className="w-20 text-center">操作</div>
+              </li>
+              {paginatedHistory.map((item) => (
+                <li key={item.id} className="list-row hover:bg-base-200 transition-colors duration-200">
+                  <div className="w-16">
+                    <div className="avatar">
+                      <div className="w-12 h-12 rounded bg-base-300">
+                        {item.url ? (
+                          <img
+                            src={item.url}
+                            alt={item.original_filename}
+                            className="object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg class="w-6 h-6 opacity-40" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path></svg></div>';
+                              }
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <ImageIcon className="w-6 h-6 text-base-content/40" />
                           </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="max-w-xs">
-                          <div className="font-medium truncate text-base-content" title={item.original_filename}>
-                            {item.original_filename}
-                          </div>
-                          {item.from_cache && (
-                            <div className="badge badge-info badge-sm mt-1">缓存</div>
-                          )}
-                        </div>
-                      </td>
-                      <td className="text-sm text-base-content/70">
-                        {formatFileSize(item.file_size)}
-                      </td>
-                      <td className="text-sm text-base-content/70">
-                        {formatDate(item.upload_time)}
-                      </td>
-                      <td>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleCopyUrl(item.url)}
-                            className="btn btn-ghost btn-xs"
-                            title="复制链接"
-                          >
-                            <Copy className="w-4 h-4 text-base-content" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteItem(item.id)}
-                            className="btn btn-ghost btn-xs text-error"
-                            title="删除记录"
-                          >
-                            <Trash2 className="w-4 h-4 text-error" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex-1 px-4 flex flex-col justify-center min-w-0">
+                    <div className="font-medium truncate text-base-content" title={item.original_filename}>
+                      {item.original_filename}
+                    </div>
+                    {item.from_cache && (
+                      <div className="badge badge-info badge-xs mt-1">缓存</div>
+                    )}
+                  </div>
+                  <div className="w-24 text-right text-sm text-base-content/70 flex items-center justify-end">
+                    {formatFileSize(item.file_size)}
+                  </div>
+                  <div className="w-32 text-right px-4 text-sm text-base-content/70 flex items-center justify-end">
+                    {formatDate(item.upload_time)}
+                  </div>
+                  <div className="w-20 flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => handleCopyUrl(item.url)}
+                      className="btn btn-ghost btn-xs btn-square"
+                      title="复制链接"
+                    >
+                      <Copy className="w-4 h-4 text-base-content" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteItem(item.id)}
+                      className="btn btn-ghost btn-xs btn-square text-error"
+                      title="删除记录"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </div>
@@ -241,22 +232,21 @@ export const UploadHistory: React.FC<UploadHistoryProps> = ({ refreshTrigger }) 
             >
               <ChevronLeft className="w-4 h-4 text-base-content" />
             </button>
-            
+
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
               return (
                 <button
                   key={pageNum}
                   onClick={() => setCurrentPage(pageNum)}
-                  className={`join-item btn btn-sm ${
-                    currentPage === pageNum ? 'btn-active' : ''
-                  }`}
+                  className={`join-item btn btn-sm ${currentPage === pageNum ? 'btn-active' : ''
+                    }`}
                 >
                   {pageNum}
                 </button>
               );
             })}
-            
+
             <button
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}

@@ -5,7 +5,6 @@ import { UploadHistory } from './UploadHistory';
 import { ImageCompressor } from './ImageCompressor';
 import { CompressHistory } from './CompressHistory';
 import { ConfigDialog } from './ConfigDialog';
-import { restoreImagesFromRecord } from '../utils/compressStorage';
 import { UploadRecord, UploadResult } from '../types';
 import { CompressRecord } from '../types/compress';
 
@@ -35,7 +34,7 @@ const MainContent: React.FC<MainContentProps> = ({
   // 用于存储要恢复的压缩记录
   const [restoreRecord, setRestoreRecord] = useState<CompressRecord | null>(null);
   return (
-    <main className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="w-full max-w-7xl mx-auto">
       {/* 上传区域 */}
       {activeTab === 'upload' && (
         <UploadModule
@@ -57,9 +56,9 @@ const MainContent: React.FC<MainContentProps> = ({
         <div className="card bg-base-100 shadow-sm">
           <div className="card-body">
             <h2 className="card-title text-2xl justify-center mb-6 text-base-content">图片压缩</h2>
-            <div className="max-w-6xl mx-auto">
-              <ImageCompressor 
-                isActive={activeTab === 'compress'} 
+            <div className="max-w-6xl mx-auto w-full">
+              <ImageCompressor
+                isActive={activeTab === 'compress'}
                 onUploadSuccess={onUploadSuccess}
                 onUploadError={onUploadError}
                 restoreRecord={restoreRecord}
@@ -72,7 +71,7 @@ const MainContent: React.FC<MainContentProps> = ({
 
       {/* 压缩记录 */}
       {activeTab === 'compress-history' && (
-        <CompressHistory 
+        <CompressHistory
           onPreviewRecord={(record) => {
             // 设置要恢复的记录
             setRestoreRecord(record);
@@ -87,16 +86,16 @@ const MainContent: React.FC<MainContentProps> = ({
         <div className="card bg-base-100 shadow-sm">
           <div className="card-body">
             <h2 className="card-title text-2xl mb-6 text-base-content">图床配置</h2>
-            
+
             {!configExists && (
               <div className="alert alert-info mb-6">
                 <AlertCircle className="w-4 h-4 text-info" />
                 <span>请先配置您的 Cloudflare R2 设置以启用图片上传功能。</span>
               </div>
             )}
-            
+
             <ConfigDialog onConfigSaved={onConfigSaved} />
-            
+
             <div className="alert alert-warning mt-8">
               <AlertCircle className="w-4 h-4 text-warning" />
               <span>注意：请确保您的 配置信息正确，错误的配置可能导致上传失败。</span>
@@ -104,7 +103,7 @@ const MainContent: React.FC<MainContentProps> = ({
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 };
 

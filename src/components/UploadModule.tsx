@@ -105,7 +105,7 @@ const UploadModule: React.FC<UploadModuleProps> = ({
       {/* 上传组件 */}
       <div className="card bg-base-100 shadow-sm">
         <div className="card-body">
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <h2 className="card-title text-2xl justify-center mb-6 text-base-content">上传图片到 R2</h2>
             <UploadArea
               onUploadSuccess={onUploadSuccess}
@@ -134,7 +134,7 @@ const UploadModule: React.FC<UploadModuleProps> = ({
                 <span className="text-primary-content">{isUrlUploading ? '上传中…' : '上传 URL'}</span>
               </button>
             </div>
-            
+
             {/* 粘贴上传提示 */}
             <div className="alert alert-info mt-6">
               <AlertCircle className="w-4 h-4 text-info" />
@@ -156,7 +156,7 @@ const UploadModule: React.FC<UploadModuleProps> = ({
               <span className="text-base-content">查看全部 →</span>
             </button>
           </div>
-          
+
           {uploadHistory.length === 0 ? (
             <div className="text-center py-12">
               <ImageIcon className="w-16 h-16 mx-auto mb-4 text-base-content/40" />
@@ -164,7 +164,7 @@ const UploadModule: React.FC<UploadModuleProps> = ({
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="table table-zebra">
+              <table className="table table-zebra w-full">
                 <thead>
                   <tr>
                     <th>缩略图</th>

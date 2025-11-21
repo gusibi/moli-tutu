@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { History, Download, Eye, Trash2, Image as ImageIcon, Edit3, Trash } from "lucide-react";
 import { CompressRecord } from "../types/compress";
-import { 
-  getCompressRecords, 
-  deleteCompressRecord, 
+import {
+  getCompressRecords,
+  deleteCompressRecord,
   restoreImagesFromRecord,
   clearAllCompressRecords,
-  testLocalStorage 
+  testLocalStorage
 } from "../utils/compressStorage";
 
 interface CompressHistoryProps {
@@ -33,14 +33,14 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
         alert('localStorage 不可用，请检查浏览器设置');
         return;
       }
-      
+
       const storedRecords = getCompressRecords();
       console.log('加载压缩记录:', storedRecords.length, '条记录');
       setRecords(storedRecords);
     };
-    
+
     loadRecords();
-    
+
     // 监听存储变化
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'compress_history') {
@@ -48,7 +48,7 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
         loadRecords();
       }
     };
-    
+
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
@@ -73,11 +73,11 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
 
   const handleDelete = async (id: string, event?: React.MouseEvent) => {
     console.log('用户点击删除按钮，记录ID:', id);
-    
+
     // 防止事件冒泡
     event?.preventDefault();
     event?.stopPropagation();
-    
+
     // 找到要删除的记录
     const recordToDelete = records.find(record => record.id === id);
     if (!recordToDelete) {
@@ -85,27 +85,27 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
       alert('记录不存在');
       return;
     }
-    
+
     // 显示确认对话框
     setDeleteConfirmRecord(recordToDelete);
   };
-  
+
   const confirmDelete = async () => {
     if (!deleteConfirmRecord) return;
-    
+
     const id = deleteConfirmRecord.id;
     console.log('用户确认删除，开始执行删除操作...');
-    
+
     try {
       await deleteCompressRecord(id);
-      
+
       console.log('更新React状态...');
       setRecords(prev => {
         const newRecords = prev.filter(record => record.id !== id);
         console.log('记录删除成功:', id, '剩余记录数:', newRecords.length);
         return newRecords;
       });
-      
+
       // 如果删除的是当前预览的记录，关闭预览
       if (selectedRecord && selectedRecord.id === id) {
         console.log('关闭当前预览的记录');
@@ -116,7 +116,7 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
           setPreviewImages(null);
         }
       }
-      
+
       console.log('删除操作完成');
     } catch (error) {
       console.error('删除记录失败:', error);
@@ -125,7 +125,7 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
       setDeleteConfirmRecord(null);
     }
   };
-  
+
   const cancelDelete = () => {
     console.log('用户取消了删除操作');
     setDeleteConfirmRecord(null);
@@ -135,7 +135,7 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
     console.log('用户点击清空按钮');
     setShowClearAllConfirm(true);
   };
-  
+
   const confirmClearAll = async () => {
     console.log('用户确认清空所有记录');
     try {
@@ -158,7 +158,7 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
       setShowClearAllConfirm(false);
     }
   };
-  
+
   const cancelClearAll = () => {
     console.log('用户取消清空操作');
     setShowClearAllConfirm(false);
@@ -167,14 +167,14 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
   const handlePreview = async (record: CompressRecord) => {
     console.log('开始预览记录:', record.id, record.originalName);
     setSelectedRecord(record);
-    
+
     // 先清理之前的图片URL
     if (previewImages) {
       URL.revokeObjectURL(previewImages.originalUrl);
       URL.revokeObjectURL(previewImages.compressedUrl);
       setPreviewImages(null);
     }
-    
+
     // 恢复图片数据用于预览
     try {
       const images = await restoreImagesFromRecord(record);
@@ -210,28 +210,28 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
     try {
       const images = await restoreImagesFromRecord(record);
       if (images) {
-        const extension = record.config.format === 'mozjpeg' ? 'jpg' : 
-                         record.config.format === 'oxipng' ? 'png' : 
-                         record.config.format;
+        const extension = record.config.format === 'mozjpeg' ? 'jpg' :
+          record.config.format === 'oxipng' ? 'png' :
+            record.config.format;
         const filename = `${record.originalName.split('.')[0]}_compressed.${extension}`;
-        
+
         const blobUrl = URL.createObjectURL(images.compressedBlob);
         const link = document.createElement('a');
         link.href = blobUrl;
         link.download = filename;
         link.style.display = 'none';
-        
+
         document.body.appendChild(link);
         link.click();
-        
+
         setTimeout(() => {
           document.body.removeChild(link);
           URL.revokeObjectURL(blobUrl);
-          
-          const downloadPath = navigator.userAgent.includes('Mac') ? '~/Downloads' : 
-                              navigator.userAgent.includes('Windows') ? '%USERPROFILE%\\Downloads' : 
-                              '~/Downloads';
-          
+
+          const downloadPath = navigator.userAgent.includes('Mac') ? '~/Downloads' :
+            navigator.userAgent.includes('Windows') ? '%USERPROFILE%\\Downloads' :
+              '~/Downloads';
+
           console.log('下载成功:', filename);
           alert(`✅ 下载成功！\n\n文件名: ${filename}\n存储位置: ${downloadPath}`);
         }, 100);
@@ -281,7 +281,7 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
           <div className="stat-title">总压缩次数</div>
           <div className="stat-value text-primary">{records.length}</div>
         </div>
-        
+
         <div className="stat bg-base-100 rounded-lg shadow-sm">
           <div className="stat-figure text-success">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -293,7 +293,7 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
             {(records.reduce((sum, record) => sum + record.compressionRatio, 0) / records.length).toFixed(1)}%
           </div>
         </div>
-        
+
         <div className="stat bg-base-100 rounded-lg shadow-sm">
           <div className="stat-figure text-info">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -353,99 +353,91 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
               )}
             </div>
           </div>
-          
+
           <div className="overflow-x-auto">
-            <table className="table table-zebra">
-              <thead>
-                <tr>
-                  <th>文件名</th>
-                  <th>原始大小</th>
-                  <th>压缩后大小</th>
-                  <th>压缩率</th>
-                  <th>格式</th>
-                  <th>质量</th>
-                  <th>压缩时间</th>
-                  <th>操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                {records.map((record) => (
-                  <tr key={record.id}>
-                    <td>
-                      <div className="flex items-center gap-3">
-                        <div className="avatar">
-                          <div className="w-10 h-10 rounded bg-base-200 flex items-center justify-center">
-                            <ImageIcon className="w-5 h-5 text-base-content/40" />
-                          </div>
-                        </div>
-                        <div>
-                          <div className="font-medium text-base-content max-w-xs truncate" title={record.originalName}>
-                            {record.originalName}
-                          </div>
-                        </div>
+            <ul className="list bg-base-100 rounded-box shadow-md">
+              <li className="p-4 pb-2 text-xs font-bold tracking-wide text-base-content/60 uppercase border-b border-base-200 flex items-center">
+                <div className="w-16">缩略图</div>
+                <div className="flex-1 px-4">文件名</div>
+                <div className="w-24 text-right">原始大小</div>
+                <div className="w-24 text-right">压缩后</div>
+                <div className="w-20 text-center">压缩率</div>
+                <div className="w-16 text-center">格式</div>
+                <div className="w-16 text-center">质量</div>
+                <div className="w-32 text-right px-4">压缩时间</div>
+                <div className="w-32 text-center">操作</div>
+              </li>
+              {records.map((record) => (
+                <li key={record.id} className="list-row hover:bg-base-200 transition-colors duration-200">
+                  <div className="w-16">
+                    <div className="avatar">
+                      <div className="w-12 h-12 rounded bg-base-200 flex items-center justify-center">
+                        <ImageIcon className="w-6 h-6 text-base-content/40" />
                       </div>
-                    </td>
-                    <td className="text-base-content/70">
-                      {formatFileSize(record.originalSize)}
-                    </td>
-                    <td className="text-base-content/70">
-                      {formatFileSize(record.compressedSize)}
-                    </td>
-                    <td>
-                      <div className={`badge ${
-                        record.compressionRatio >= 70 ? 'badge-success' :
-                        record.compressionRatio >= 50 ? 'badge-warning' : 'badge-error'
+                    </div>
+                  </div>
+                  <div className="flex-1 px-4 flex flex-col justify-center min-w-0">
+                    <div className="font-medium text-base-content truncate" title={record.originalName}>
+                      {record.originalName}
+                    </div>
+                  </div>
+                  <div className="w-24 text-right text-sm text-base-content/70 flex items-center justify-end">
+                    {formatFileSize(record.originalSize)}
+                  </div>
+                  <div className="w-24 text-right text-sm text-base-content/70 flex items-center justify-end">
+                    {formatFileSize(record.compressedSize)}
+                  </div>
+                  <div className="w-20 flex items-center justify-center">
+                    <div className={`badge ${record.compressionRatio >= 70 ? 'badge-success' :
+                      record.compressionRatio >= 50 ? 'badge-warning' : 'badge-error'
                       } badge-sm`}>
-                        ↓ {record.compressionRatio.toFixed(1)}%
-                      </div>
-                    </td>
-                    <td>
-                      <div className="badge badge-outline badge-sm">
-                        {record.config.format.toUpperCase()}
-                      </div>
-                    </td>
-                    <td className="text-base-content/70">
-                      {record.config.format !== 'oxipng' ? `${record.config.quality}%` : '-'}
-                    </td>
-                    <td className="text-sm text-base-content/70">
-                      {formatDate(record.compressTime)}
-                    </td>
-                    <td>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => handleEditRecord(record)}
-                          className="btn btn-ghost btn-xs text-primary hover:bg-primary/10"
-                          title="编辑 - 恢复到编辑器"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handlePreview(record)}
-                          className="btn btn-ghost btn-xs"
-                          title="预览详情"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDownload(record)}
-                          className="btn btn-ghost btn-xs"
-                          title="下载压缩图片"
-                        >
-                          <Download className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={(e) => handleDelete(record.id, e)}
-                          className="btn btn-ghost btn-xs text-error hover:bg-error/10"
-                          title="删除记录"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      ↓ {record.compressionRatio.toFixed(1)}%
+                    </div>
+                  </div>
+                  <div className="w-16 flex items-center justify-center">
+                    <div className="badge badge-outline badge-xs">
+                      {record.config.format.toUpperCase()}
+                    </div>
+                  </div>
+                  <div className="w-16 text-center text-sm text-base-content/70 flex items-center justify-center">
+                    {record.config.format !== 'oxipng' ? `${record.config.quality}%` : '-'}
+                  </div>
+                  <div className="w-32 text-right px-4 text-sm text-base-content/70 flex items-center justify-end">
+                    {formatDate(record.compressTime)}
+                  </div>
+                  <div className="w-32 flex items-center justify-center gap-1">
+                    <button
+                      onClick={() => handleEditRecord(record)}
+                      className="btn btn-ghost btn-xs btn-square text-primary hover:bg-primary/10"
+                      title="编辑 - 恢复到编辑器"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handlePreview(record)}
+                      className="btn btn-ghost btn-xs btn-square"
+                      title="预览详情"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDownload(record)}
+                      className="btn btn-ghost btn-xs btn-square"
+                      title="下载压缩图片"
+                    >
+                      <Download className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => handleDelete(record.id, e)}
+                      className="btn btn-ghost btn-xs btn-square text-error hover:bg-error/10"
+                      title="删除记录"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
@@ -517,7 +509,7 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
         <div className="modal modal-open">
           <div className="modal-box max-w-4xl">
             <h3 className="font-bold text-lg mb-4">压缩详情 - {selectedRecord.originalName}</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* 压缩信息 */}
               <div className="space-y-4">
@@ -567,9 +559,9 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
                           <div className="text-center">
                             <h5 className="text-sm font-medium mb-2">原始图片</h5>
                             <div className="bg-white rounded-lg p-2 shadow-inner">
-                              <img 
-                                src={previewImages.originalUrl} 
-                                alt="原始图片" 
+                              <img
+                                src={previewImages.originalUrl}
+                                alt="原始图片"
                                 className="max-w-full max-h-32 mx-auto object-contain"
                               />
                             </div>
@@ -580,14 +572,14 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
                           <div className="text-center">
                             <h5 className="text-sm font-medium mb-2">压缩后</h5>
                             <div className="bg-white rounded-lg p-2 shadow-inner">
-                              <img 
-                                src={previewImages.compressedUrl} 
-                                alt="压缩后图片" 
+                              <img
+                                src={previewImages.compressedUrl}
+                                alt="压缩后图片"
                                 className="max-w-full max-h-32 mx-auto object-contain"
                               />
                             </div>
                             <p className="text-xs text-base-content/60 mt-1">
-                              {formatFileSize(selectedRecord.compressedSize)} 
+                              {formatFileSize(selectedRecord.compressedSize)}
                               <span className="text-success ml-1">(-{selectedRecord.compressionRatio.toFixed(1)}%)</span>
                             </p>
                           </div>
