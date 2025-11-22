@@ -6,6 +6,22 @@ export default {
   ],
   theme: {
     extend: {
+      colors: {
+        "primary": "#136dec",
+        "background-light": "#f6f7f8",
+        "background-dark": "#101822",
+        "success": "#34c759",
+        "error": "#ff3b30"
+      },
+      fontFamily: {
+        "display": ["Inter", "sans-serif"]
+      },
+      borderRadius: {
+        "DEFAULT": "0.25rem",
+        "lg": "0.5rem",
+        "xl": "0.75rem",
+        "full": "9999px"
+      },
       animation: {
         'spin-reverse': 'spin 1s linear infinite reverse',
       }

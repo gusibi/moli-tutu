@@ -33,72 +33,76 @@ const MainContent: React.FC<MainContentProps> = ({
 }) => {
   // 用于存储要恢复的压缩记录
   const [restoreRecord, setRestoreRecord] = useState<CompressRecord | null>(null);
+
   return (
-    <div className="w-full max-w-7xl mx-auto">
+    <div className="w-full h-full">
       {/* 上传区域 */}
       {activeTab === 'upload' && (
-        <UploadModule
-          uploadHistory={uploadHistory}
-          onUploadSuccess={onUploadSuccess}
-          onUploadError={onUploadError}
-          onShowNotification={onShowNotification}
-          onViewAllHistory={() => onTabChange('history')}
-        />
+        <div className="w-full max-w-5xl mx-auto p-6">
+          <UploadModule
+            uploadHistory={uploadHistory}
+            onUploadSuccess={onUploadSuccess}
+            onUploadError={onUploadError}
+            onShowNotification={onShowNotification}
+            onViewAllHistory={() => onTabChange('history')}
+          />
+        </div>
       )}
 
       {/* 上传记录 */}
       {activeTab === 'history' && (
-        <UploadHistory refreshTrigger={refreshTrigger} />
+        <div className="w-full max-w-5xl mx-auto p-6">
+          <UploadHistory refreshTrigger={refreshTrigger} />
+        </div>
       )}
 
       {/* 图片压缩 */}
       {activeTab === 'compress' && (
-        <div className="card bg-base-100 shadow-sm">
-          <div className="card-body">
-            <h2 className="card-title text-2xl justify-center mb-6 text-base-content">图片压缩</h2>
-            <div className="max-w-6xl mx-auto w-full">
-              <ImageCompressor
-                isActive={activeTab === 'compress'}
-                onUploadSuccess={onUploadSuccess}
-                onUploadError={onUploadError}
-                restoreRecord={restoreRecord}
-                onRecordRestored={() => setRestoreRecord(null)}
-              />
-            </div>
-          </div>
+        <div className="w-full h-full flex flex-col">
+          <ImageCompressor
+            isActive={activeTab === 'compress'}
+            onUploadSuccess={onUploadSuccess}
+            onUploadError={onUploadError}
+            restoreRecord={restoreRecord}
+            onRecordRestored={() => setRestoreRecord(null)}
+          />
         </div>
       )}
 
       {/* 压缩记录 */}
       {activeTab === 'compress-history' && (
-        <CompressHistory
-          onPreviewRecord={(record) => {
-            // 设置要恢复的记录
-            setRestoreRecord(record);
-            // 切换到压缩页面
-            onTabChange('compress');
-          }}
-        />
+        <div className="w-full max-w-5xl mx-auto p-6">
+          <CompressHistory
+            onPreviewRecord={(record) => {
+              // 设置要恢复的记录
+              setRestoreRecord(record);
+              // 切换到压缩页面
+              onTabChange('compress');
+            }}
+          />
+        </div>
       )}
 
       {/* R2 配置 */}
       {activeTab === 'config' && (
-        <div className="card bg-base-100 shadow-sm">
-          <div className="card-body">
-            <h2 className="card-title text-2xl mb-6 text-base-content">图床配置</h2>
+        <div className="w-full max-w-5xl mx-auto p-6">
+          <div className="max-w-2xl mx-auto space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">R2 Configuration</h2>
 
             {!configExists && (
-              <div className="alert alert-info mb-6">
-                <AlertCircle className="w-4 h-4 text-info" />
-                <span>请先配置您的 Cloudflare R2 设置以启用图片上传功能。</span>
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                <span className="text-sm font-medium">Please configure your Cloudflare R2 settings to enable image uploading.</span>
               </div>
             )}
 
-            <ConfigDialog onConfigSaved={onConfigSaved} />
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <ConfigDialog onConfigSaved={onConfigSaved} />
+            </div>
 
-            <div className="alert alert-warning mt-8">
-              <AlertCircle className="w-4 h-4 text-warning" />
-              <span>注意：请确保您的 配置信息正确，错误的配置可能导致上传失败。</span>
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800">
+              <AlertCircle className="w-5 h-5 shrink-0" />
+              <span className="text-sm font-medium">Note: Ensure your configuration is correct. Incorrect settings will cause upload failures.</span>
             </div>
           </div>
         </div>

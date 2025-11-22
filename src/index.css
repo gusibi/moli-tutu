@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,40 +11,26 @@
 
 @layer base {
   body {
-    @apply bg-base-100 text-base-content overflow-hidden selection:bg-primary selection:text-primary-content;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    @apply font-display bg-background-light dark:bg-background-dark text-[#333333] dark:text-gray-200 antialiased overflow-hidden selection:bg-primary selection:text-white;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer components {
-  .sidebar-item {
-    @apply flex items-center gap-3 px-3 py-2 mx-2 rounded-md text-sm font-medium transition-all duration-200;
-  }
-
-  .sidebar-item.active {
-    @apply bg-primary text-primary-content shadow-sm;
-  }
-
-  .sidebar-item:not(.active) {
-    @apply text-base-content hover:bg-base-200 hover:text-base-content hover:opacity-100;
-    opacity: 0.7;
-  }
-
   .mac-window {
-    @apply flex h-screen w-screen overflow-hidden bg-base-100;
+    @apply flex h-screen w-screen overflow-hidden bg-background-light dark:bg-background-dark;
   }
 
+  /* .mac-sidebar is no longer used in Sidebar.tsx, but keeping for reference or cleanup later */
   .mac-sidebar {
-    @apply flex flex-col h-full bg-base-200 backdrop-blur-xl border-r border-base-300 pt-[var(--titlebar-height)];
+    @apply flex flex-col h-full bg-gray-50 dark:bg-gray-900/50 border-r border-gray-200 dark:border-gray-800 pt-[var(--titlebar-height)];
     width: var(--sidebar-width);
     min-width: var(--sidebar-width);
-    background-color: rgba(var(--b2), 0.5);
   }
 
   .mac-content {
-    @apply flex-1 flex flex-col h-full overflow-hidden bg-base-100 relative;
+    @apply flex-1 flex flex-col h-full overflow-hidden bg-background-light dark:bg-background-dark relative;
   }
 
   .mac-titlebar {

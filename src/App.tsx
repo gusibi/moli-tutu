@@ -115,7 +115,7 @@ function App() {
         {notification && (
           <div className="toast toast-top toast-end z-50 mt-12 mr-4">
             <div className={`alert ${notification.type === 'success' ? 'alert-success' :
-                notification.type === 'error' ? 'alert-error' : 'alert-info'
+              notification.type === 'error' ? 'alert-error' : 'alert-info'
               } shadow-lg`}>
               {notification.type === 'success' && <CheckCircle className="w-5 h-5" />}
               {notification.type === 'error' && <XCircle className="w-5 h-5" />}

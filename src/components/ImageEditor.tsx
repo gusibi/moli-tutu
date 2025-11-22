@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useMemo } from "react";
-import { Download, RotateCcw, Settings as SettingsIcon, CloudUpload } from "lucide-react";
+import { Download, RotateCcw, ChevronDown, Link as LinkIcon, CloudUpload } from "lucide-react";
 import { ImageHostingAPI } from "../api";
 import { UploadResult } from "../types";
 
@@ -73,7 +73,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
       }
     };
     img.src = URL.createObjectURL(originalImage);
-    
+
     return () => {
       URL.revokeObjectURL(img.src);
     };
@@ -123,21 +123,21 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
     }
 
     setIsUploading(true);
-    
+
     try {
       // 从 Blob 创建 File 对象
       const compressedFile = new File(
-        [compressedResult.compressedBlob], 
+        [compressedResult.compressedBlob],
         `compressed_${originalImage.name}`,
         { type: compressedResult.compressedBlob.type }
       );
-      
+
       // 转换为 Uint8Array
       const fileData = await ImageHostingAPI.convertFileToUint8Array(compressedFile);
-      
+
       // 上传图片
       const result = await ImageHostingAPI.uploadImage(fileData, compressedFile.name);
-      
+
       if (result.success) {
         onUploadSuccess(result);
       } else {
@@ -155,9 +155,9 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
   const calculatedDimensions = useMemo(() => {
     const originalWidth = imageDimensions.width;
     const originalHeight = imageDimensions.height;
-    
-    if (!originalWidth || !originalHeight) return '计算中...';
-    
+
+    if (!originalWidth || !originalHeight) return 'Calculating...';
+
     if (config.resizePreset !== 'custom') {
       const percentage = parseInt(config.resizePreset.replace('%', '')) / 100;
       const width = Math.round(originalWidth * percentage);
@@ -189,413 +189,333 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
   ]);
 
   return (
-    <div className="fixed inset-0 top-16 bg-base-200">
-      {/* 顶部操作栏 */}
-      <div className="absolute top-0 left-0 right-0 z-30 bg-base-100 border-b border-base-300">
-        <div className="flex justify-between items-center px-6 py-4">
-          <h3 className="text-lg font-semibold text-base-content">图片压缩编辑器</h3>
-          <div className="flex gap-2">
-            <button
-              onClick={onReset}
-              className="btn btn-ghost btn-sm gap-2 text-base-content"
-            >
-              <RotateCcw className="w-4 h-4 text-base-content" />
-              重新选择
-            </button>
-            {compressedResult && (
-              <>
-                <button
-                  onClick={onDownload}
-                  className="btn btn-primary btn-sm gap-2"
-                >
-                  <Download className="w-4 h-4 text-primary-content" />
-                  下载压缩图片
-                </button>
-                {onUploadSuccess && onUploadError && (
-                  <button
-                    onClick={handleUploadCompressed}
-                    disabled={isUploading}
-                    className="btn btn-secondary btn-sm gap-2"
+    <div className="flex h-full w-full overflow-hidden bg-background-light dark:bg-background-dark">
+      {/* Settings Sidebar */}
+      <aside className="flex w-80 flex-shrink-0 flex-col border-r border-gray-200/80 bg-gray-50/50 dark:border-gray-800/80 dark:bg-gray-900/50">
+        <div className="flex-1 space-y-6 overflow-y-auto p-4">
+          {/* Format Section */}
+          <section>
+            <h3 className="px-0 pb-2 pt-2 text-base font-bold leading-tight tracking-[-0.015em] text-gray-800 dark:text-white">
+              Format
+            </h3>
+            <div className="flex h-10 flex-1 items-center justify-center rounded-lg bg-gray-200 p-1 dark:bg-black/40">
+              {(['mozjpeg', 'webp', 'oxipng', 'avif'] as const).map((fmt) => {
+                const label = fmt === 'mozjpeg' ? 'JPEG' : fmt === 'oxipng' ? 'PNG' : fmt.toUpperCase();
+                const isSelected = config.format === fmt;
+                return (
+                  <label
+                    key={fmt}
+                    className={`flex h-full flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-md px-2 text-sm font-medium leading-normal transition-all
+                      ${isSelected
+                        ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                      }`}
                   >
-                    {isUploading ? (
-                      <>
-                        <span className="loading loading-spinner loading-xs"></span>
-                        上传中...
-                      </>
-                    ) : (
-                      <>
-                        <CloudUpload className="w-4 h-4 text-secondary-content" />
-                        上传压缩图片
-                      </>
-                    )}
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+                    <span className="truncate">{label}</span>
+                    <input
+                      type="radio"
+                      name="format-selector"
+                      value={fmt}
+                      checked={isSelected}
+                      onChange={() => setConfig(prev => ({ ...prev, format: fmt }))}
+                      className="hidden"
+                    />
+                  </label>
+                );
+              })}
+            </div>
+          </section>
 
-      {/* 全屏分屏对比视图 */}
-      <div className="absolute inset-0 pt-20">
-        {/* 对比视图容器 */}
-        <div 
+          {/* Quality Section */}
+          {config.format !== 'oxipng' && (
+            <section>
+              <h3 className="px-0 pb-2 pt-2 text-base font-bold leading-tight tracking-[-0.015em] text-gray-800 dark:text-white">
+                Quality
+              </h3>
+              <div className="relative flex w-full flex-col items-start justify-between gap-3 rounded-lg bg-gray-200 p-3 dark:bg-black/40">
+                <div className="flex w-full items-center justify-between">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Quality</p>
+                  <p className="text-sm font-normal text-gray-600 dark:text-gray-400">{config.quality}%</p>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="100"
+                  value={config.quality}
+                  onChange={(e) => setConfig(prev => ({ ...prev, quality: parseInt(e.target.value) }))}
+                  className="w-full h-1.5 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 accent-primary"
+                />
+              </div>
+            </section>
+          )}
+
+          {/* Resize Section */}
+          <section>
+            <h3 className="px-0 pb-2 pt-2 text-base font-bold leading-tight tracking-[-0.015em] text-gray-800 dark:text-white">
+              Resize
+            </h3>
+            <div className="space-y-3 rounded-lg bg-gray-200 p-3 dark:bg-black/40">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Preset</label>
+                <select
+                  className="h-8 rounded-md border-gray-300 bg-white/50 text-sm shadow-sm focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-200 outline-none px-2"
+                  value={config.resizePreset}
+                  onChange={(e) => {
+                    const val = e.target.value as any;
+                    setConfig(prev => ({
+                      ...prev,
+                      resizePreset: val,
+                      resize: val !== '100%' // Auto enable resize if not 100%
+                    }));
+                  }}
+                >
+                  <option value="100%">100%</option>
+                  <option value="75%">75%</option>
+                  <option value="50%">50%</option>
+                  <option value="25%">25%</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  className="h-8 w-full rounded-md border-gray-300 bg-white/50 text-sm shadow-sm focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-200 px-2 disabled:opacity-50"
+                  placeholder="Width"
+                  type="number"
+                  value={config.resizeWidth || ''}
+                  disabled={config.resizePreset !== 'custom'}
+                  onChange={(e) => setConfig(prev => ({ ...prev, resizeWidth: parseInt(e.target.value) || 0, resize: true }))}
+                />
+                <span className="text-gray-400">×</span>
+                <input
+                  className="h-8 w-full rounded-md border-gray-300 bg-white/50 text-sm shadow-sm focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-200 px-2 disabled:opacity-50"
+                  placeholder="Height"
+                  type="number"
+                  value={config.resizeHeight || ''}
+                  disabled={config.resizePreset !== 'custom'}
+                  onChange={(e) => setConfig(prev => ({ ...prev, resizeHeight: parseInt(e.target.value) || 0, resize: true }))}
+                />
+                <button
+                  onClick={() => setConfig(prev => ({ ...prev, maintainAspectRatio: !prev.maintainAspectRatio }))}
+                  className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${config.maintainAspectRatio ? 'bg-primary/20 text-primary' : 'bg-gray-300 text-gray-500 dark:bg-gray-600'}`}
+                  title="Maintain Aspect Ratio"
+                >
+                  <LinkIcon className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="text-xs text-gray-500 dark:text-gray-400 flex justify-between px-1">
+                <span>Original: {imageDimensions.width}×{imageDimensions.height}</span>
+                <span>New: {calculatedDimensions}</span>
+              </div>
+            </div>
+          </section>
+
+          {/* Advanced Section */}
+          <section>
+            <details className="group" open>
+              <summary className="flex list-none cursor-pointer items-center justify-between py-2">
+                <h3 className="text-base font-bold leading-tight tracking-[-0.015em] text-gray-800 dark:text-white">
+                  Advanced
+                </h3>
+                <ChevronDown className="w-4 h-4 transition-transform duration-200 group-open:rotate-180 text-gray-500" />
+              </summary>
+              <div className="space-y-2 rounded-lg bg-gray-200 p-3 dark:bg-black/40">
+                <label className="flex cursor-pointer items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Pre-multiply Alpha</span>
+                  <input
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-900 dark:focus:ring-offset-gray-900 accent-primary"
+                    type="checkbox"
+                    checked={config.premultiplyAlpha}
+                    onChange={(e) => setConfig(prev => ({ ...prev, premultiplyAlpha: e.target.checked }))}
+                  />
+                </label>
+                <label className="flex cursor-pointer items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Linear RGB</span>
+                  <input
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-900 dark:focus:ring-offset-gray-900 accent-primary"
+                    type="checkbox"
+                    checked={config.linearRGB}
+                    onChange={(e) => setConfig(prev => ({ ...prev, linearRGB: e.target.checked }))}
+                  />
+                </label>
+              </div>
+            </details>
+          </section>
+
+          {/* PNG Options */}
+          {config.format === 'oxipng' && (
+            <section>
+              <details className="group" open>
+                <summary className="flex list-none cursor-pointer items-center justify-between py-2">
+                  <h3 className="text-base font-bold leading-tight tracking-[-0.015em] text-gray-800 dark:text-white">
+                    PNG Options
+                  </h3>
+                  <ChevronDown className="w-4 h-4 transition-transform duration-200 group-open:rotate-180 text-gray-500" />
+                </summary>
+                <div className="space-y-3 rounded-lg bg-gray-200 p-3 dark:bg-black/40">
+                  <label className="flex cursor-pointer items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Reduce Palette</span>
+                    <input
+                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-900 dark:focus:ring-offset-gray-900 accent-primary"
+                      type="checkbox"
+                      checked={config.reducePalette}
+                      onChange={(e) => setConfig(prev => ({ ...prev, reducePalette: e.target.checked }))}
+                    />
+                  </label>
+
+                  {config.reducePalette && (
+                    <>
+                      <div className="relative flex w-full flex-col items-start justify-between gap-3">
+                        <div className="flex w-full items-center justify-between">
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Colors</p>
+                          <p className="text-sm font-normal text-gray-600 dark:text-gray-400">{config.paletteColors}</p>
+                        </div>
+                        <input
+                          type="range"
+                          min="2"
+                          max="256"
+                          value={config.paletteColors}
+                          onChange={(e) => setConfig(prev => ({ ...prev, paletteColors: parseInt(e.target.value) }))}
+                          className="w-full h-1.5 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 accent-primary"
+                        />
+                      </div>
+                      <div className="relative flex w-full flex-col items-start justify-between gap-3">
+                        <div className="flex w-full items-center justify-between">
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Dithering</p>
+                          <p className="text-sm font-normal text-gray-600 dark:text-gray-400">{config.dithering}</p>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.1"
+                          value={config.dithering}
+                          onChange={(e) => setConfig(prev => ({ ...prev, dithering: parseFloat(e.target.value) }))}
+                          className="w-full h-1.5 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 accent-primary"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              </details>
+            </section>
+          )}
+        </div>
+
+        {/* Sidebar Footer Actions */}
+        <div className="flex flex-shrink-0 items-center gap-2 border-t border-gray-200/80 p-4 dark:border-gray-800/80">
+          <button
+            onClick={onReset}
+            className="flex h-9 flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-gray-200/80 px-4 text-sm font-medium text-gray-700 hover:bg-gray-300/80 dark:bg-gray-700/80 dark:text-gray-200 dark:hover:bg-gray-600/80 transition-colors"
+          >
+            <RotateCcw className="w-4 h-4 mr-2" />
+            <span className="truncate">Reset</span>
+          </button>
+          <button
+            onClick={onDownload}
+            className="flex h-9 flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-4 text-sm font-medium text-white shadow-sm hover:bg-primary/90 transition-colors"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            <span className="truncate">Save Image</span>
+          </button>
+          {onUploadSuccess && (
+            <button
+              onClick={handleUploadCompressed}
+              disabled={isUploading || !compressedResult}
+              className="flex h-9 flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-blue-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Quick Upload to R2"
+            >
+              <CloudUpload className="w-4 h-4 mr-2" />
+              <span className="truncate">{isUploading ? 'Uploading...' : 'Upload'}</span>
+            </button>
+          )}
+        </div>
+      </aside>
+
+      {/* Main Preview Area */}
+      <main className="flex flex-1 flex-col overflow-hidden bg-background-light dark:bg-background-dark relative">
+        {/* Preview Container */}
+        <div
           ref={containerRef}
-          className="relative w-full h-full overflow-hidden bg-base-200"
+          className="flex-1 relative overflow-hidden bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYGAQYcAP3uCTZhw1gGGYhAGBZIA/nYDCgBDAm9BGDWAAJyRCgLaBCAAgXwixzAS0pgAAAABJRU5ErkJggg==')] dark:bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYGAQYcAP3uCTZhw1gGGYhAGBZIA/nYDCgBDAm9BGDWAAJyRCgLaBCAAgXwixzAS0pgAAAABJRU5ErkJggg==')] bg-repeat"
           style={{ cursor: isDragging ? 'col-resize' : 'default' }}
         >
-          {/* 原图 */}
-          <div 
-            className="absolute inset-0"
+          {/* Original Image (Left) */}
+          <div
+            className="absolute inset-0 flex items-center justify-center overflow-hidden"
             style={{ clipPath: `inset(0 ${100 - splitPosition}% 0 0)` }}
           >
             <img
               src={URL.createObjectURL(originalImage)}
-              alt="原图"
-              className="w-full h-full object-contain"
+              alt="Original"
+              className="max-w-full max-h-full object-contain p-8"
               draggable={false}
             />
-            {/* 原图标签 */}
-            <div className="absolute top-4 left-4 bg-base-100 border border-base-300 px-3 py-1 rounded-full text-sm font-medium text-base-content shadow-lg">
-              原图 ({formatFileSize(originalImage.size)})
+            <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm">
+              Original
             </div>
           </div>
 
-          {/* 压缩后图片 */}
-          <div 
-            className="absolute inset-0"
+          {/* Compressed Image (Right) */}
+          <div
+            className="absolute inset-0 flex items-center justify-center overflow-hidden"
             style={{ clipPath: `inset(0 0 0 ${splitPosition}%)` }}
           >
             {compressedResult ? (
-              <>
-                <img
-                  src={compressedResult.compressedUrl}
-                  alt="压缩后"
-                  className="w-full h-full object-contain"
-                  draggable={false}
-                />
-                {/* 压缩后标签 */}
-                <div className="absolute top-4 right-4 bg-primary px-3 py-1 rounded-full text-sm font-medium text-primary-content shadow-lg">
-                  压缩后 ({formatFileSize(compressedResult.compressedSize)})
-                </div>
-              </>
+              <img
+                src={compressedResult.compressedUrl}
+                alt="Compressed"
+                className="max-w-full max-h-full object-contain p-8"
+                draggable={false}
+              />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-base-300">
-                <div className="text-center">
-                  {isProcessing ? (
-                    <>
-                      <span className="loading loading-spinner loading-lg text-primary"></span>
-                      <p className="mt-4 text-base-content/60">处理中...</p>
-                    </>
-                  ) : (
-                    <p className="text-base-content/60">等待压缩...</p>
-                  )}
-                </div>
+              <div className="flex items-center justify-center h-full text-gray-500">
+                {isProcessing ? 'Compressing...' : 'Waiting...'}
               </div>
             )}
+            <div className="absolute top-4 right-4 bg-primary/80 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm">
+              Compressed
+            </div>
           </div>
 
-          {/* 分割线 */}
-          <div 
-            className="absolute top-0 bottom-0 w-1 bg-primary cursor-col-resize z-10 hover:w-2 transition-all duration-200"
-            style={{ left: `${splitPosition}%`, transform: 'translateX(-50%)' }}
+          {/* Split Line */}
+          <div
+            className="absolute top-0 bottom-0 w-0.5 bg-white cursor-col-resize z-10 shadow-[0_0_10px_rgba(0,0,0,0.5)]"
+            style={{ left: `${splitPosition}%` }}
             onMouseDown={handleMouseDown}
           >
-            {/* 分割线手柄 */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
-              <div className="w-1 h-4 bg-primary-content rounded-full"></div>
-              <div className="w-1 h-4 bg-primary-content rounded-full ml-1"></div>
-            </div>
-          </div>
-
-          {/* 拖拽提示 */}
-          {!compressedResult && !isProcessing && (
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-base-100 border border-base-300 px-4 py-2 rounded-full text-sm text-base-content shadow-lg">
-              调整设置查看压缩效果
-            </div>
-          )}
-
-          {/* 悬浮配置面板 */}
-          <div className="absolute bottom-6 right-6 z-40">
-            <div className="card bg-base-100 shadow-xl w-80 max-h-[calc(100vh-200px)] overflow-y-auto">
-              <div className="card-body p-4">
-                <h4 className="card-title text-sm gap-2 mb-3 text-base-content">
-                  <SettingsIcon className="w-4 h-4 text-base-content" />
-                  压缩设置
-                </h4>
-                
-                <div className="space-y-3">
-                  {/* 格式选择 */}
-                  <div className="form-control">
-                    <label className="label py-1">
-                      <span className="label-text text-xs text-base-content">输出格式</span>
-                    </label>
-                    <select
-                      className="select select-bordered select-xs bg-base-100 text-base-content"
-                      value={config.format}
-                      onChange={(e) => setConfig(prev => ({ ...prev, format: e.target.value as any }))}
-                    >
-                      <option value="mozjpeg">JPEG</option>
-                      <option value="webp">WebP</option>
-                      <option value="oxipng">PNG</option>
-                    </select>
-                  </div>
-
-                  {/* 质量设置 */}
-                  {config.format !== 'oxipng' && (
-                    <div className="form-control">
-                      <label className="label py-1">
-                        <span className="label-text text-xs text-base-content">质量: {config.quality}%</span>
-                      </label>
-                      <input
-                        type="range"
-                        min="1"
-                        max="100"
-                        value={config.quality}
-                        onChange={(e) => setConfig(prev => ({ ...prev, quality: parseInt(e.target.value) }))}
-                        className="range range-primary range-xs"
-                      />
-                    </div>
-                  )}
-
-                  {/* 尺寸调整 */}
-                  <div className="form-control">
-                    <label className="label cursor-pointer py-1">
-                      <span className="label-text text-xs text-base-content">调整尺寸</span>
-                      <input
-                        type="checkbox"
-                        className="toggle toggle-primary toggle-xs"
-                        checked={config.resize}
-                        onChange={(e) => setConfig(prev => ({ ...prev, resize: e.target.checked }))}
-                      />
-                    </label>
-                  </div>
-
-                  {config.resize && (
-                    <div className="space-y-3">
-                      {/* 缩放方法 */}
-                      <div className="form-control">
-                        <label className="label py-1">
-                          <span className="label-text text-xs text-base-content">方法</span>
-                        </label>
-                        <select
-                          className="select select-bordered select-xs bg-base-100 text-base-content"
-                          value={config.resizeMethod}
-                          onChange={(e) => setConfig(prev => ({ ...prev, resizeMethod: e.target.value as any }))}
-                        >
-                          <option value="lanczos3">Lanczos3</option>
-                          <option value="mitchell">Mitchell</option>
-                          <option value="catmull-rom">Catmull-Rom</option>
-                          <option value="triangle">Triangle (bilinear)</option>
-                          <option value="hqx">hqx (pixel art)</option>
-                          <option value="browser-pixelated">Browser pixelated</option>
-                          <option value="browser-low">Browser low quality</option>
-                          <option value="browser-medium">Browser medium quality</option>
-                          <option value="browser-high">Browser high quality</option>
-                        </select>
-                      </div>
-
-                      {/* 预设尺寸 */}
-                      <div className="form-control">
-                        <label className="label py-1">
-                          <span className="label-text text-xs text-base-content">预设</span>
-                        </label>
-                        <select
-                          className="select select-bordered select-xs bg-base-100 text-base-content"
-                          value={config.resizePreset}
-                          onChange={(e) => setConfig(prev => ({ ...prev, resizePreset: e.target.value as any }))}
-                        >
-                          <option value="100%">100%</option>
-                          <option value="75%">75%</option>
-                          <option value="50%">50%</option>
-                          <option value="25%">25%</option>
-                          <option value="custom">自定义</option>
-                        </select>
-                      </div>
-
-                      {/* 显示当前尺寸信息 */}
-                      <div className="bg-base-200 p-2 rounded text-xs border border-base-300">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="text-base-content">原始尺寸:</span>
-                          <span className="font-medium text-base-content">{imageDimensions.width} × {imageDimensions.height}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-base-content">调整后:</span>
-                          <span className="font-medium text-primary">
-                            {calculatedDimensions}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* 宽高输入 - 始终显示 */}
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="form-control">
-                          <label className="label py-1">
-                            <span className="label-text text-xs text-base-content">宽度</span>
-                          </label>
-                          <input
-                            type="number"
-                            className="input input-bordered input-xs bg-base-100 text-base-content"
-                            value={config.resizeWidth || ''}
-                            disabled={config.resizePreset !== 'custom'}
-                            onChange={(e) => setConfig(prev => ({ ...prev, resizeWidth: parseInt(e.target.value) || 0 }))}
-                            placeholder={config.resizePreset !== 'custom' ? '自动计算' : '输入宽度'}
-                          />
-                        </div>
-                        <div className="form-control">
-                          <label className="label py-1">
-                            <span className="label-text text-xs text-base-content">高度</span>
-                          </label>
-                          <input
-                            type="number"
-                            className="input input-bordered input-xs"
-                            value={config.resizeHeight || ''}
-                            disabled={config.resizePreset !== 'custom'}
-                            onChange={(e) => setConfig(prev => ({ ...prev, resizeHeight: parseInt(e.target.value) || 0 }))}
-                            placeholder={config.resizePreset !== 'custom' ? '自动计算' : '输入高度'}
-                          />
-                        </div>
-                      </div>
-
-                      {/* 高级选项 */}
-                      <div className="space-y-2">
-                        <div className="form-control">
-                          <label className="label cursor-pointer py-1">
-                            <span className="label-text text-xs text-base-content">预乘透明通道</span>
-                            <input
-                              type="checkbox"
-                              className="checkbox checkbox-primary checkbox-xs"
-                              checked={config.premultiplyAlpha}
-                              onChange={(e) => setConfig(prev => ({ ...prev, premultiplyAlpha: e.target.checked }))}
-                            />
-                          </label>
-                        </div>
-
-                        <div className="form-control">
-                          <label className="label cursor-pointer py-1">
-                            <span className="label-text text-xs text-base-content">线性 RGB</span>
-                            <input
-                              type="checkbox"
-                              className="checkbox checkbox-primary checkbox-xs"
-                              checked={config.linearRGB}
-                              onChange={(e) => setConfig(prev => ({ ...prev, linearRGB: e.target.checked }))}
-                            />
-                          </label>
-                        </div>
-
-                        <div className="form-control">
-                          <label className="label cursor-pointer py-1">
-                            <span className="label-text text-xs text-base-content">保持宽高比</span>
-                            <input
-                              type="checkbox"
-                              className="checkbox checkbox-primary checkbox-xs"
-                              checked={config.maintainAspectRatio}
-                              onChange={(e) => setConfig(prev => ({ ...prev, maintainAspectRatio: e.target.checked }))}
-                            />
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 调色板设置 */}
-                  {config.format === 'oxipng' && (
-                    <div className="space-y-3">
-                      <div className="form-control">
-                        <label className="label cursor-pointer py-1">
-                          <span className="label-text text-xs text-base-content">减少调色板</span>
-                          <input
-                            type="checkbox"
-                            className="toggle toggle-primary toggle-xs"
-                            checked={config.reducePalette}
-                            onChange={(e) => setConfig(prev => ({ ...prev, reducePalette: e.target.checked }))}
-                          />
-                        </label>
-                      </div>
-
-                      {config.reducePalette && (
-                        <div className="space-y-3">
-                          {/* 颜色数量 */}
-                          <div className="form-control">
-                            <label className="label py-1">
-                              <span className="label-text text-xs text-base-content">颜色数量: {config.paletteColors}</span>
-                            </label>
-                            <input
-                              type="range"
-                              min="2"
-                              max="256"
-                              value={config.paletteColors}
-                              onChange={(e) => setConfig(prev => ({ ...prev, paletteColors: parseInt(e.target.value) }))}
-                              className="range range-primary range-xs"
-                            />
-                            <div className="w-full flex justify-between text-xs px-2 text-base-content/70">
-                              <span>2</span>
-                              <span>256</span>
-                            </div>
-                          </div>
-
-                          {/* 抖动 */}
-                          <div className="form-control">
-                            <label className="label py-1">
-                              <span className="label-text text-xs text-base-content">抖动: {config.dithering}</span>
-                            </label>
-                            <input
-                              type="range"
-                              min="0"
-                              max="10"
-                              step="0.1"
-                              value={config.dithering}
-                              onChange={(e) => setConfig(prev => ({ ...prev, dithering: parseFloat(e.target.value) }))}
-                              className="range range-primary range-xs"
-                            />
-                            <div className="w-full flex justify-between text-xs px-2 text-base-content/70">
-                              <span>0</span>
-                              <span>10</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* 文件信息 */}
-                  <div className="divider my-2"></div>
-                  <div className="space-y-1 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-base-content">原始大小:</span>
-                      <span className="font-medium text-base-content">{formatFileSize(originalImage.size)}</span>
-                    </div>
-                    {compressedResult && (
-                      <>
-                        <div className="flex justify-between">
-                          <span className="text-base-content">压缩后:</span>
-                          <span className="font-medium text-base-content">{formatFileSize(compressedResult.compressedSize)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-base-content">压缩率:</span>
-                          <div className={`badge ${compressedResult.compressionRatio > 0 ? 'badge-success' : 'badge-warning'} badge-xs`}>
-                            {compressedResult.compressionRatio > 0 ? '↓' : '↑'} {Math.abs(compressedResult.compressionRatio).toFixed(1)}%
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {isProcessing && (
-                    <div className="mt-3">
-                      <div className="flex items-center gap-2 text-xs text-base-content">
-                        <span className="loading loading-spinner loading-xs text-primary"></span>
-                        处理中...
-                      </div>
-                      <progress className="progress progress-primary w-full mt-1 h-1"></progress>
-                    </div>
-                  )}
-                </div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg text-primary">
+              <div className="flex gap-0.5">
+                <div className="w-0.5 h-3 bg-gray-400 rounded-full"></div>
+                <div className="w-0.5 h-3 bg-gray-400 rounded-full"></div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+
+        {/* Footer Stats */}
+        <footer className="flex h-16 flex-shrink-0 items-center justify-between border-t border-gray-200/80 bg-gray-100/50 px-8 backdrop-blur-sm dark:border-gray-800/80 dark:bg-gray-900/50">
+          <div className="text-center">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Original Size</p>
+            <p className="text-base font-semibold text-gray-800 dark:text-gray-200">{formatFileSize(originalImage.size)}</p>
+          </div>
+          <div className="h-8 border-l border-gray-300 dark:border-gray-700"></div>
+          <div className="text-center">
+            <p className="text-xs text-gray-500 dark:text-gray-400">New Size</p>
+            <p className="text-base font-semibold text-gray-800 dark:text-gray-200">
+              {compressedResult ? formatFileSize(compressedResult.compressedSize) : '-'}
+            </p>
+          </div>
+          <div className="h-8 border-l border-gray-300 dark:border-gray-700"></div>
+          <div className="text-center">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Reduction</p>
+            <p className={`text-base font-semibold ${compressedResult && compressedResult.compressionRatio > 0 ? 'text-green-600 dark:text-green-500' : 'text-gray-800 dark:text-gray-200'}`}>
+              {compressedResult ? `-${Math.abs(compressedResult.compressionRatio).toFixed(0)}%` : '-'}
+            </p>
+          </div>
+        </footer>
+      </main>
     </div>
   );
 };

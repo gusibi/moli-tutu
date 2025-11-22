@@ -60,7 +60,7 @@ export const ConfigDialog: React.FC<ConfigDialogProps> = ({ onConfigSaved }) => 
   return (
     <>
       {/* 触发按钮 */}
-      <button 
+      <button
         className="btn btn-ghost gap-2"
         onClick={() => setOpen(true)}
       >
@@ -79,11 +79,11 @@ export const ConfigDialog: React.FC<ConfigDialogProps> = ({ onConfigSaved }) => 
             </div>
             <h3 className="font-bold text-lg text-base-content">Cloudflare R2 配置</h3>
           </div>
-          
+
           <p className="text-sm text-base-content/70 mb-6">
             配置您的 Cloudflare R2 设置以启用图片上传功能。所有字段都是必填的。
           </p>
-          
+
           <div className="space-y-4">
             <div className="form-control">
               <label className="label">
@@ -98,7 +98,7 @@ export const ConfigDialog: React.FC<ConfigDialogProps> = ({ onConfigSaved }) => 
                 className="input input-bordered w-full"
               />
             </div>
-            
+
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-semibold text-base-content">Secret Access Key</span>
@@ -112,7 +112,7 @@ export const ConfigDialog: React.FC<ConfigDialogProps> = ({ onConfigSaved }) => 
                 className="input input-bordered w-full"
               />
             </div>
-            
+
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-semibold text-base-content">Endpoint</span>
@@ -126,7 +126,7 @@ export const ConfigDialog: React.FC<ConfigDialogProps> = ({ onConfigSaved }) => 
                 className="input input-bordered w-full"
               />
             </div>
-            
+
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-semibold text-base-content">Bucket Name</span>
@@ -140,7 +140,7 @@ export const ConfigDialog: React.FC<ConfigDialogProps> = ({ onConfigSaved }) => 
                 className="input input-bordered w-full"
               />
             </div>
-            
+
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-semibold text-base-content">Public URL Base</span>
@@ -155,25 +155,25 @@ export const ConfigDialog: React.FC<ConfigDialogProps> = ({ onConfigSaved }) => 
               />
             </div>
           </div>
-          
+
           <div className="modal-action">
-            <button 
+            <button
               className="btn btn-ghost"
               onClick={() => setOpen(false)}
               disabled={loading}
             >
               <span className="text-base-content">取消</span>
             </button>
-            <button 
+            <button
               className={`btn btn-primary ${loading ? 'loading' : ''}`}
-              onClick={handleSave} 
+              onClick={handleSave}
               disabled={loading}
             >
               <span className="text-primary-content">{loading ? "保存中..." : "保存配置"}</span>
             </button>
           </div>
         </div>
-        
+
         {/* 点击背景关闭 */}
         <form method="dialog" className="modal-backdrop">
           <button onClick={() => setOpen(false)}>close</button>

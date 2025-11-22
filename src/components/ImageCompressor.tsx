@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from "react";
-import { Image as ImageIcon, Zap } from "lucide-react";
+import { Image as ImageIcon, CloudUpload } from "lucide-react";
 import { ImageEditor } from "./ImageEditor";
 import { listen } from "@tauri-apps/api/event";
 import { ImageHostingAPI } from "../api";
@@ -37,9 +37,9 @@ const getMimeTypeFromPath = (path: string): string => {
   }
 };
 
-export const ImageCompressor: React.FC<ImageCompressorProps> = ({ 
-  isActive = false, 
-  onUploadSuccess, 
+export const ImageCompressor: React.FC<ImageCompressorProps> = ({
+  isActive = false,
+  onUploadSuccess,
   onUploadError,
   restoreRecord,
   onRecordRestored
@@ -183,7 +183,7 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
       // 创建图片对象
       const img = new Image();
       const imageUrl = URL.createObjectURL(originalImage);
-      
+
       await new Promise((resolve, reject) => {
         img.onload = resolve;
         img.onerror = reject;
@@ -303,32 +303,32 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
       const extension = config.format === 'mozjpeg' ? 'jpg' : config.format === 'oxipng' ? 'png' : config.format;
       const originalName = originalImage?.name.split('.')[0] || 'compressed';
       const filename = `${originalName}_compressed.${extension}`;
-      
+
       // 创建新的 Blob URL 确保有效性
       const blobUrl = URL.createObjectURL(compressedResult.compressedBlob);
-      
+
       const link = document.createElement('a');
       link.href = blobUrl;
       link.download = filename;
       link.style.display = 'none';
-      
+
       document.body.appendChild(link);
       console.log('Triggering download with filename:', filename);
-      
+
       // 使用 setTimeout 确保链接被正确处理
       setTimeout(() => {
         link.click();
-        
+
         // 清理
         setTimeout(() => {
           document.body.removeChild(link);
           URL.revokeObjectURL(blobUrl);
-          
+
           // 显示下载成功提示
-          const downloadPath = navigator.userAgent.includes('Mac') ? '~/Downloads' : 
-                              navigator.userAgent.includes('Windows') ? '%USERPROFILE%\\Downloads' : 
-                              '~/Downloads';
-          
+          const downloadPath = navigator.userAgent.includes('Mac') ? '~/Downloads' :
+            navigator.userAgent.includes('Windows') ? '%USERPROFILE%\\Downloads' :
+              '~/Downloads';
+
           alert(`✅ 下载成功！
 
 文件名: ${filename}
@@ -337,20 +337,20 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
 💡 提示: 具体路径可能因浏览器设置而异`);
         }, 100);
       }, 10);
-      
+
     } catch (error) {
       console.error('Download failed:', error);
-      
+
       // 方法2: 备用下载方法 - 使用 FileSaver API 风格
       try {
         const extension = config.format === 'mozjpeg' ? 'jpg' : config.format === 'oxipng' ? 'png' : config.format;
         const originalName = originalImage?.name.split('.')[0] || 'compressed';
         const filename = `${originalName}_compressed.${extension}`;
-        
+
         // 创建 URL 并直接打开
         const url = URL.createObjectURL(compressedResult.compressedBlob);
         const newWindow = window.open(url, '_blank');
-        
+
         if (!newWindow) {
           // 如果弹窗被阻止，提示用户
           alert('请允许弹窗以下载文件，或者右键点击图片选择"另存为"');
@@ -358,12 +358,12 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
           // 显示下载提示
           alert('✅ 文件已在新窗口中打开，请右键选择"另存为"进行下载');
         }
-        
+
         // 延迟清理 URL
         setTimeout(() => {
           URL.revokeObjectURL(url);
         }, 5000);
-        
+
       } catch (fallbackError) {
         console.error('Fallback download also failed:', fallbackError);
         alert('下载失败，请尝试右键点击压缩后的图片选择"另存为"');
@@ -432,13 +432,13 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
       return () => clearTimeout(timer);
     }
   }, [
-    config.format, 
-    config.quality, 
-    config.resize, 
+    config.format,
+    config.quality,
+    config.resize,
     config.resizeMethod,
     config.resizePreset,
-    config.resizeWidth, 
-    config.resizeHeight, 
+    config.resizeWidth,
+    config.resizeHeight,
     config.premultiplyAlpha,
     config.linearRGB,
     config.maintainAspectRatio,
@@ -449,7 +449,7 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
 
   if (originalImage) {
     return (
-      <ImageEditor 
+      <ImageEditor
         originalImage={originalImage}
         compressedResult={compressedResult}
         config={config}
@@ -464,98 +464,55 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
   }
 
   return (
-    <div className="w-full space-y-6">
-      {/* 拖拽上传区域 */}
-      <div
-        data-compress-drop-zone="true"
-        className={`
-          relative border-2 border-dashed rounded-lg p-12 text-center cursor-pointer 
-          transition-all duration-300 ease-in-out overflow-hidden
-          ${isDragOver
-            ? "border-primary bg-primary/10 scale-105 shadow-lg shadow-primary/20"
-            : "border-base-300 hover:border-primary/50 hover:scale-102"
-          }
-        `}
-      >
-        {/* 动画边框效果 */}
-        {isDragOver && (
-          <div className="absolute inset-0 rounded-lg">
-            <div className="absolute inset-0 rounded-lg border-2 border-primary animate-pulse"></div>
-            <div className="absolute inset-2 rounded-lg border border-primary/50 animate-ping"></div>
+    <div className="flex flex-1 flex-col overflow-hidden bg-background-light dark:bg-background-dark">
+      <div className="flex flex-1 items-center justify-center p-8">
+        <div
+          data-compress-drop-zone="true"
+          className={`
+            flex h-full w-full flex-col items-center justify-center gap-6 rounded-xl border-2 border-dashed transition-colors
+            ${isDragOver
+              ? "border-primary bg-primary/5"
+              : "border-gray-300 dark:border-gray-700"
+            }
+          `}
+        >
+          <div className="flex max-w-[480px] flex-col items-center gap-2 text-center">
+            <CloudUpload className={`w-16 h-16 transition-colors ${isDragOver ? "text-primary" : "text-gray-400 dark:text-gray-600"}`} strokeWidth={1.5} />
+            <p className="text-lg font-bold leading-tight tracking-[-0.015em] text-gray-900 dark:text-white">
+              {isDragOver ? "Drop Image Here" : "Drag & Drop an Image"}
+            </p>
+            <p className="text-sm font-normal leading-normal text-gray-600 dark:text-gray-400">
+              or select a file / paste from clipboard
+            </p>
           </div>
-        )}
-        
-        {/* 星星粒子效果 */}
-        {isDragOver && (
-          <>
-            <div className="absolute top-4 left-4 w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-            <div className="absolute top-8 right-8 w-1 h-1 bg-primary/70 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-            <div className="absolute bottom-6 left-8 w-1.5 h-1.5 bg-primary/80 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-            <div className="absolute bottom-4 right-6 w-1 h-1 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.6s' }}></div>
-            <div className="absolute top-1/2 left-6 w-1 h-1 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '0.8s' }}></div>
-            <div className="absolute top-1/3 right-4 w-1.5 h-1.5 bg-primary/70 rounded-full animate-bounce" style={{ animationDelay: '1s' }}></div>
-          </>
-        )}
 
-        <Zap className={`mx-auto w-16 h-16 mb-4 transition-all duration-300 relative z-10 ${
-          isDragOver 
-            ? "text-primary scale-110 animate-pulse" 
-            : "text-base-content/40 hover:text-primary/70"
-        }`} />
-        
-        <div className="space-y-2 relative z-10">
-          <p className={`text-lg font-medium transition-all duration-300 ${
-            isDragOver 
-              ? "text-primary scale-105 animate-pulse" 
-              : "text-base-content"
-          }`}>
-            {isDragOver ? (
-              <span className="animate-bounce">✨ 在这里放下图片进行压缩 ✨</span>
-            ) : (
-              "拖拽图片到这里或点击选择 开始压缩"
-            )}
-          </p>
-          <p className={`text-sm transition-all duration-300 ${
-            isDragOver 
-              ? "text-primary/80 scale-105" 
-              : "text-base-content/60"
-          }`}>
-            支持 JPG、PNG、GIF、WebP 格式
-          </p>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            className="hidden"
+            id="compress-file-input"
+          />
+
+          <button
+            onClick={() => {
+              const input = document.getElementById('compress-file-input') as HTMLInputElement;
+              input?.click();
+            }}
+            className="flex h-10 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-gray-200 px-4 text-sm font-medium text-gray-800 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 transition-colors"
+          >
+            <span className="truncate">Select File</span>
+          </button>
+
+          {/* 剪贴板粘贴按钮 */}
+          <button
+            onClick={handlePasteFromClipboard}
+            className="flex items-center gap-2 text-sm text-gray-500 hover:text-primary transition-colors"
+          >
+            <ImageIcon className="w-4 h-4" />
+            <span>Paste from Clipboard</span>
+          </button>
         </div>
-        
-        <input 
-          type="file" 
-          accept="image/*" 
-          onChange={handleFileSelect}
-          className="hidden" 
-          id="compress-file-input"
-        />
-        
-        <button 
-          onClick={() => {
-            const input = document.getElementById('compress-file-input') as HTMLInputElement;
-            input?.click();
-          }}
-          className={`btn btn-primary mt-4 transition-all duration-300 relative z-10 ${
-            isDragOver 
-              ? "scale-110 shadow-lg shadow-primary/30 animate-pulse" 
-              : "hover:scale-105 hover:shadow-md"
-          }`}
-        >
-          <span className="text-primary-content">选择图片</span>
-        </button>
-      </div>
-      
-      {/* 剪贴板粘贴按钮 */}
-      <div className="flex justify-center">
-        <button
-          onClick={handlePasteFromClipboard}
-          className="btn btn-outline btn-sm gap-2"
-        >
-          <ImageIcon className="w-4 h-4 text-base-content" />
-          <span className="text-base-content">从剪贴板粘贴</span>
-        </button>
       </div>
     </div>
   );

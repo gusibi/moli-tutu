@@ -292,62 +292,21 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={`
-          relative border-2 border-dashed rounded-lg p-12 text-center cursor-pointer 
-          transition-all duration-300 ease-in-out overflow-hidden
+          relative flex flex-col items-center gap-6 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors
           ${isDragOver
-            ? "border-primary bg-upload-drag scale-105 shadow-lg shadow-primary/20"
-            : "border-base-300 hover:border-primary/50 hover:scale-102"
+            ? "border-primary bg-primary/5"
+            : "border-gray-300 dark:border-gray-700 hover:border-primary dark:hover:border-primary"
           }
           ${isUploading ? "opacity-50 pointer-events-none" : ""}
         `}
       >
-        {/* 动画边框效果 */}
-        {isDragOver && (
-          <div className="absolute inset-0 rounded-lg">
-            <div className="absolute inset-0 rounded-lg border-2 border-primary animate-pulse"></div>
-            <div className="absolute inset-2 rounded-lg border border-primary/50 animate-ping"></div>
-          </div>
-        )}
+        <CloudUpload className={`text-5xl transition-colors ${isDragOver ? "text-primary" : "text-gray-400 dark:text-gray-500"}`} size={48} strokeWidth={1.5} />
 
-        {/* 星星粒子效果 */}
-        {isDragOver && (
-          <>
-            <div className="upload-dot upload-dot-1"></div>
-            <div className="upload-dot upload-dot-2"></div>
-            <div className="upload-dot upload-dot-3"></div>
-            <div className="upload-dot upload-dot-4"></div>
-            <div className="upload-dot upload-dot-5"></div>
-            <div className="upload-dot upload-dot-6"></div>
-          </>
-        )}
-
-        <CloudUpload className={`mx-auto w-16 h-16 mb-4 transition-all duration-300 relative z-10 ${isDragOver
-          ? "text-primary scale-110 animate-pulse"
-          : "text-base-content/40 hover:text-primary/70"
-          }`} />
-
-        <div className="space-y-2 relative z-10">
-          <p className={`text-lg font-medium transition-all duration-300 ${isDragOver
-            ? "text-primary scale-105 animate-pulse"
-            : "text-base-content"
-            }`}>
-            {isUploading ? (
-              <span className="inline-flex items-center gap-2">
-                <span className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></span>
-                上传中...
-              </span>
-            ) : isDragOver ? (
-              <span className="animate-bounce">✨ 在这里放下图片 ✨</span>
-            ) : (
-              "拖拽图片到这里或点击选择 开始上传"
-            )}
+        <div className="flex flex-col items-center gap-1">
+          <p className="text-lg font-bold text-gray-900 dark:text-white">
+            {isDragOver ? "Drop Images Here" : "Drag & Drop Images Here"}
           </p>
-          <p className={`text-sm transition-all duration-300 ${isDragOver
-            ? "text-primary/80 scale-105"
-            : "text-base-content/60"
-            }`}>
-            支持 JPG、PNG、GIF 格式，最大 10MB
-          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">or just paste an image (⌘V)</p>
         </div>
 
         <input
@@ -365,27 +324,29 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
               const input = document.querySelector('input[type="file"]') as HTMLInputElement;
               input?.click();
             }}
-            className={`btn btn-primary mt-4 transition-all duration-300 relative z-10 ${isDragOver
-              ? "scale-110 shadow-lg shadow-primary/30 animate-pulse"
-              : "hover:scale-105 hover:shadow-md"
-              }`}
+            className="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary text-white text-sm font-semibold tracking-wide shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
           >
-            <span className="text-primary-content">选择文件</span>
+            <span className="truncate">Choose File...</span>
           </button>
         )}
 
         {isUploading && (
-          <div className="mt-6 space-y-2 animate-fade-in relative z-10">
-            <div className="flex justify-between text-sm text-base-content/70">
-              <span className="text-base-content/70 animate-pulse">上传进度</span>
-              <span className="text-base-content/70 animate-bounce">处理中...</span>
+          <div className="w-full max-w-xs space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium text-gray-900 dark:text-white">Uploading...</span>
+              <span className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></span>
             </div>
-            <div className="relative">
-              <progress className="progress progress-primary w-full animate-pulse"></progress>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+            <div className="h-2 rounded-full bg-gray-200 dark:bg-gray-700 w-full overflow-hidden">
+              <div className="h-2 rounded-full bg-primary animate-pulse w-full"></div>
             </div>
           </div>
         )}
+      </div>
+
+      <div className="flex items-center gap-3">
+        <hr className="w-full border-t border-gray-200 dark:border-gray-700" />
+        <span className="text-xs font-medium text-gray-400 dark:text-gray-500">OR</span>
+        <hr className="w-full border-t border-gray-200 dark:border-gray-700" />
       </div>
 
       {/* 剪贴板粘贴按钮 */}
@@ -393,11 +354,15 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
         <button
           onClick={handlePasteFromClipboard}
           disabled={isUploading}
-          className={`btn btn-outline btn-sm gap-2 ${isUploading ? 'btn-disabled' : ''}`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-sm transition-colors ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          <ImageIcon className="w-4 h-4 text-base-content" />
-          <span className="text-base-content">从剪贴板粘贴</span>
+          <ImageIcon className="w-4 h-4" />
+          <span>Paste from Clipboard</span>
         </button>
+      </div>
+
+      <div className="px-6 pb-4 pt-2">
+        <p className="text-xs text-gray-400 dark:text-gray-500 text-center">Supports: JPG, PNG, GIF, WebP, BMP, SVG. Max 10MB.</p>
       </div>
     </div>
   );

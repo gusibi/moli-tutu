@@ -97,140 +97,144 @@ export const UploadHistory: React.FC<UploadHistoryProps> = ({ refreshTrigger }) 
   return (
     <div className="space-y-6">
       {/* 搜索和操作栏 */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-        <div className="flex gap-2">
-          <div className="form-control">
-            <div className="input-group">
-              <input
-                type="text"
-                placeholder="搜索文件名..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="input input-bordered"
-              />
-              <button
-                onClick={handleRefresh}
-                disabled={isLoading}
-                className={`btn btn-square ${isLoading ? 'loading' : ''}`}
-              >
-                {!isLoading && <RefreshCw className="w-4 h-4 text-base-content" />}
-              </button>
-            </div>
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="flex gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:w-64">
+            <input
+              type="text"
+              placeholder="Search filenames..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full h-10 pl-3 pr-10 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+            />
+            <button
+              onClick={handleRefresh}
+              disabled={isLoading}
+              className="absolute right-1 top-1 h-8 w-8 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
           </div>
         </div>
 
         <button
           onClick={handleClearHistory}
-          className="btn btn-error btn-outline btn-sm gap-2"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 text-sm font-medium transition-colors"
         >
-          <Trash2 className="w-4 h-4 text-error" />
-          <span className="text-error">清空记录</span>
+          <Trash2 className="w-4 h-4" />
+          <span>Clear History</span>
         </button>
       </div>
 
       {/* 上传历史列表 */}
-      <div className="card bg-base-100 shadow-sm">
-        <div className="card-body p-0">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="flex items-center gap-2 text-base-content">
-                <span className="loading loading-spinner loading-sm"></span>
-                <span>加载中...</span>
-              </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+              <span className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full"></span>
+              <span className="text-sm font-medium">Loading...</span>
             </div>
-          ) : filteredHistory.length === 0 ? (
-            <div className="text-center py-12">
-              <ImageIcon className="w-16 h-16 mx-auto mb-4 text-base-content/40" />
-              <h3 className="text-lg font-medium mb-2 text-base-content">
-                {searchTerm ? "未找到匹配的记录" : "暂无上传记录"}
-              </h3>
-              <p className="text-base-content/60">
-                {searchTerm ? "尝试使用不同的关键词搜索" : "开始上传您的第一张图片吧！"}
-              </p>
-            </div>
-          ) : (
-            <ul className="list bg-base-100 rounded-box shadow-md">
-              <li className="p-4 pb-2 text-xs font-bold tracking-wide text-base-content/60 uppercase border-b border-base-200 flex items-center">
-                <div className="w-16">缩略图</div>
-                <div className="flex-1 px-4">文件名</div>
-                <div className="w-24 text-right">大小</div>
-                <div className="w-32 text-right px-4">上传时间</div>
-                <div className="w-20 text-center">操作</div>
-              </li>
-              {paginatedHistory.map((item) => (
-                <li key={item.id} className="list-row hover:bg-base-200 transition-colors duration-200">
-                  <div className="w-16">
-                    <div className="avatar">
-                      <div className="w-12 h-12 rounded bg-base-300">
+          </div>
+        ) : filteredHistory.length === 0 ? (
+          <div className="text-center py-12">
+            <ImageIcon className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+            <h3 className="text-lg font-medium mb-2 text-gray-900 dark:text-white">
+              {searchTerm ? "No matching records found" : "No upload history"}
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
+              {searchTerm ? "Try searching with different keywords" : "Start uploading your first image!"}
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-gray-50 dark:bg-gray-900/50 text-xs uppercase text-gray-500 dark:text-gray-400 font-medium">
+                <tr>
+                  <th className="px-4 py-3 w-20">Thumbnail</th>
+                  <th className="px-4 py-3">Filename</th>
+                  <th className="px-4 py-3 text-right w-24">Size</th>
+                  <th className="px-4 py-3 text-right w-32">Time</th>
+                  <th className="px-4 py-3 text-center w-24">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {paginatedHistory.map((item) => (
+                  <li key={item.id} className="table-row hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="w-12 h-12 rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 overflow-hidden flex items-center justify-center">
                         {item.url ? (
                           <img
                             src={item.url}
                             alt={item.original_filename}
-                            className="object-cover"
+                            className="w-full h-full object-cover"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.style.display = 'none';
                               const parent = target.parentElement;
                               if (parent) {
-                                parent.innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg class="w-6 h-6 opacity-40" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path></svg></div>';
+                                parent.innerHTML = '<svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
                               }
                             }}
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <ImageIcon className="w-6 h-6 text-base-content/40" />
-                          </div>
+                          <ImageIcon className="w-6 h-6 text-gray-400" />
                         )}
                       </div>
-                    </div>
-                  </div>
-                  <div className="flex-1 px-4 flex flex-col justify-center min-w-0">
-                    <div className="font-medium truncate text-base-content" title={item.original_filename}>
-                      {item.original_filename}
-                    </div>
-                    {item.from_cache && (
-                      <div className="badge badge-info badge-xs mt-1">缓存</div>
-                    )}
-                  </div>
-                  <div className="w-24 text-right text-sm text-base-content/70 flex items-center justify-end">
-                    {formatFileSize(item.file_size)}
-                  </div>
-                  <div className="w-32 text-right px-4 text-sm text-base-content/70 flex items-center justify-end">
-                    {formatDate(item.upload_time)}
-                  </div>
-                  <div className="w-20 flex items-center justify-center gap-2">
-                    <button
-                      onClick={() => handleCopyUrl(item.url)}
-                      className="btn btn-ghost btn-xs btn-square"
-                      title="复制链接"
-                    >
-                      <Copy className="w-4 h-4 text-base-content" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteItem(item.id)}
-                      className="btn btn-ghost btn-xs btn-square text-error"
-                      title="删除记录"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col justify-center">
+                        <div className="font-medium truncate max-w-[200px] text-gray-900 dark:text-white" title={item.original_filename}>
+                          {item.original_filename}
+                        </div>
+                        {item.from_cache && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 mt-1 w-fit">
+                            Cached
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-500 dark:text-gray-400">
+                      {formatFileSize(item.file_size)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-500 dark:text-gray-400">
+                      {formatDate(item.upload_time)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          onClick={() => handleCopyUrl(item.url)}
+                          className="p-1.5 rounded-md text-gray-500 hover:text-primary hover:bg-primary/10 transition-colors"
+                          title="Copy Link"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteItem(item.id)}
+                          className="p-1.5 rounded-md text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </li>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* 分页 */}
       {totalPages > 1 && (
-        <div className="flex justify-center">
-          <div className="join">
+        <div className="flex justify-center pt-4">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
-              className="join-item btn btn-sm"
+              className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronLeft className="w-4 h-4 text-base-content" />
+              <ChevronLeft className="w-4 h-4" />
             </button>
 
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -239,7 +243,9 @@ export const UploadHistory: React.FC<UploadHistoryProps> = ({ refreshTrigger }) 
                 <button
                   key={pageNum}
                   onClick={() => setCurrentPage(pageNum)}
-                  className={`join-item btn btn-sm ${currentPage === pageNum ? 'btn-active' : ''
+                  className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${currentPage === pageNum
+                      ? 'bg-primary text-white shadow-sm'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                     }`}
                 >
                   {pageNum}
@@ -250,9 +256,9 @@ export const UploadHistory: React.FC<UploadHistoryProps> = ({ refreshTrigger }) 
             <button
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
-              className="join-item btn btn-sm"
+              className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronRight className="w-4 h-4 text-base-content" />
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>

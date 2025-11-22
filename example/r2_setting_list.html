@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>MoliTutu - R2 Configuration</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#136dec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark">
+    <div class="flex h-screen w-full">
+        <!-- Sidebar Navigation -->
+        <aside
+            class="w-64 shrink-0 flex-col bg-slate-100/80 dark:bg-background-dark/50 border-r border-slate-200 dark:border-slate-800 p-4 hidden md:flex">
+            <div class="flex items-center gap-2.5 mb-8">
+                <div class="flex size-8 items-center justify-center rounded-lg bg-primary text-white">
+                    <span class="material-symbols-outlined text-lg">layers</span>
+                </div>
+                <h1 class="text-lg font-bold text-slate-900 dark:text-white">MoliTutu</h1>
+            </div>
+            <nav class="flex flex-col gap-2">
+                <a class="flex h-10 items-center gap-3 rounded-lg px-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800/50"
+                    href="#">
+                    <span class="material-symbols-outlined text-xl">space_dashboard</span>
+                    <span class="text-sm font-medium">Dashboard</span>
+                </a>
+                <a class="flex h-10 items-center gap-3 rounded-lg px-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800/50"
+                    href="#">
+                    <span class="material-symbols-outlined text-xl">compress</span>
+                    <span class="text-sm font-medium">Image Compression</span>
+                </a>
+                <a class="flex h-10 items-center gap-3 rounded-lg bg-primary/20 px-3 text-primary dark:text-primary"
+                    href="#">
+                    <span class="material-symbols-outlined text-xl"
+                        style="font-variation-settings: 'FILL' 1;">cloud</span>
+                    <span class="text-sm font-bold">R2 Configuration</span>
+                </a>
+                <a class="flex h-10 items-center gap-3 rounded-lg px-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800/50"
+                    href="#">
+                    <span class="material-symbols-outlined text-xl">settings</span>
+                    <span class="text-sm font-medium">Settings</span>
+                </a>
+            </nav>
+        </aside>
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col bg-background-light dark:bg-background-dark">
+            <!-- Header -->
+            <header
+                class="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 px-6">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">Cloudflare R2 Accounts</h2>
+                <button
+                    class="flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary/90">
+                    <span class="material-symbols-outlined text-base">add</span>
+                    Add New Account
+                </button>
+            </header>
+            <!-- Accounts List -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <div class="flex flex-col gap-2">
+                    <!-- List Item 1 -->
+                    <div
+                        class="group flex items-center gap-4 rounded-xl bg-slate-100 p-4 transition-colors hover:bg-slate-200 dark:bg-slate-800/50 dark:hover:bg-slate-800">
+                        <div
+                            class="flex size-10 shrink-0 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700">
+                            <span
+                                class="material-symbols-outlined text-slate-500 dark:text-slate-400">cloud_queue</span>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-slate-800 dark:text-slate-200">Personal Blog Assets</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Account ID: ...a1b2c3d4</p>
+                        </div>
+                        <div class="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                            <button
+                                class="flex size-8 items-center justify-center rounded-lg hover:bg-slate-300 dark:hover:bg-slate-700/50"
+                                data-alt="Edit account button">
+                                <span
+                                    class="material-symbols-outlined text-base text-slate-600 dark:text-slate-400">edit</span>
+                            </button>
+                            <button
+                                class="flex size-8 items-center justify-center rounded-lg hover:bg-red-500/10 dark:hover:bg-red-500/20"
+                                data-alt="Delete account button">
+                                <span
+                                    class="material-symbols-outlined text-base text-red-500 dark:text-red-500">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- List Item 2 -->
+                    <div
+                        class="group flex items-center gap-4 rounded-xl bg-slate-100 p-4 transition-colors hover:bg-slate-200 dark:bg-slate-800/50 dark:hover:bg-slate-800">
+                        <div
+                            class="flex size-10 shrink-0 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700">
+                            <span
+                                class="material-symbols-outlined text-slate-500 dark:text-slate-400">cloud_queue</span>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-slate-800 dark:text-slate-200">Work Project Media</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Account ID: ...e5f6g7h8</p>
+                        </div>
+                        <div class="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                            <button
+                                class="flex size-8 items-center justify-center rounded-lg hover:bg-slate-300 dark:hover:bg-slate-700/50"
+                                data-alt="Edit account button">
+                                <span
+                                    class="material-symbols-outlined text-base text-slate-600 dark:text-slate-400">edit</span>
+                            </button>
+                            <button
+                                class="flex size-8 items-center justify-center rounded-lg hover:bg-red-500/10 dark:hover:bg-red-500/20"
+                                data-alt="Delete account button">
+                                <span
+                                    class="material-symbols-outlined text-base text-red-500 dark:text-red-500">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Empty State Example (commented out) -->
+                    <!-- 
+                    <div class="flex flex-1 items-center justify-center rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-800 mt-4 py-24">
+                        <div class="text-center">
+                            <div class="inline-flex size-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800/50 mb-4">
+                                <span class="material-symbols-outlined text-3xl text-slate-400 dark:text-slate-500">cloud_off</span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-200">No R2 Accounts Configured</h3>
+                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Click 'Add New Account' to connect to your Cloudflare R2 storage.</p>
+                        </div>
+                    </div>
+                     -->
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>
