@@ -17,8 +17,8 @@ export const useCompressState = () => {
     isRestored: false
   });
 
-  const restoreFromRecord = useCallback((record: CompressRecord) => {
-    const images = restoreImagesFromRecord(record);
+  const restoreFromRecord = useCallback(async (record: CompressRecord) => {
+    const images = await restoreImagesFromRecord(record);
     if (images) {
       setCompressState({
         originalFile: images.originalFile,

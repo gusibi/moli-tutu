@@ -26,6 +26,11 @@ function App() {
   const handleThemeChange = (newTheme: string) => {
     setTheme(newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
     localStorage.setItem('theme', newTheme);
   };
 
@@ -34,6 +39,11 @@ function App() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, []);
 
   // 异步检查配置和加载历史记录

@@ -35,9 +35,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <aside className="w-60 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50 p-4 border-r border-gray-200 dark:border-gray-800 flex flex-col h-full drag-region">
             {/* App Title / Logo Area */}
             <div className="flex items-center gap-3 px-3 mb-6 mt-2 no-drag">
-                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-white shadow-sm">
-                    <CloudUpload className="w-5 h-5" />
-                </div>
+                <img src="/molitutu_logo.png" alt="Moli TuTu Logo" className="h-8 w-8 rounded-lg shadow-sm object-cover" />
                 <h1 className="font-bold text-lg text-gray-900 dark:text-white tracking-tight">Moli TuTu</h1>
             </div>
 
@@ -56,8 +54,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             key={item.id}
                             onClick={() => onTabChange(item.id as any)}
                             className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors w-full text-left ${isActive
-                                    ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-white font-semibold'
-                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white'
+                                ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-white font-semibold'
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                         >
                             <Icon className={`w-5 h-5 ${isActive ? '' : 'opacity-70'}`} />

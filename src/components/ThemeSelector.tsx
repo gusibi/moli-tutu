@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Sun, Moon, Palette, Check } from "lucide-react";
 
 interface ThemeSelectorProps {
@@ -44,17 +44,17 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onTh
 
   return (
     <div className="dropdown dropdown-end">
-      <div 
-        tabIndex={0} 
-        role="button" 
+      <div
+        tabIndex={0}
+        role="button"
         className="btn btn-ghost btn-circle"
         title="选择主题"
       >
         <CurrentIcon className="w-5 h-5 text-base-content" />
       </div>
-      
-      <ul 
-        tabIndex={0} 
+
+      <ul
+        tabIndex={0}
         className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg border border-base-300 max-h-96 overflow-y-auto"
       >
         <li className="menu-title">

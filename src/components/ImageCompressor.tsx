@@ -343,9 +343,7 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
 
       // 方法2: 备用下载方法 - 使用 FileSaver API 风格
       try {
-        const extension = config.format === 'mozjpeg' ? 'jpg' : config.format === 'oxipng' ? 'png' : config.format;
-        const originalName = originalImage?.name.split('.')[0] || 'compressed';
-        const filename = `${originalName}_compressed.${extension}`;
+
 
         // 创建 URL 并直接打开
         const url = URL.createObjectURL(compressedResult.compressedBlob);
