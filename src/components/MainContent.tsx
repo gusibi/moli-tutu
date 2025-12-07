@@ -5,8 +5,10 @@ import { UploadHistory } from './UploadHistory';
 import { ImageCompressor } from './ImageCompressor';
 import { CompressHistory } from './CompressHistory';
 import { ConfigDialog } from './ConfigDialog';
+import { LanguageSelector } from './LanguageSelector';
 import { UploadRecord, UploadResult } from '../types';
 import { CompressRecord } from '../types/compress';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface MainContentProps {
   activeTab: 'upload' | 'history' | 'config' | 'compress' | 'compress-history';
@@ -31,6 +33,7 @@ const MainContent: React.FC<MainContentProps> = ({
   onConfigSaved,
   onTabChange
 }) => {
+  const { t } = useLanguage();
   // 用于存储要恢复的压缩记录
   const [restoreRecord, setRestoreRecord] = useState<CompressRecord | null>(null);
 
@@ -87,12 +90,20 @@ const MainContent: React.FC<MainContentProps> = ({
       {activeTab === 'config' && (
         <div className="w-full max-w-5xl mx-auto p-6">
           <div className="max-w-2xl mx-auto space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">R2 Configuration</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t.sidebar.settings}</h2>
+
+            {/* 语言设置 */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <LanguageSelector />
+            </div>
+
+            {/* R2 配置 */}
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t.config.r2Config}</h3>
 
             {!configExists && (
               <div className="flex items-center gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                 <AlertCircle className="w-5 h-5 shrink-0" />
-                <span className="text-sm font-medium">Please configure your Cloudflare R2 settings to enable image uploading.</span>
+                <span className="text-sm font-medium">{t.config.configureR2}</span>
               </div>
             )}
 
@@ -102,7 +113,7 @@ const MainContent: React.FC<MainContentProps> = ({
 
             <div className="flex items-center gap-3 p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800">
               <AlertCircle className="w-5 h-5 shrink-0" />
-              <span className="text-sm font-medium">Note: Ensure your configuration is correct. Incorrect settings will cause upload failures.</span>
+              <span className="text-sm font-medium">{t.config.configWarning}</span>
             </div>
           </div>
         </div>

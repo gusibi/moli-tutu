@@ -4,8 +4,10 @@ import { Sidebar } from "./components/Sidebar";
 import MainContent from "./components/MainContent";
 import { UploadResult, UploadRecord } from "./types";
 import { ImageHostingAPI } from "./api";
+import { useLanguage } from "./contexts/LanguageContext";
 
 function App() {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<'upload' | 'history' | 'config' | 'compress' | 'compress-history'>('upload');
   const [configExists, setConfigExists] = useState(false);
   const [notification, setNotification] = useState<{
@@ -73,7 +75,7 @@ function App() {
   }, []);
 
   const handleUploadSuccess = (_result: UploadResult) => {
-    showNotification('图片上传成功！', 'success');
+    showNotification(t.notification.uploadSuccess, 'success');
     // 重新加载历史记录
     ImageHostingAPI.getUploadHistory().then(setUploadHistory);
     // 触发历史记录组件刷新
@@ -81,12 +83,12 @@ function App() {
   };
 
   const handleUploadError = (error: string) => {
-    showNotification(`上传失败: ${error}`, 'error');
+    showNotification(`${t.notification.uploadFailed}: ${error}`, 'error');
   };
 
   const handleConfigSaved = () => {
     setConfigExists(true);
-    showNotification('配置保存成功！', 'success');
+    showNotification(t.notification.configSaved, 'success');
   };
 
   return (

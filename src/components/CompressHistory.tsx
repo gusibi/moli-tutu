@@ -8,12 +8,14 @@ import {
   clearAllCompressRecords,
   testLocalStorage
 } from "../utils/compressStorage";
+import { useLanguage } from "../contexts/LanguageContext";
 
 interface CompressHistoryProps {
   onPreviewRecord?: (record: CompressRecord) => void;
 }
 
 export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecord }) => {
+  const { t } = useLanguage();
   const [records, setRecords] = useState<CompressRecord[]>([]);
   const [selectedRecord, setSelectedRecord] = useState<CompressRecord | null>(null);
   const [previewImages, setPreviewImages] = useState<{
@@ -201,7 +203,7 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
       onPreviewRecord(record);
     } else {
       console.warn('父组件回调函数不存在');
-      alert('编辑功能不可用，请检查父组件配置');
+      alert(t.compressHistory.restoreFailed);
     }
   };
 
@@ -233,15 +235,15 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
               '~/Downloads';
 
           console.log('下载成功:', filename);
-          alert(`✅ 下载成功！\n\n文件名: ${filename}\n存储位置: ${downloadPath}`);
+          alert(`✅ ${t.compress.downloadSuccess}\n\n${t.compress.fileName}: ${filename}\n${t.compress.savedTo}: ${downloadPath}`);
         }, 100);
       } else {
         console.warn('无法恢复图片数据');
-        alert('无法恢复图片数据，请重新压缩');
+        alert(t.compressHistory.cannotRestoreData);
       }
     } catch (error) {
       console.error('下载失败:', error);
-      alert('下载失败，请重试');
+      alert(t.compress.downloadFailed);
     }
   };
 
@@ -259,11 +261,11 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
     return (
       <div className="card bg-base-100 shadow-sm">
         <div className="card-body">
-          <h2 className="card-title text-2xl mb-6 text-base-content">压缩记录</h2>
+          <h2 className="card-title text-2xl mb-6 text-base-content">{t.compressHistory.title}</h2>
           <div className="text-center py-12">
             <History className="w-16 h-16 mx-auto mb-4 text-base-content/40" />
-            <p className="text-base-content/60">暂无压缩记录</p>
-            <p className="text-sm text-base-content/40 mt-2">压缩图片后记录将显示在这里</p>
+            <p className="text-base-content/60">{t.compressHistory.noRecords}</p>
+            <p className="text-sm text-base-content/40 mt-2">{t.compressHistory.recordsWillAppear}</p>
           </div>
         </div>
       </div>
@@ -278,7 +280,7 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
           <div className="stat-figure text-primary">
             <History className="w-8 h-8" />
           </div>
-          <div className="stat-title">总压缩次数</div>
+          <div className="stat-title">{t.compressHistory.totalCompressions}</div>
           <div className="stat-value text-primary">{records.length}</div>
         </div>
 
@@ -288,7 +290,7 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
             </svg>
           </div>
-          <div className="stat-title">平均压缩率</div>
+          <div className="stat-title">{t.compressHistory.avgCompressionRate}</div>
           <div className="stat-value text-success">
             {(records.reduce((sum, record) => sum + record.compressionRatio, 0) / records.length).toFixed(1)}%
           </div>
@@ -300,7 +302,7 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
             </svg>
           </div>
-          <div className="stat-title">节省空间</div>
+          <div className="stat-title">{t.compressHistory.spaceSaved}</div>
           <div className="stat-value text-info">
             {formatFileSize(
               records.reduce((sum, record) => sum + (record.originalSize - record.compressedSize), 0)
@@ -313,10 +315,10 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
       <div className="card bg-base-100 shadow-sm">
         <div className="card-body">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="card-title text-base-content">压缩记录</h2>
+            <h2 className="card-title text-base-content">{t.compressHistory.title}</h2>
             <div className="flex items-center gap-2">
               <div className="text-sm text-base-content/60">
-                共 {records.length} 条记录
+                {records.length} {t.compressHistory.records}
               </div>
               {records.length > 0 && (
                 <>
@@ -337,17 +339,17 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
                       }
                     }}
                     className="btn btn-ghost btn-xs text-info"
-                    title="调试信息"
+                    title={t.common.debug}
                   >
-                    调试
+                    {t.common.debug}
                   </button>
                   <button
                     onClick={handleClearAll}
                     className="btn btn-ghost btn-xs text-error hover:bg-error/10"
-                    title="清空所有记录"
+                    title={t.compressHistory.clearAll}
                   >
                     <Trash className="w-4 h-4" />
-                    清空
+                    {t.compressHistory.clearAll}
                   </button>
                 </>
               )}
@@ -357,15 +359,15 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
           <div className="overflow-x-auto">
             <ul className="list bg-base-100 rounded-box shadow-md">
               <li className="p-4 pb-2 text-xs font-bold tracking-wide text-base-content/60 uppercase border-b border-base-200 flex items-center">
-                <div className="w-16">缩略图</div>
-                <div className="flex-1 px-4">文件名</div>
-                <div className="w-24 text-right">原始大小</div>
-                <div className="w-24 text-right">压缩后</div>
-                <div className="w-20 text-center">压缩率</div>
-                <div className="w-16 text-center">格式</div>
-                <div className="w-16 text-center">质量</div>
-                <div className="w-32 text-right px-4">压缩时间</div>
-                <div className="w-32 text-center">操作</div>
+                <div className="w-16">{t.history.thumbnail}</div>
+                <div className="flex-1 px-4">{t.history.filename}</div>
+                <div className="w-24 text-right">{t.compressHistory.originalSize}</div>
+                <div className="w-24 text-right">{t.compressHistory.compressedSize}</div>
+                <div className="w-20 text-center">{t.compressHistory.compressionRate}</div>
+                <div className="w-16 text-center">{t.compressHistory.format}</div>
+                <div className="w-16 text-center">{t.compressHistory.quality}</div>
+                <div className="w-32 text-right px-4">{t.compressHistory.compressTime}</div>
+                <div className="w-32 text-center">{t.history.action}</div>
               </li>
               {records.map((record) => (
                 <li key={record.id} className="list-row hover:bg-base-200 transition-colors duration-200">
@@ -409,28 +411,28 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
                     <button
                       onClick={() => handleEditRecord(record)}
                       className="btn btn-ghost btn-xs btn-square text-primary hover:bg-primary/10"
-                      title="编辑 - 恢复到编辑器"
+                      title={t.compressHistory.editRestore}
                     >
                       <Edit3 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handlePreview(record)}
                       className="btn btn-ghost btn-xs btn-square"
-                      title="预览详情"
+                      title={t.compressHistory.previewDetails}
                     >
                       <Eye className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDownload(record)}
                       className="btn btn-ghost btn-xs btn-square"
-                      title="下载压缩图片"
+                      title={t.compressHistory.downloadCompressed}
                     >
                       <Download className="w-4 h-4" />
                     </button>
                     <button
                       onClick={(e) => handleDelete(record.id, e)}
                       className="btn btn-ghost btn-xs btn-square text-error hover:bg-error/10"
-                      title="删除记录"
+                      title={t.compressHistory.deleteRecord}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -446,12 +448,12 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
       {showClearAllConfirm && (
         <div className="modal modal-open">
           <div className="modal-box">
-            <h3 className="font-bold text-lg mb-4">确认清空</h3>
+            <h3 className="font-bold text-lg mb-4">{t.compressHistory.confirmClear}</h3>
             <p className="mb-4">
-              确定要清空所有压缩记录吗？
+              {t.compressHistory.confirmClearMessage}
             </p>
             <p className="text-sm text-base-content/60 mb-6">
-              此操作不可恢复，所有记录和相关的临时文件都将被删除。
+              {t.compressHistory.clearWarning}
             </p>
             <div className="modal-action">
               <button
@@ -459,13 +461,13 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
                 className="btn btn-error gap-2"
               >
                 <Trash className="w-4 h-4" />
-                确认清空
+                {t.compressHistory.confirmClear}
               </button>
               <button
                 onClick={cancelClearAll}
                 className="btn"
               >
-                取消
+                {t.common.cancel}
               </button>
             </div>
           </div>
@@ -477,12 +479,12 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
       {deleteConfirmRecord && (
         <div className="modal modal-open">
           <div className="modal-box">
-            <h3 className="font-bold text-lg mb-4">确认删除</h3>
+            <h3 className="font-bold text-lg mb-4">{t.compressHistory.confirmDelete}</h3>
             <p className="mb-4">
-              确定要删除压缩记录 <span className="font-semibold">{deleteConfirmRecord.originalName}</span> 吗？
+              {t.compressHistory.confirmDeleteMessage} <span className="font-semibold">{deleteConfirmRecord.originalName}</span>?
             </p>
             <p className="text-sm text-base-content/60 mb-6">
-              此操作不可恢复，相关的临时文件也将被删除。
+              {t.compressHistory.deleteWarning}
             </p>
             <div className="modal-action">
               <button
@@ -490,13 +492,13 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
                 className="btn btn-error gap-2"
               >
                 <Trash2 className="w-4 h-4" />
-                确认删除
+                {t.compressHistory.confirmDelete}
               </button>
               <button
                 onClick={cancelDelete}
                 className="btn"
               >
-                取消
+                {t.common.cancel}
               </button>
             </div>
           </div>
@@ -508,39 +510,39 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
       {selectedRecord && (
         <div className="modal modal-open">
           <div className="modal-box max-w-4xl">
-            <h3 className="font-bold text-lg mb-4">压缩详情 - {selectedRecord.originalName}</h3>
+            <h3 className="font-bold text-lg mb-4">{t.compressHistory.compressionDetails} - {selectedRecord.originalName}</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* 压缩信息 */}
               <div className="space-y-4">
                 <div className="card bg-base-200">
                   <div className="card-body p-4">
-                    <h4 className="font-semibold mb-2">压缩信息</h4>
+                    <h4 className="font-semibold mb-2">{t.compressHistory.compressionInfo}</h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span>原始大小:</span>
+                        <span>{t.compressHistory.originalSize}:</span>
                         <span>{formatFileSize(selectedRecord.originalSize)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>压缩后大小:</span>
+                        <span>{t.compressHistory.compressedSize}:</span>
                         <span>{formatFileSize(selectedRecord.compressedSize)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>压缩率:</span>
+                        <span>{t.compressHistory.compressionRate}:</span>
                         <span className="text-success">↓ {selectedRecord.compressionRatio.toFixed(1)}%</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>输出格式:</span>
+                        <span>{t.compressHistory.outputFormat}:</span>
                         <span>{selectedRecord.config.format.toUpperCase()}</span>
                       </div>
                       {selectedRecord.config.format !== 'oxipng' && (
                         <div className="flex justify-between">
-                          <span>质量:</span>
+                          <span>{t.compressHistory.quality}:</span>
                           <span>{selectedRecord.config.quality}%</span>
                         </div>
                       )}
                       <div className="flex justify-between">
-                        <span>压缩时间:</span>
+                        <span>{t.compressHistory.compressTime}:</span>
                         <span>{formatDate(selectedRecord.compressTime)}</span>
                       </div>
                     </div>
@@ -552,16 +554,16 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
               <div className="space-y-4">
                 <div className="card bg-base-200">
                   <div className="card-body p-4">
-                    <h4 className="font-semibold mb-2">图片预览</h4>
+                    <h4 className="font-semibold mb-2">{t.compressHistory.imagePreview}</h4>
                     {previewImages ? (
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 gap-4">
                           <div className="text-center">
-                            <h5 className="text-sm font-medium mb-2">原始图片</h5>
+                            <h5 className="text-sm font-medium mb-2">{t.compressHistory.originalImage}</h5>
                             <div className="bg-white rounded-lg p-2 shadow-inner">
                               <img
                                 src={previewImages.originalUrl}
-                                alt="原始图片"
+                                alt={t.compressHistory.originalImage}
                                 className="max-w-full max-h-32 mx-auto object-contain"
                               />
                             </div>
@@ -570,11 +572,11 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
                             </p>
                           </div>
                           <div className="text-center">
-                            <h5 className="text-sm font-medium mb-2">压缩后</h5>
+                            <h5 className="text-sm font-medium mb-2">{t.compressHistory.compressedImage}</h5>
                             <div className="bg-white rounded-lg p-2 shadow-inner">
                               <img
                                 src={previewImages.compressedUrl}
-                                alt="压缩后图片"
+                                alt={t.compressHistory.compressedImage}
                                 className="max-w-full max-h-32 mx-auto object-contain"
                               />
                             </div>
@@ -589,8 +591,8 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
                       <div className="aspect-square bg-base-100 rounded-lg flex items-center justify-center">
                         <div className="text-center text-base-content/40">
                           <ImageIcon className="w-12 h-12 mx-auto mb-2" />
-                          <p className="text-sm">无图片数据</p>
-                          <p className="text-xs mt-1">大文件不保存预览数据</p>
+                          <p className="text-sm">{t.compressHistory.noImageData}</p>
+                          <p className="text-xs mt-1">{t.compressHistory.largeFileNoPreview}</p>
                         </div>
                       </div>
                     )}
@@ -605,13 +607,13 @@ export const CompressHistory: React.FC<CompressHistoryProps> = ({ onPreviewRecor
                 className="btn btn-primary gap-2"
               >
                 <Download className="w-4 h-4" />
-                下载压缩图片
+                {t.compressHistory.downloadCompressed}
               </button>
               <button
                 onClick={() => setSelectedRecord(null)}
                 className="btn"
               >
-                关闭
+                {t.common.close}
               </button>
             </div>
           </div>

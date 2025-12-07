@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useMemo } from "react";
 import { Download, RotateCcw, ChevronDown, Link as LinkIcon, CloudUpload } from "lucide-react";
 import { ImageHostingAPI } from "../api";
 import { UploadResult } from "../types";
+import { useLanguage } from "../contexts/LanguageContext";
 
 interface CompressConfig {
   format: 'mozjpeg' | 'webp' | 'avif' | 'oxipng';
@@ -52,6 +53,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
   onUploadSuccess,
   onUploadError,
 }) => {
+  const { t } = useLanguage();
   const [splitPosition, setSplitPosition] = useState(50); // 分割线位置百分比
   const [isDragging, setIsDragging] = useState(false);
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
@@ -141,22 +143,22 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
       if (result.success) {
         onUploadSuccess(result);
       } else {
-        onUploadError(result.error || "上传失败");
+        onUploadError(result.error || t.upload.uploadFailed);
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "上传失败";
+      const errorMessage = error instanceof Error ? error.message : t.upload.uploadFailed;
       onUploadError(errorMessage);
     } finally {
       setIsUploading(false);
     }
-  }, [compressedResult, originalImage.name, onUploadSuccess, onUploadError]);
+  }, [compressedResult, originalImage.name, onUploadSuccess, onUploadError, t]);
 
   // 使用 useMemo 优化尺寸计算，避免闪烁
   const calculatedDimensions = useMemo(() => {
     const originalWidth = imageDimensions.width;
     const originalHeight = imageDimensions.height;
 
-    if (!originalWidth || !originalHeight) return 'Calculating...';
+    if (!originalWidth || !originalHeight) return t.editor.calculating;
 
     if (config.resizePreset !== 'custom') {
       const percentage = parseInt(config.resizePreset.replace('%', '')) / 100;
@@ -196,7 +198,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
           {/* Format Section */}
           <section>
             <h3 className="px-0 pb-2 pt-2 text-base font-bold leading-tight tracking-[-0.015em] text-gray-800 dark:text-white">
-              Format
+              {t.editor.format}
             </h3>
             <div className="flex h-10 flex-1 items-center justify-center rounded-lg bg-gray-200 p-1 dark:bg-black/40">
               {(['mozjpeg', 'webp', 'oxipng', 'avif'] as const).map((fmt) => {
@@ -230,11 +232,11 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
           {config.format !== 'oxipng' && (
             <section>
               <h3 className="px-0 pb-2 pt-2 text-base font-bold leading-tight tracking-[-0.015em] text-gray-800 dark:text-white">
-                Quality
+                {t.editor.quality}
               </h3>
               <div className="relative flex w-full flex-col items-start justify-between gap-3 rounded-lg bg-gray-200 p-3 dark:bg-black/40">
                 <div className="flex w-full items-center justify-between">
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Quality</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.editor.quality}</p>
                   <p className="text-sm font-normal text-gray-600 dark:text-gray-400">{config.quality}%</p>
                 </div>
                 <input
@@ -252,11 +254,11 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
           {/* Resize Section */}
           <section>
             <h3 className="px-0 pb-2 pt-2 text-base font-bold leading-tight tracking-[-0.015em] text-gray-800 dark:text-white">
-              Resize
+              {t.editor.resize}
             </h3>
             <div className="space-y-3 rounded-lg bg-gray-200 p-3 dark:bg-black/40">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Preset</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.editor.preset}</label>
                 <select
                   className="h-8 rounded-md border-gray-300 bg-white/50 text-sm shadow-sm focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-200 outline-none px-2"
                   value={config.resizePreset}
@@ -273,14 +275,14 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                   <option value="75%">75%</option>
                   <option value="50%">50%</option>
                   <option value="25%">25%</option>
-                  <option value="custom">Custom</option>
+                  <option value="custom">{t.editor.custom}</option>
                 </select>
               </div>
 
               <div className="flex items-center gap-2">
                 <input
                   className="h-8 w-full rounded-md border-gray-300 bg-white/50 text-sm shadow-sm focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-200 px-2 disabled:opacity-50"
-                  placeholder="Width"
+                  placeholder={t.editor.width}
                   type="number"
                   value={config.resizeWidth || ''}
                   disabled={config.resizePreset !== 'custom'}
@@ -289,7 +291,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                 <span className="text-gray-400">×</span>
                 <input
                   className="h-8 w-full rounded-md border-gray-300 bg-white/50 text-sm shadow-sm focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-200 px-2 disabled:opacity-50"
-                  placeholder="Height"
+                  placeholder={t.editor.height}
                   type="number"
                   value={config.resizeHeight || ''}
                   disabled={config.resizePreset !== 'custom'}
@@ -298,15 +300,15 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                 <button
                   onClick={() => setConfig(prev => ({ ...prev, maintainAspectRatio: !prev.maintainAspectRatio }))}
                   className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${config.maintainAspectRatio ? 'bg-primary/20 text-primary' : 'bg-gray-300 text-gray-500 dark:bg-gray-600'}`}
-                  title="Maintain Aspect Ratio"
+                  title={t.editor.maintainAspectRatio}
                 >
                   <LinkIcon className="w-4 h-4" />
                 </button>
               </div>
 
               <div className="text-xs text-gray-500 dark:text-gray-400 flex justify-between px-1">
-                <span>Original: {imageDimensions.width}×{imageDimensions.height}</span>
-                <span>New: {calculatedDimensions}</span>
+                <span>{t.editor.original}: {imageDimensions.width}×{imageDimensions.height}</span>
+                <span>{t.editor.new}: {calculatedDimensions}</span>
               </div>
             </div>
           </section>
@@ -316,13 +318,13 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
             <details className="group" open>
               <summary className="flex list-none cursor-pointer items-center justify-between py-2">
                 <h3 className="text-base font-bold leading-tight tracking-[-0.015em] text-gray-800 dark:text-white">
-                  Advanced
+                  {t.editor.advanced}
                 </h3>
                 <ChevronDown className="w-4 h-4 transition-transform duration-200 group-open:rotate-180 text-gray-500" />
               </summary>
               <div className="space-y-2 rounded-lg bg-gray-200 p-3 dark:bg-black/40">
                 <label className="flex cursor-pointer items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Pre-multiply Alpha</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.editor.premultiplyAlpha}</span>
                   <input
                     className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-900 dark:focus:ring-offset-gray-900 accent-primary"
                     type="checkbox"
@@ -331,7 +333,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                   />
                 </label>
                 <label className="flex cursor-pointer items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Linear RGB</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.editor.linearRGB}</span>
                   <input
                     className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-900 dark:focus:ring-offset-gray-900 accent-primary"
                     type="checkbox"
@@ -349,13 +351,13 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
               <details className="group" open>
                 <summary className="flex list-none cursor-pointer items-center justify-between py-2">
                   <h3 className="text-base font-bold leading-tight tracking-[-0.015em] text-gray-800 dark:text-white">
-                    PNG Options
+                    {t.editor.pngOptions}
                   </h3>
                   <ChevronDown className="w-4 h-4 transition-transform duration-200 group-open:rotate-180 text-gray-500" />
                 </summary>
                 <div className="space-y-3 rounded-lg bg-gray-200 p-3 dark:bg-black/40">
                   <label className="flex cursor-pointer items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Reduce Palette</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.editor.reducePalette}</span>
                     <input
                       className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-900 dark:focus:ring-offset-gray-900 accent-primary"
                       type="checkbox"
@@ -368,7 +370,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                     <>
                       <div className="relative flex w-full flex-col items-start justify-between gap-3">
                         <div className="flex w-full items-center justify-between">
-                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Colors</p>
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.editor.colors}</p>
                           <p className="text-sm font-normal text-gray-600 dark:text-gray-400">{config.paletteColors}</p>
                         </div>
                         <input
@@ -382,7 +384,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
                       </div>
                       <div className="relative flex w-full flex-col items-start justify-between gap-3">
                         <div className="flex w-full items-center justify-between">
-                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Dithering</p>
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.editor.dithering}</p>
                           <p className="text-sm font-normal text-gray-600 dark:text-gray-400">{config.dithering}</p>
                         </div>
                         <input
@@ -410,24 +412,24 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
             className="flex h-9 flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-gray-200/80 px-4 text-sm font-medium text-gray-700 hover:bg-gray-300/80 dark:bg-gray-700/80 dark:text-gray-200 dark:hover:bg-gray-600/80 transition-colors"
           >
             <RotateCcw className="w-4 h-4 mr-2" />
-            <span className="truncate">Reset</span>
+            <span className="truncate">{t.common.reset}</span>
           </button>
           <button
             onClick={onDownload}
             className="flex h-9 flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-4 text-sm font-medium text-white shadow-sm hover:bg-primary/90 transition-colors"
           >
             <Download className="w-4 h-4 mr-2" />
-            <span className="truncate">Save Image</span>
+            <span className="truncate">{t.editor.saveImage}</span>
           </button>
           {onUploadSuccess && (
             <button
               onClick={handleUploadCompressed}
               disabled={isUploading || !compressedResult}
               className="flex h-9 flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-blue-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              title="Quick Upload to R2"
+              title={t.editor.quickUpload}
             >
               <CloudUpload className="w-4 h-4 mr-2" />
-              <span className="truncate">{isUploading ? 'Uploading...' : 'Upload'}</span>
+              <span className="truncate">{isUploading ? t.common.uploading : t.common.upload}</span>
             </button>
           )}
         </div>
@@ -453,7 +455,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
               draggable={false}
             />
             <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm">
-              Original
+              {t.editor.original}
             </div>
           </div>
 
@@ -471,11 +473,11 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
               />
             ) : (
               <div className="flex items-center justify-center h-full text-gray-500">
-                {isProcessing ? 'Compressing...' : 'Waiting...'}
+                {isProcessing ? t.editor.compressing : t.editor.waiting}
               </div>
             )}
             <div className="absolute top-4 right-4 bg-primary/80 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm">
-              Compressed
+              {t.editor.compressed}
             </div>
           </div>
 
@@ -497,19 +499,19 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
         {/* Footer Stats */}
         <footer className="flex h-16 flex-shrink-0 items-center justify-between border-t border-gray-200/80 bg-gray-100/50 px-8 backdrop-blur-sm dark:border-gray-800/80 dark:bg-gray-900/50">
           <div className="text-center">
-            <p className="text-xs text-gray-500 dark:text-gray-400">Original Size</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t.editor.originalSize}</p>
             <p className="text-base font-semibold text-gray-800 dark:text-gray-200">{formatFileSize(originalImage.size)}</p>
           </div>
           <div className="h-8 border-l border-gray-300 dark:border-gray-700"></div>
           <div className="text-center">
-            <p className="text-xs text-gray-500 dark:text-gray-400">New Size</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t.editor.newSize}</p>
             <p className="text-base font-semibold text-gray-800 dark:text-gray-200">
               {compressedResult ? formatFileSize(compressedResult.compressedSize) : '-'}
             </p>
           </div>
           <div className="h-8 border-l border-gray-300 dark:border-gray-700"></div>
           <div className="text-center">
-            <p className="text-xs text-gray-500 dark:text-gray-400">Reduction</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t.editor.reduction}</p>
             <p className={`text-base font-semibold ${compressedResult && compressedResult.compressionRatio > 0 ? 'text-green-600 dark:text-green-500' : 'text-gray-800 dark:text-gray-200'}`}>
               {compressedResult ? `-${Math.abs(compressedResult.compressionRatio).toFixed(0)}%` : '-'}
             </p>

@@ -3,6 +3,7 @@ import { AlertCircle, ImageIcon, Copy } from 'lucide-react';
 import { UploadArea } from './UploadArea';
 import { UploadRecord, UploadResult } from '../types';
 import { ImageHostingAPI } from '../api';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface UploadModuleProps {
   uploadHistory: UploadRecord[];
@@ -19,28 +20,29 @@ const UploadModule: React.FC<UploadModuleProps> = ({
   onShowNotification,
   onViewAllHistory
 }) => {
+  const { t } = useLanguage();
   const [urlInput, setUrlInput] = useState('');
   const [isUrlUploading, setIsUrlUploading] = useState(false);
   const handleCopyUrl = (url: string) => {
     navigator.clipboard.writeText(url);
-    onShowNotification('链接已复制到剪贴板', 'success');
+    onShowNotification(t.history.linkCopied, 'success');
   };
 
   const handleUploadFromUrl = async () => {
     const raw = urlInput.trim();
     if (!raw) {
-      onShowNotification('请输入有效的图片 URL', 'error');
+      onShowNotification(t.upload.pasteImageUrl, 'error');
       return;
     }
     let parsed: URL;
     try {
       parsed = new URL(raw);
     } catch {
-      onShowNotification('URL 格式不正确', 'error');
+      onShowNotification(t.upload.urlFormatError, 'error');
       return;
     }
     if (!(parsed.protocol === 'http:' || parsed.protocol === 'https:')) {
-      onShowNotification('仅支持 http/https URL', 'error');
+      onShowNotification(t.upload.onlyHttpSupported, 'error');
       return;
     }
 
@@ -48,7 +50,7 @@ const UploadModule: React.FC<UploadModuleProps> = ({
     try {
       const resp = await fetch(parsed.toString());
       if (!resp.ok) {
-        onUploadError(`获取 URL 失败: ${resp.status} ${resp.statusText}`);
+        onUploadError(`${t.upload.fetchUrlFailed}: ${resp.status} ${resp.statusText}`);
         return;
       }
       const contentType = resp.headers.get('content-type') || '';
@@ -88,13 +90,13 @@ const UploadModule: React.FC<UploadModuleProps> = ({
       const result = await ImageHostingAPI.uploadImage(data, filename);
       if (result.success) {
         onUploadSuccess(result);
-        onShowNotification('URL 上传成功', 'success');
+        onShowNotification(t.upload.urlUploadSuccess, 'success');
       } else {
-        onUploadError(result.error || '上传失败');
+        onUploadError(result.error || t.upload.uploadFailed);
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      onUploadError(`处理 URL 时出错: ${msg}`);
+      onUploadError(`${t.upload.processingUrlError}: ${msg}`);
     } finally {
       setIsUrlUploading(false);
     }
@@ -117,7 +119,7 @@ const UploadModule: React.FC<UploadModuleProps> = ({
               <input
                 type="text"
                 className="w-full h-10 pl-3 pr-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-                placeholder="Paste image URL (http/https)"
+                placeholder={t.upload.pasteImageUrl}
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -131,14 +133,14 @@ const UploadModule: React.FC<UploadModuleProps> = ({
               className={`h-10 px-4 rounded-lg bg-primary text-white text-sm font-medium shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[100px]`}
               disabled={isUrlUploading || !urlInput.trim()}
             >
-              {isUrlUploading ? 'Uploading...' : 'Upload URL'}
+              {isUrlUploading ? t.common.uploading : t.upload.uploadUrl}
             </button>
           </div>
 
           {/* 粘贴上传提示 */}
           <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-400 dark:text-gray-500">
             <AlertCircle className="w-3 h-3" />
-            <span>Tip: You can drag & drop, choose file, paste image, or paste URL.</span>
+            <span>{t.upload.uploadTip}</span>
           </div>
         </div>
       </div>
@@ -146,30 +148,30 @@ const UploadModule: React.FC<UploadModuleProps> = ({
       {/* 最近上传的图片列表 */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-          <h3 className="font-semibold text-gray-900 dark:text-white">Recent Uploads</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white">{t.upload.recentUploads}</h3>
           <button
             onClick={onViewAllHistory}
             className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
           >
-            View All →
+            {t.upload.viewAll}
           </button>
         </div>
 
         {uploadHistory.length === 0 ? (
           <div className="text-center py-12">
             <ImageIcon className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-            <p className="text-gray-500 dark:text-gray-400 text-sm">No upload history yet</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">{t.upload.noHistory}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="bg-gray-50 dark:bg-gray-900/50 text-xs uppercase text-gray-500 dark:text-gray-400 font-medium">
                 <tr>
-                  <th className="px-4 py-3">Thumbnail</th>
-                  <th className="px-4 py-3">Filename</th>
-                  <th className="px-4 py-3">Size</th>
-                  <th className="px-4 py-3">Time</th>
-                  <th className="px-4 py-3 text-right">Action</th>
+                  <th className="px-4 py-3">{t.history.thumbnail}</th>
+                  <th className="px-4 py-3">{t.history.filename}</th>
+                  <th className="px-4 py-3">{t.history.size}</th>
+                  <th className="px-4 py-3">{t.history.time}</th>
+                  <th className="px-4 py-3 text-right">{t.history.action}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -216,7 +218,7 @@ const UploadModule: React.FC<UploadModuleProps> = ({
                       <button
                         onClick={() => handleCopyUrl(item.url)}
                         className="p-1.5 rounded-md text-gray-500 hover:text-primary hover:bg-primary/10 transition-colors"
-                        title="Copy Link"
+                        title={t.history.copyLink}
                       >
                         <Copy className="w-4 h-4" />
                       </button>

@@ -3,6 +3,7 @@ import { Image as ImageIcon, CloudUpload } from "lucide-react";
 import { ImageHostingAPI } from "../api";
 import { UploadResult } from "../types";
 import { listen } from "@tauri-apps/api/event";
+import { useLanguage } from "../contexts/LanguageContext";
 
 interface UploadAreaProps {
   onUploadSuccess: (result: UploadResult) => void;
@@ -15,6 +16,7 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
   onUploadError,
   isActive = true,
 }) => {
+  const { t } = useLanguage();
   console.log("[UploadArea] Component initializing...");
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -43,7 +45,7 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
       // Check if file is an image
       if (!file.type.startsWith("image/")) {
         console.error("[UploadArea] Invalid file type:", file.type);
-        onUploadError("请选择图片文件");
+        onUploadError(t.upload.selectImageFile);
         return;
       }
 
@@ -65,11 +67,11 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
           onUploadSuccess(result);
         } else {
           console.error("[UploadArea] Upload failed with error:", result.error);
-          onUploadError(result.error || "上传失败");
+          onUploadError(result.error || t.upload.uploadFailed);
         }
       } catch (error) {
         console.error("[UploadArea] Upload exception:", error);
-        const errorMessage = error instanceof Error ? error.message : "上传失败";
+        const errorMessage = error instanceof Error ? error.message : t.upload.uploadFailed;
         console.error("[UploadArea] Error details:", {
           message: errorMessage,
           stack: error instanceof Error ? error.stack : 'No stack trace',
@@ -207,13 +209,13 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
             if (result.success) {
               onUploadSuccess(result);
             } else {
-              onUploadError(result.error || "上传失败");
+              onUploadError(result.error || t.upload.uploadFailed);
             }
           } else {
-            onUploadError("无法读取文件数据");
+            onUploadError(t.upload.failedToReadFile);
           }
         } catch (error) {
-          onUploadError(error instanceof Error ? error.message : "处理拖拽文件时出错");
+          onUploadError(error instanceof Error ? error.message : t.upload.errorProcessingDrag);
         } finally {
           setIsUploading(false);
         }
@@ -257,7 +259,7 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
 
       if (!clipboardData) {
         console.warn("[UploadArea] No image found in clipboard");
-        onUploadError("No image found in clipboard");
+        onUploadError(t.upload.noImageInClipboard);
         return;
       }
 
@@ -271,16 +273,16 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
         onUploadSuccess(result);
       } else {
         console.error("[UploadArea] Clipboard upload failed:", result.error);
-        onUploadError(result.error || "Upload failed");
+        onUploadError(result.error || t.upload.uploadFailed);
       }
     } catch (error) {
       console.error("[UploadArea] Clipboard upload exception:", error);
-      onUploadError(error instanceof Error ? error.message : "Failed to upload from clipboard");
+      onUploadError(error instanceof Error ? error.message : t.upload.uploadFailed);
     } finally {
       setIsUploading(false);
       console.log("[UploadArea] Clipboard upload process completed");
     }
-  }, [onUploadSuccess, onUploadError]);
+  }, [onUploadSuccess, onUploadError, t]);
 
   return (
     <div className="w-full space-y-6">
@@ -304,9 +306,9 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
 
         <div className="flex flex-col items-center gap-1">
           <p className="text-lg font-bold text-gray-900 dark:text-white">
-            {isDragOver ? "Drop Images Here" : "Drag & Drop Images Here"}
+            {isDragOver ? t.upload.dropHere : t.upload.dragDropTitle}
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">or just paste an image (⌘V)</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t.upload.pasteHint}</p>
         </div>
 
         <input
@@ -326,14 +328,14 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
             }}
             className="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary text-white text-sm font-semibold tracking-wide shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
           >
-            <span className="truncate">Choose File...</span>
+            <span className="truncate">{t.upload.chooseFile}</span>
           </button>
         )}
 
         {isUploading && (
           <div className="w-full max-w-xs space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="font-medium text-gray-900 dark:text-white">Uploading...</span>
+              <span className="font-medium text-gray-900 dark:text-white">{t.common.uploading}</span>
               <span className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></span>
             </div>
             <div className="h-2 rounded-full bg-gray-200 dark:bg-gray-700 w-full overflow-hidden">
@@ -345,7 +347,7 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
 
       <div className="flex items-center gap-3">
         <hr className="w-full border-t border-gray-200 dark:border-gray-700" />
-        <span className="text-xs font-medium text-gray-400 dark:text-gray-500">OR</span>
+        <span className="text-xs font-medium text-gray-400 dark:text-gray-500">{t.common.or}</span>
         <hr className="w-full border-t border-gray-200 dark:border-gray-700" />
       </div>
 
@@ -357,12 +359,12 @@ export const UploadArea: React.FC<UploadAreaProps> = ({
           className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-sm transition-colors ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           <ImageIcon className="w-4 h-4" />
-          <span>Paste from Clipboard</span>
+          <span>{t.upload.pasteFromClipboard}</span>
         </button>
       </div>
 
       <div className="px-6 pb-4 pt-2">
-        <p className="text-xs text-gray-400 dark:text-gray-500 text-center">Supports: JPG, PNG, GIF, WebP, BMP, SVG. Max 10MB.</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 text-center">{t.upload.supportedFormats}</p>
       </div>
     </div>
   );

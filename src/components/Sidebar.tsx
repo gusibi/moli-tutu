@@ -5,8 +5,11 @@ import {
     Zap,
     Settings,
     Moon,
-    Sun
+    Sun,
+    Globe
 } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
+import { Language, languages } from '../i18n';
 
 interface SidebarProps {
     theme: string;
@@ -21,15 +24,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onThemeChange,
     onTabChange
 }) => {
+    const { language, setLanguage, t } = useLanguage();
+
     const menuItems = [
-        { id: 'upload', label: 'Image Upload', icon: CloudUpload },
-        { id: 'history', label: 'Upload History', icon: History },
+        { id: 'upload', label: t.sidebar.imageUpload, icon: CloudUpload },
+        { id: 'history', label: t.sidebar.uploadHistory, icon: History },
         { type: 'divider' },
-        { id: 'compress', label: 'Image Compression', icon: Zap },
-        { id: 'compress-history', label: 'Compression History', icon: History },
+        { id: 'compress', label: t.sidebar.imageCompression, icon: Zap },
+        { id: 'compress-history', label: t.sidebar.compressionHistory, icon: History },
         { type: 'divider' },
-        { id: 'config', label: 'Settings', icon: Settings },
+        { id: 'config', label: t.sidebar.settings, icon: Settings },
     ];
+
+    const toggleLanguage = () => {
+        const newLang: Language = language === 'en' ? 'zh' : 'en';
+        setLanguage(newLang);
+    };
 
     return (
         <aside className="w-60 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50 p-4 border-r border-gray-200 dark:border-gray-800 flex flex-col h-full drag-region">
@@ -66,7 +76,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </nav>
 
             {/* Bottom Actions */}
-            <div className="pt-4 mt-auto border-t border-gray-200 dark:border-gray-800 no-drag">
+            <div className="pt-4 mt-auto border-t border-gray-200 dark:border-gray-800 no-drag space-y-1">
+                {/* Language Toggle */}
+                <button
+                    onClick={toggleLanguage}
+                    className="flex items-center gap-3 px-3 py-2 w-full rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white transition-colors"
+                >
+                    <Globe className="w-5 h-5 opacity-70" />
+                    <span>{languages[language]}</span>
+                </button>
+
+                {/* Theme Toggle */}
                 <button
                     onClick={() => onThemeChange(theme === 'dark' ? 'light' : 'dark')}
                     className="flex items-center gap-3 px-3 py-2 w-full rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white transition-colors"
@@ -74,12 +94,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {theme === 'dark' ? (
                         <>
                             <Sun className="w-5 h-5 opacity-70" />
-                            <span>Light Mode</span>
+                            <span>{t.sidebar.lightMode}</span>
                         </>
                     ) : (
                         <>
                             <Moon className="w-5 h-5 opacity-70" />
-                            <span>Dark Mode</span>
+                            <span>{t.sidebar.darkMode}</span>
                         </>
                     )}
                 </button>

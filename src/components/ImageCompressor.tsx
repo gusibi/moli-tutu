@@ -5,6 +5,7 @@ import { listen } from "@tauri-apps/api/event";
 import { ImageHostingAPI } from "../api";
 import { saveCompressRecord, restoreImagesFromRecord } from "../utils/compressStorage";
 import { CompressConfig, CompressedResult, CompressRecord } from "../types/compress";
+import { useLanguage } from "../contexts/LanguageContext";
 
 
 
@@ -44,6 +45,7 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
   restoreRecord,
   onRecordRestored
 }) => {
+  const { t } = useLanguage();
   const [isDragOver, setIsDragOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [originalImage, setOriginalImage] = useState<File | null>(null);
@@ -121,7 +123,7 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
         setFileSource('drag'); // 拖拽的文件
       } catch (error) {
         console.error("Error reading dropped file:", error);
-        alert("无法读取拖拽的文件");
+        alert(t.upload.errorProcessingDrag);
         return;
       }
     }
@@ -129,7 +131,7 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert("请选择图片文件");
+      alert(t.upload.selectImageFile);
       return;
     }
 
@@ -162,12 +164,12 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
           }
         }
       }
-      alert("剪贴板中没有找到图片");
+      alert(t.compress.noImageInClipboard);
     } catch (error) {
       console.error("读取剪贴板失败:", error);
-      alert("读取剪贴板失败");
+      alert(t.compress.readClipboardFailed);
     }
-  }, []);
+  }, [t]);
 
   const compressImage = useCallback(async () => {
     if (!originalImage || isProcessing) return;
@@ -281,12 +283,12 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
 
     } catch (error) {
       console.error("压缩失败:", error);
-      alert("压缩失败: " + (error instanceof Error ? error.message : "未知错误"));
+      alert(t.compress.compressionFailed + ": " + (error instanceof Error ? error.message : "Unknown error"));
       setHasProcessed(true);
     } finally {
       setIsProcessing(false);
     }
-  }, [originalImage, config, isProcessing, fileSource]);
+  }, [originalImage, config, isProcessing, fileSource, t]);
 
   const downloadCompressed = useCallback(async () => {
     console.log('Download button clicked');
@@ -329,12 +331,12 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
             navigator.userAgent.includes('Windows') ? '%USERPROFILE%\\Downloads' :
               '~/Downloads';
 
-          alert(`✅ 下载成功！
+          alert(`✅ ${t.compress.downloadSuccess}
 
-文件名: ${filename}
-存储位置: ${downloadPath}
+${t.compress.fileName}: ${filename}
+${t.compress.savedTo}: ${downloadPath}
 
-💡 提示: 具体路径可能因浏览器设置而异`);
+💡 ${t.compress.downloadPathTip}`);
         }, 100);
       }, 10);
 
@@ -351,10 +353,10 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
 
         if (!newWindow) {
           // 如果弹窗被阻止，提示用户
-          alert('请允许弹窗以下载文件，或者右键点击图片选择"另存为"');
+          alert(t.compress.allowPopup);
         } else {
           // 显示下载提示
-          alert('✅ 文件已在新窗口中打开，请右键选择"另存为"进行下载');
+          alert(`✅ ${t.compress.openedInNewWindow}`);
         }
 
         // 延迟清理 URL
@@ -364,10 +366,10 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
 
       } catch (fallbackError) {
         console.error('Fallback download also failed:', fallbackError);
-        alert('下载失败，请尝试右键点击压缩后的图片选择"另存为"');
+        alert(t.compress.downloadFailed);
       }
     }
-  }, [compressedResult, config.format, originalImage]);
+  }, [compressedResult, config.format, originalImage, t]);
 
   const resetAll = useCallback(() => {
     setOriginalImage(null);
@@ -477,10 +479,10 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
           <div className="flex max-w-[480px] flex-col items-center gap-2 text-center">
             <CloudUpload className={`w-16 h-16 transition-colors ${isDragOver ? "text-primary" : "text-gray-400 dark:text-gray-600"}`} strokeWidth={1.5} />
             <p className="text-lg font-bold leading-tight tracking-[-0.015em] text-gray-900 dark:text-white">
-              {isDragOver ? "Drop Image Here" : "Drag & Drop an Image"}
+              {isDragOver ? t.compress.dropImageHere : t.compress.dragDropImage}
             </p>
             <p className="text-sm font-normal leading-normal text-gray-600 dark:text-gray-400">
-              or select a file / paste from clipboard
+              {t.compress.selectOrPaste}
             </p>
           </div>
 
@@ -499,7 +501,7 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
             }}
             className="flex h-10 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-gray-200 px-4 text-sm font-medium text-gray-800 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 transition-colors"
           >
-            <span className="truncate">Select File</span>
+            <span className="truncate">{t.compress.selectFile}</span>
           </button>
 
           {/* 剪贴板粘贴按钮 */}
@@ -508,7 +510,7 @@ export const ImageCompressor: React.FC<ImageCompressorProps> = ({
             className="flex items-center gap-2 text-sm text-gray-500 hover:text-primary transition-colors"
           >
             <ImageIcon className="w-4 h-4" />
-            <span>Paste from Clipboard</span>
+            <span>{t.upload.pasteFromClipboard}</span>
           </button>
         </div>
       </div>
