@@ -77,7 +77,7 @@ jobs:
             3. 首次运行时配置你的 R2 存储信息
 
             ---
-            完整更新日志请查看 [CHANGELOG.md](https://github.com/gusi/MoliTutu/blob/main/CHANGELOG.md)
+            完整更新日志请查看 [CHANGELOG.md](https://github.com/gusibi/moli-tutu/blob/main/CHANGELOG.md)
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}

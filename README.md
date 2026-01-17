@@ -17,7 +17,7 @@
 
 ### 从 Release 下载
 
-1. 前往 [Releases](https://github.com/gusi/MoliTutu/releases) 页面
+1. 前往 [Releases](https://github.com/gusibi/moli-tutu/releases) 页面
 2. 下载对应平台的安装包：
    - **Windows**: `.msi` 文件
    - **macOS**: `.dmg` 文件（支持 Intel 和 Apple Silicon）
@@ -27,7 +27,7 @@
 
 ```bash
 # 克隆仓库
-git clone https://github.com/gusi/MoliTutu.git
+git clone https://github.com/gusibi/moli-tutu.git
 cd MoliTutu
 
 # 安装依赖
@@ -83,4 +83,4 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 
 ## 📞 支持
 
-如有问题，请在 [Issues](https://github.com/gusi/MoliTutu/issues) 页面提交。
+如有问题，请在 [Issues](https://github.com/gusibi/moli-tutu/issues) 页面提交。

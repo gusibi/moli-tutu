@@ -5,8 +5,8 @@ description = "Moli TuTu - Image Hosting Application"
 authors = ["gusi"]
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/gusi/MoliTutu"
-homepage = "https://github.com/gusi/MoliTutu"
+repository = "https://github.com/gusibi/moli-tutu"
+homepage = "https://github.com/gusibi/moli-tutu"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

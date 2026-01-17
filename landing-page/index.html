@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoliTutu - Smart Image Compression & Cloud Upload</title>
+    <link rel="icon" type="image/png" href="./images/64x64.png">
+    <link rel="apple-touch-icon" href="./images/icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0ea5e9', // Sky 500
+                        secondary: '#64748b', // Slate 500
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <!-- Navbar -->
+    <nav
+        class="fixed w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-100 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center gap-3">
+                    <img src="./images/icon.png" alt="MoliTutu Logo" class="h-8 w-8 rounded-lg shadow-sm">
+                    <span
+                        class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">MoliTutu</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <select id="lang-select"
+                        class="bg-gray-100 dark:bg-slate-800 border-none rounded-md py-1 px-3 text-sm focus:ring-2 focus:ring-primary outline-none">
+                        <option value="en">English</option>
+                        <option value="zh-CN">简体中文</option>
+                        <option value="zh-TW">繁體中文</option>
+                        <option value="es">Español</option>
+                        <option value="fr">Français</option>
+                        <option value="de">Deutsch</option>
+                        <option value="ja">日本語</option>
+                        <option value="ko">한국어</option>
+                        <option value="ru">Русский</option>
+                        <option value="pt">Português</option>
+                        <option value="ar">العربية</option>
+                        <option value="hi">हिन्दी</option>
+                    </select>
+                    <button id="theme-toggle"
+                        class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                        aria-label="Toggle Theme">
+                        <!-- Icon injected by JS -->
+                    </button>
+                    <a href="https://github.com/gusibi/moli-tutu" target="_blank"
+                        class="hidden sm:block text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd"
+                                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col md:flex-row items-center">
+        <div class="md:w-1/2 text-center md:text-left mb-12 md:mb-0">
+            <h1 id="hero-title" class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4">MoliTutu
+            </h1>
+            <p id="hero-subtitle" class="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-6 font-medium">Smart
+                Image Compression & Cloud Upload</p>
+            <p id="hero-desc" class="text-lg text-gray-500 dark:text-gray-400 mb-8 max-w-lg mx-auto md:mx-0">The
+                ultimate tool for optimizing images and uploading them directly to Cloudflare R2. Save space, speed up
+                your workflow.</p>
+            <div class="flex flex-col sm:flex-row justify-center md:justify-start gap-4">
+                <a href="https://github.com/gusibi/moli-tutu/releases" id="hero-download"
+                    class="px-8 py-3 bg-primary hover:bg-blue-600 text-white font-semibold rounded-lg shadow-lg transition-colors transform hover:-translate-y-0.5"
+                    target="_blank">Download Now</a>
+                <a href="https://github.com/gusibi/moli-tutu" id="hero-github"
+                    class="px-8 py-3 bg-white dark:bg-slate-800 text-gray-900 dark:text-white border border-gray-200 dark:border-slate-700 font-semibold rounded-lg shadow hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                    target="_blank">View on GitHub</a>
+            </div>
+        </div>
+        <div class="md:w-1/2 flex justify-center relative">
+            <div
+                class="absolute inset-0 bg-gradient-to-r from-blue-300 to-purple-300 blur-3xl opacity-30 dark:opacity-20 rounded-full">
+            </div>
+            <img src="./images/hero-mockup.png" alt="MoliTutu Interface"
+                class="relative rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 max-w-full h-auto transform hover:scale-[1.02] transition-transform duration-500">
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-gray-50 dark:bg-slate-900/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 id="features-title" class="text-3xl font-bold text-center mb-12">Core Features</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Feature 1 -->
+                <div
+                    class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md transition-shadow">
+                    <div
+                        class="h-12 w-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4 text-primary">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                    </div>
+                    <h3 id="feat-compression-title" class="text-lg font-semibold mb-2">Smart Compression</h3>
+                    <p id="feat-compression-desc" class="text-gray-500 dark:text-gray-400">Intelligent algorithms reduce
+                        file size without losing quality.</p>
+                </div>
+                <!-- Feature 2 -->
+                <div
+                    class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md transition-shadow">
+                    <div
+                        class="h-12 w-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-4 text-purple-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                    </div>
+                    <h3 id="feat-upload-title" class="text-lg font-semibold mb-2">R2 Upload</h3>
+                    <p id="feat-upload-desc" class="text-gray-500 dark:text-gray-400">Seamless integration with
+                        Cloudflare R2 for instant hosting.</p>
+                </div>
+                <!-- Feature 3 -->
+                <div
+                    class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md transition-shadow">
+                    <div
+                        class="h-12 w-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-4 text-green-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                    <h3 id="feat-privacy-title" class="text-lg font-semibold mb-2">Privacy First</h3>
+                    <p id="feat-privacy-desc" class="text-gray-500 dark:text-gray-400">Everything runs locally. Your
+                        data is yours.</p>
+                </div>
+                <!-- Feature 4 -->
+                <div
+                    class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md transition-shadow">
+                    <div
+                        class="h-12 w-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center mb-4 text-orange-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h3 id="feat-proxy-title" class="text-lg font-semibold mb-2">Local API Proxy</h3>
+                    <p id="feat-proxy-desc" class="text-gray-500 dark:text-gray-400">Upload images via a local HTTP
+                        proxy without opening the app.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-20 bg-white dark:bg-slate-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 id="how-title" class="text-3xl font-bold text-center mb-16">How It Works</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <!-- Step 1 -->
+                <div class="flex flex-col items-center text-center">
+                    <div
+                        class="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-2xl font-bold text-primary mb-6">
+                        1</div>
+                    <h3 id="step-1-title" class="text-xl font-semibold mb-4">Configure R2</h3>
+                    <p id="step-1-desc" class="text-gray-500 dark:text-gray-400">Enter your Cloudflare R2 credentials in
+                        the settings. Setup once, use forever.</p>
+                </div>
+                <!-- Step 2 -->
+                <div class="flex flex-col items-center text-center">
+                    <div
+                        class="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-2xl font-bold text-primary mb-6">
+                        2</div>
+                    <h3 id="step-2-title" class="text-xl font-semibold mb-4">Drag & Drop</h3>
+                    <p id="step-2-desc" class="text-gray-500 dark:text-gray-400">Pull your images into the app.
+                        Optimization and compression start automatically.</p>
+                </div>
+                <!-- Step 3 -->
+                <div class="flex flex-col items-center text-center">
+                    <div
+                        class="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-2xl font-bold text-primary mb-6">
+                        3</div>
+                    <h3 id="step-3-title" class="text-xl font-semibold mb-4">Get Link</h3>
+                    <p id="step-3-desc" class="text-gray-500 dark:text-gray-400">Copy the public URL with one click.
+                        Ready to share or embed in your blog.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detailed Features / Advanced -->
+    <section id="advanced" class="py-20 bg-gray-50 dark:bg-slate-900/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center gap-12">
+                <div class="md:w-1/2">
+                    <h2 id="adv-title" class="text-3xl font-bold mb-6">More Than Just Uploads</h2>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div>
+                                <strong id="adv-1-title" class="block text-lg font-medium">Batch Processing</strong>
+                                <span id="adv-1-desc" class="text-gray-500 dark:text-gray-400">Process hundreds of
+                                    images at once. Supports JPG, PNG, WebP.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div>
+                                <strong id="adv-2-title" class="block text-lg font-medium">History & Management</strong>
+                                <span id="adv-2-desc" class="text-gray-500 dark:text-gray-400">View upload history,
+                                    retry failed uploads, and clear records easily.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div>
+                                <strong id="adv-3-title" class="block text-lg font-medium">Developer Friendly</strong>
+                                <span id="adv-3-desc" class="text-gray-500 dark:text-gray-400">Includes a local API
+                                    proxy. Integrate MoliTutu into your scripts or other apps.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div
+                    class="md:w-1/2 bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-slate-700">
+                    <div class="prose dark:prose-invert">
+                        <h3 class="text-xl font-bold mb-4">API Example</h3>
+                        <pre class="bg-gray-100 dark:bg-slate-900 p-4 rounded-lg overflow-x-auto text-sm"><code>curl -X POST \
+  http://localhost:3001/upload \
+  -F "file=@image.png"</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 bg-white dark:bg-slate-900">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 id="faq-title" class="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+            <div class="space-y-6">
+                <!-- QQ 1 -->
+                <div class="border-b border-gray-200 dark:border-slate-800 pb-6">
+                    <h3 id="faq-1-q" class="text-lg font-semibold mb-2">Is MoliTutu free?</h3>
+                    <p id="faq-1-a" class="text-gray-500 dark:text-gray-400">Yes, MoliTutu is completely free and open
+                        source. You only pay for your own Cloudflare R2 usage (which has a generous free tier).</p>
+                </div>
+                <!-- QQ 2 -->
+                <div class="border-b border-gray-200 dark:border-slate-800 pb-6">
+                    <h3 id="faq-2-q" class="text-lg font-semibold mb-2">Where is my data stored?</h3>
+                    <p id="faq-2-a" class="text-gray-500 dark:text-gray-400">Your images are stored directly in your
+                        Cloudflare R2 bucket. MoliTutu does not store or process your data on any third-party servers.
+                    </p>
+                </div>
+                <!-- QQ 3 -->
+                <div class="pb-6">
+                    <h3 id="faq-3-q" class="text-lg font-semibold mb-2">Does it support macOS and Windows?</h3>
+                    <p id="faq-3-a" class="text-gray-500 dark:text-gray-400">Yes, MoliTutu is built with Tauri and
+                        supports both macOS (Intel & Apple Silicon) and Windows 10/11.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "MoliTutu",
+      "operatingSystem": "macOS, Windows",
+      "applicationCategory": "UtilitiesApplication",
+      "genre": "Productivity",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Smart Image Compression & Cloud Upload tool for Cloudflare R2.",
+      "softwareVersion": "1.0.0",
+      "author": {
+          "@type": "Person",
+          "name": "Gusi"
+      },
+      "downloadUrl": "https://github.com/gusibi/moli-tutu/releases"
+    }
+    </script>
+
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p id="footer-text" class="text-gray-500 dark:text-gray-400">© 2026 MoliTutu. Open Source Project.</p>
+        </div>
+    </footer>
+
+    <script src="./js/locales.js"></script>
+    <script src="./js/main.js"></script>
+</body>
+
+</html>
