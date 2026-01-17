@@ -101,6 +101,15 @@ export const en = {
     configSaved: 'Configuration saved successfully!',
     configureR2: 'Please configure your Cloudflare R2 settings to enable image uploading.',
     configWarning: 'Note: Ensure your configuration is correct. Incorrect settings will cause upload failures.',
+    apiProxyTitle: 'Local API Proxy',
+    apiProxyDescription: 'Enable a local HTTP proxy so you can upload to R2 without opening the app.',
+    apiProxyPort: 'Proxy Port',
+    apiProxyEndpoint: 'Upload endpoint',
+    apiProxyHint: 'Send a multipart/form-data POST with a file field named "file" to /upload.',
+    apiProxyStatusFailed: 'Failed to load API proxy status.',
+    apiProxyStarted: 'API proxy started.',
+    apiProxyStopped: 'API proxy stopped.',
+    apiProxyToggleFailed: 'Failed to update API proxy.',
   },
 
   // Image Compressor

@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { R2Config, UploadRecord, UploadResult } from "../types";
+import { ApiProxyStatus, R2Config, UploadRecord, UploadResult } from "../types";
 
 export class ImageHostingAPI {
   static async saveR2Config(config: R2Config): Promise<void> {
@@ -28,6 +28,28 @@ export class ImageHostingAPI {
       return result as R2Config | null;
     } catch (error) {
       console.error('[API] Failed to get R2 config:', error);
+      throw error;
+    }
+  }
+
+  static async getApiProxyStatus(): Promise<ApiProxyStatus> {
+    console.log('[API] Getting API proxy status...');
+    try {
+      const result = await invoke("get_api_proxy_status");
+      return result as ApiProxyStatus;
+    } catch (error) {
+      console.error('[API] Failed to get API proxy status:', error);
+      throw error;
+    }
+  }
+
+  static async setApiProxyEnabled(enabled: boolean, port?: number): Promise<ApiProxyStatus> {
+    console.log('[API] Setting API proxy enabled:', { enabled, port });
+    try {
+      const result = await invoke("set_api_proxy_enabled", { enabled, port });
+      return result as ApiProxyStatus;
+    } catch (error) {
+      console.error('[API] Failed to set API proxy enabled:', error);
       throw error;
     }
   }

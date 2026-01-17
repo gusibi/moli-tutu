@@ -6,6 +6,12 @@ export interface R2Config {
   public_url_base: string;
 }
 
+export interface ApiProxyStatus {
+  enabled: boolean;
+  running: boolean;
+  port: number;
+}
+
 export interface UploadRecord {
   id: string;
   original_filename: string;

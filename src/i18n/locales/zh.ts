@@ -101,6 +101,15 @@ export const zh = {
     configSaved: '配置保存成功！',
     configureR2: '请配置您的 Cloudflare R2 设置以启用图片上传功能。',
     configWarning: '注意：请确保配置正确。错误的设置将导致上传失败。',
+    apiProxyTitle: '本地 API 代理',
+    apiProxyDescription: '开启本地 HTTP 代理，避免打开应用也能上传到 R2。',
+    apiProxyPort: '代理端口',
+    apiProxyEndpoint: '上传地址',
+    apiProxyHint: '使用 multipart/form-data POST，文件字段名为 "file"。',
+    apiProxyStatusFailed: '获取 API 代理状态失败。',
+    apiProxyStarted: 'API 代理已启动。',
+    apiProxyStopped: 'API 代理已停止。',
+    apiProxyToggleFailed: '更新 API 代理失败。',
   },
 
   // Image Compressor

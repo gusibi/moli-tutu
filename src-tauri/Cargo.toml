@@ -40,4 +40,4 @@ thiserror = "1.0"
 anyhow = "1.0"
 clipboard = "0.5"
 arboard = "3.4"
-
+axum = { version = "0.7", features = ["multipart"] }

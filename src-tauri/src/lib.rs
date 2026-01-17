@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use tauri::{Manager, State};
 use uuid::Uuid;
 use base64;
@@ -7,16 +7,20 @@ mod types;
 mod r2_uploader;
 mod database;
 mod config;
+mod proxy_server;
 
-use types::{R2Config, UploadRecord, UploadResult};
+use types::{ApiProxyStatus, AppSettings, R2Config, UploadRecord, UploadResult};
 use r2_uploader::R2Uploader;
 use database::Database;
 use config::ConfigManager;
+use proxy_server::ProxyServer;
 
 struct AppState {
-    db: Mutex<Option<Database>>,
+    db: Arc<Mutex<Option<Database>>>,
     config_manager: Mutex<ConfigManager>,
-    uploader: Mutex<Option<R2Uploader>>,
+    uploader: Arc<Mutex<Option<R2Uploader>>>,
+    proxy: Mutex<ProxyServer>,
+    settings: Mutex<AppSettings>,
 }
 
 #[tauri::command]
@@ -172,6 +176,61 @@ async fn upload_image(
         url: Some(url),
         error: None,
         from_cache: false,
+    })
+}
+
+#[tauri::command]
+fn get_api_proxy_status(
+    state: State<'_, AppState>,
+) -> Result<ApiProxyStatus, String> {
+    let settings = state.settings.lock().unwrap();
+    let proxy = state.proxy.lock().unwrap();
+    Ok(ApiProxyStatus {
+        enabled: settings.api_proxy_enabled,
+        running: proxy.is_running(),
+        port: proxy.port(),
+    })
+}
+
+#[tauri::command]
+fn set_api_proxy_enabled(
+    enabled: bool,
+    port: Option<u16>,
+    state: State<'_, AppState>,
+) -> Result<ApiProxyStatus, String> {
+    let uploader = state.uploader.clone();
+    let db = state.db.clone();
+    let mut settings = state.settings.lock().unwrap();
+    let mut proxy = state.proxy.lock().unwrap();
+
+    if enabled {
+        if let Some(port) = port {
+            if port == 0 {
+                return Err("Port must be between 1 and 65535".to_string());
+            }
+            if proxy.is_running() && proxy.port() != port {
+                return Err("Proxy is running; stop it before changing ports".to_string());
+            }
+            proxy.set_port(port);
+            settings.api_proxy_port = port;
+        }
+        tauri::async_runtime::block_on(proxy.start(uploader, db))?;
+        settings.api_proxy_enabled = true;
+    } else {
+        proxy.stop()?;
+        settings.api_proxy_enabled = false;
+    }
+
+    settings.api_proxy_port = proxy.port();
+    let config_manager = state.config_manager.lock().unwrap();
+    config_manager
+        .save_settings(&settings)
+        .map_err(|e| e.to_string())?;
+
+    Ok(ApiProxyStatus {
+        enabled: settings.api_proxy_enabled,
+        running: proxy.is_running(),
+        port: proxy.port(),
     })
 }
 
@@ -352,6 +411,9 @@ pub fn run() {
             std::fs::create_dir_all(&app_dir).expect("failed to create app data dir");
             
             let config_manager = ConfigManager::new(app_dir.clone());
+            let mut settings = config_manager
+                .load_settings()
+                .unwrap_or_default();
             let db_path = app_dir.join("uploads.db");
             let db = Database::new(db_path).expect("failed to initialize database");
             
@@ -364,10 +426,23 @@ pub fn run() {
                 None
             };
             
+            let db = Arc::new(Mutex::new(Some(db)));
+            let uploader = Arc::new(Mutex::new(uploader));
+            let mut proxy = ProxyServer::new(settings.api_proxy_port);
+            if settings.api_proxy_enabled {
+                if let Err(err) = tauri::async_runtime::block_on(proxy.start(uploader.clone(), db.clone())) {
+                    println!("[Backend] Failed to start API proxy: {}", err);
+                    settings.api_proxy_enabled = false;
+                    let _ = config_manager.save_settings(&settings);
+                }
+            }
+
             let state = AppState {
-                db: Mutex::new(Some(db)),
+                db,
                 config_manager: Mutex::new(config_manager),
-                uploader: Mutex::new(uploader),
+                uploader,
+                proxy: Mutex::new(proxy),
+                settings: Mutex::new(settings),
             };
             
             app.manage(state);
@@ -379,6 +454,8 @@ pub fn run() {
             get_r2_config,
             upload_image,
             get_upload_history,
+            get_api_proxy_status,
+            set_api_proxy_enabled,
             get_clipboard_image,
             read_file_from_path
         ])
