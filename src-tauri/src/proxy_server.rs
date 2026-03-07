@@ -11,13 +11,13 @@ use axum::{
 use tokio::sync::oneshot;
 
 use crate::database::Database;
-use crate::r2_uploader::R2Uploader;
+use crate::storage_manager::StorageManager;
 use crate::types::{UploadRecord, UploadResult};
 use uuid::Uuid;
 
 #[derive(Clone)]
 struct ProxyState {
-    uploader: Arc<Mutex<Option<R2Uploader>>>,
+    uploader: Arc<Mutex<Option<StorageManager>>>,
     db: Arc<Mutex<Option<Database>>>,
 }
 
@@ -50,7 +50,7 @@ impl ProxyServer {
 
     pub async fn start(
         &mut self,
-        uploader: Arc<Mutex<Option<R2Uploader>>>,
+        uploader: Arc<Mutex<Option<StorageManager>>>,
         db: Arc<Mutex<Option<Database>>>,
     ) -> Result<(), String> {
         if self.is_running() {
@@ -59,7 +59,7 @@ impl ProxyServer {
 
         let has_uploader = uploader.lock().unwrap().is_some();
         if !has_uploader {
-            return Err("R2 configuration not set".to_string());
+            return Err("Storage configuration not set".to_string());
         }
 
         let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), self.port);
@@ -69,7 +69,9 @@ impl ProxyServer {
 
         let (shutdown_tx, shutdown_rx) = oneshot::channel();
         let state = ProxyState { uploader, db };
-        let app = Router::new().route("/upload", post(upload_handler)).with_state(state);
+        let app = Router::new()
+            .route("/upload", post(upload_handler))
+            .with_state(state);
 
         let server = axum::serve(listener, app).with_graceful_shutdown(async {
             let _ = shutdown_rx.await;
@@ -169,7 +171,7 @@ async fn upload_handler(
                 let result = UploadResult {
                     success: false,
                     url: None,
-                    error: Some("R2 configuration not set".to_string()),
+                    error: Some("Storage configuration not set".to_string()),
                     from_cache: false,
                 };
                 return (StatusCode::SERVICE_UNAVAILABLE, Json(result));
@@ -177,7 +179,7 @@ async fn upload_handler(
         }
     };
 
-    let file_hash = R2Uploader::calculate_hash(&file_data);
+    let file_hash = StorageManager::calculate_hash(&file_data);
     {
         let db_guard = state.db.lock().unwrap();
         if let Some(ref db) = *db_guard {
@@ -193,7 +195,10 @@ async fn upload_handler(
         }
     }
 
-    match uploader.upload_file(file_data.clone(), &filename, &content_type).await {
+    match uploader
+        .upload_file(file_data.clone(), &filename, &content_type)
+        .await
+    {
         Ok(url) => {
             let record = UploadRecord {
                 id: Uuid::new_v4().to_string(),

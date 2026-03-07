@@ -55,7 +55,7 @@ function App() {
       setTimeout(async () => {
         // 异步检查配置
         try {
-          const config = await ImageHostingAPI.getR2Config();
+          const config = await ImageHostingAPI.getStorageConfig();
           setConfigExists(!!config);
         } catch (error) {
           console.error('Failed to check config:', error);

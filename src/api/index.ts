@@ -1,33 +1,75 @@
 import { invoke } from "@tauri-apps/api/core";
-import { ApiProxyStatus, R2Config, UploadRecord, UploadResult } from "../types";
+import { ApiProxyStatus, StorageConfig, StorageConfigList, UploadRecord, UploadResult } from "../types";
 
 export class ImageHostingAPI {
-  static async saveR2Config(config: R2Config): Promise<void> {
-    console.log('[API] Saving R2 config:', {
-      accessKeyId: config.access_key_id ? `${config.access_key_id.substring(0, 6)}...` : 'not set',
-      secretAccessKey: config.secret_access_key ? 'set' : 'not set',
-      endpoint: config.endpoint,
-      bucket: config.bucket_name,
-      publicUrl: config.public_url_base
+  static async saveStorageConfig(config: StorageConfig): Promise<void> {
+    console.log('[API] Saving storage config:', {
+      provider: config.provider,
+      endpoint: config.endpoint || 'N/A',
+      bucket: config.bucket_name || 'N/A',
     });
     try {
-      const result = await invoke("save_r2_config", { config });
-      console.log('[API] R2 config saved successfully');
+      // Use save_storage_config (new command) which falls through to save_r2_config
+      const result = await invoke("save_storage_config", { config });
+      console.log('[API] Storage config saved successfully');
       return result as void;
     } catch (error) {
-      console.error('[API] Failed to save R2 config:', error);
+      console.error('[API] Failed to save storage config:', error);
       throw error;
     }
   }
 
-  static async getR2Config(): Promise<R2Config | null> {
-    console.log('[API] Getting R2 config...');
+  // Backward compatible alias
+  static async saveR2Config(config: StorageConfig): Promise<void> {
+    return this.saveStorageConfig(config);
+  }
+
+  static async getStorageConfig(): Promise<StorageConfig | null> {
+    console.log('[API] Getting storage config...');
     try {
-      const result = await invoke("get_r2_config");
-      console.log('[API] R2 config retrieved:', result ? 'config exists' : 'no config found');
-      return result as R2Config | null;
+      const result = await invoke("get_storage_config");
+      console.log('[API] Storage config retrieved:', result ? 'config exists' : 'no config found');
+      return result as StorageConfig | null;
     } catch (error) {
-      console.error('[API] Failed to get R2 config:', error);
+      console.error('[API] Failed to get storage config:', error);
+      throw error;
+    }
+  }
+
+  // Backward compatible alias
+  static async getR2Config(): Promise<StorageConfig | null> {
+    return this.getStorageConfig();
+  }
+
+  static async getStorageConfigList(): Promise<StorageConfigList> {
+    console.log('[API] Getting storage config list...');
+    try {
+      const result = await invoke("get_storage_config_list");
+      return result as StorageConfigList;
+    } catch (error) {
+      console.error('[API] Failed to get storage config list:', error);
+      throw error;
+    }
+  }
+
+  static async deleteStorageConfig(id: string): Promise<StorageConfigList> {
+    console.log('[API] Deleting storage config:', id);
+    try {
+      const result = await invoke("delete_storage_config", { id });
+      return result as StorageConfigList;
+    } catch (error) {
+      console.error('[API] Failed to delete storage config:', error);
+      throw error;
+    }
+  }
+
+  static async setActiveStorageConfig(id: string): Promise<StorageConfigList> {
+    console.log('[API] Setting active storage config:', id);
+    try {
+      const result = await invoke("set_active_storage_config", { id });
+      return result as StorageConfigList;
+    } catch (error) {
+      console.error('[API] Failed to set active storage config:', error);
       throw error;
     }
   }
@@ -61,17 +103,16 @@ export class ImageHostingAPI {
     console.log('[API] Starting upload_image invoke:', {
       filename,
       dataSize: fileData.length,
-      arrayLength: Array.from(fileData).length
     });
-    
+
     try {
       const startTime = Date.now();
-      const result = await invoke("upload_image", { 
-        fileData: Array.from(fileData), 
-        filename 
+      const result = await invoke("upload_image", {
+        fileData: Array.from(fileData),
+        filename
       });
       const endTime = Date.now();
-      
+
       console.log('[API] Upload invoke completed:', {
         duration: `${endTime - startTime}ms`,
         success: (result as any).success,
@@ -79,7 +120,7 @@ export class ImageHostingAPI {
         error: (result as any).error,
         fromCache: (result as any).from_cache
       });
-      
+
       return {
         success: (result as any).success,
         url: (result as any).url,
@@ -90,7 +131,6 @@ export class ImageHostingAPI {
       console.error('[API] Upload invoke failed:', {
         error,
         message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
       });
       return {
         success: false,
@@ -160,25 +200,14 @@ export class ImageHostingAPI {
   }
 
   static async convertFileToUint8Array(file: File): Promise<Uint8Array> {
-    console.log('[API] Converting file to Uint8Array:', {
-      name: file.name,
-      size: file.size,
-      type: file.type
-    });
-    
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
         const result = reader.result as ArrayBuffer;
         const uint8Array = new Uint8Array(result);
-        console.log('[API] File conversion successful:', {
-          arrayBufferSize: result.byteLength,
-          uint8ArrayLength: uint8Array.length
-        });
         resolve(uint8Array);
       };
       reader.onerror = (error) => {
-        console.error('[API] File conversion failed:', error);
         reject(error);
       };
       reader.readAsArrayBuffer(file);
