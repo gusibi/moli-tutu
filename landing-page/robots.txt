@@ -1,3 +1,64 @@
+# MoliTutu — AI & Search Crawler Configuration
+# ==============================================
+
+# AI training crawlers — respectfully disallowed
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+# AI search crawlers — allowed (indexing for search, not training)
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /api/
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /api/
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /api/
+
+# General search crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Default
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /*.json$
+
 Sitemap: https://molitutu.pages.dev/sitemap.xml

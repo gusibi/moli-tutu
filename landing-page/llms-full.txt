@@ -1,0 +1,146 @@
+# MoliTutu — Complete Project Reference
+> Generated: 2026-05-02
+> Version: 1.0.0
+> Author: Gusi
+> Repository: https://github.com/gusibi/moli-tutu
+
+---
+
+## Overview
+
+MoliTutu is a privacy-focused, open-source desktop application for image compression and cloud storage upload. It combines intelligent image optimization algorithms with seamless Cloudflare R2 integration, providing a streamlined workflow for developers, designers, content creators, and anyone who regularly works with images.
+
+### Why MoliTutu?
+- **Local-first**: All compression happens on your machine. No cloud processing, no data leaks.
+- **Free & Open Source**: MIT licensed. No subscriptions, no hidden costs.
+- **Developer Friendly**: Includes a local API proxy for script and workflow integration.
+- **Privacy Guaranteed**: Your images go directly to your own Cloudflare R2 bucket. We never see them.
+
+---
+
+## Features
+
+### Smart Compression Engine
+- Intelligent compression algorithms that balance file size reduction with visual quality
+- Lossy and lossless compression modes
+- Adjustable quality slider for fine-grained control
+- Real-time preview showing before/after comparison
+- File size savings displayed immediately
+
+### Cloudflare R2 Upload
+- Direct upload to your Cloudflare R2 storage buckets
+- Automatic public URL generation after upload
+- Configurable bucket and path settings
+- Support for custom domains and CDN integration
+- Automatic retry on failure with exponential backoff
+
+### Batch Processing
+- Drag-and-drop multiple images simultaneously
+- Queue-based processing with progress indicators
+- Parallel compression and upload pipelines
+- Summary report after batch completion
+- Resume failed items individually
+
+### Local API Proxy
+- Built-in HTTP server for programmatic uploads
+- RESTful endpoint: `POST http://localhost:3001/upload`
+- Accepts multipart form data
+- Returns JSON response with URL and metadata
+- Configurable port and authentication
+
+### History & Management
+- Complete upload history with timestamps
+- Quick copy URL button for each entry
+- Search and filter capabilities
+- Export history as CSV or JSON
+- Clear or archive old records
+
+---
+
+## Use Cases
+
+### For Bloggers & Content Creators
+Optimize featured images, screenshots, and inline graphics for faster page loads. Upload directly to R2 and get CDN-backed URLs for your blog or CMS.
+
+### For Developers
+Integrate MoliTutu via the local API proxy into your build pipeline, CI/CD workflows, or custom scripts. Automate image optimization as part of your deployment process.
+
+### For Designers
+Compress portfolio pieces, mockups, and design assets before sharing with clients or uploading to project management tools. Maintain visual fidelity while reducing file sizes by 60-80%.
+
+### For DevOps & Platform Engineers
+Use MoliTutu as part of your media pipeline. Batch optimize and upload product images, user avatars, or any user-generated content to R2 with minimal overhead.
+
+---
+
+## Technical Architecture
+
+### Tech Stack
+- **Frontend**: React + TypeScript + Tailwind CSS
+- **Backend Runtime**: Tauri (Rust)
+- **Image Processing**: Rust image crates (image, mozjpeg, oxipng, webp)
+- **Storage API**: S3-compatible (Cloudflare R2)
+- **Local Proxy**: Actix-web (embedded HTTP server)
+
+### Supported Input Formats
+| Format | Compression | Notes |
+|--------|-------------|-------|
+| JPEG | Lossy + Lossless | Progressive JPEG supported |
+| PNG | Lossless | Palette optimization |
+| WebP | Lossy + Lossless | Best modern format |
+| AVIF | Lossy | High efficiency |
+| GIF | Lossy | Frame optimization |
+
+### Performance Benchmarks
+- Average compression ratio: 60-80% size reduction
+- Processing speed: ~50 images/second (1080p JPEG)
+- Memory usage: ~50MB idle, ~200MB under load
+- API response time: <100ms for upload endpoint
+
+---
+
+## FAQ
+
+### Is MoliTutu really free?
+Yes, MoliTutu is completely free and open source (MIT license). You only pay for your Cloudflare R2 usage, which has a generous free tier (10GB storage, 1M reads/month).
+
+### How does MoliTutu handle my privacy?
+All image processing is done locally on your machine. Images are uploaded directly from your computer to your Cloudflare R2 bucket. MoliTutu has no cloud infrastructure that processes or stores your data.
+
+### What operating systems are supported?
+MoliTutu supports macOS (Intel and Apple Silicon) and Windows 10/11. Linux support is on the roadmap.
+
+### Can I use MoliTutu from the command line?
+Yes! MoliTutu includes a local API proxy that provides a RESTful endpoint. You can use curl, wget, or any HTTP client to upload images programmatically.
+
+### What image formats are supported?
+Currently supports JPEG, PNG, WebP, AVIF, and GIF. Support for HEIC and SVG is planned.
+
+### How do I set up Cloudflare R2?
+1. Create a Cloudflare account
+2. Navigate to R2 in the dashboard
+3. Create a new bucket
+4. Generate API tokens with read/write permissions
+5. Enter the credentials in MoliTutu settings
+
+### Does MoliTutu support multiple R2 buckets?
+Yes, you can configure multiple buckets and switch between them. Each configuration stores the bucket name, endpoint, access key, and secret key.
+
+### Can I contribute to MoliTutu?
+Absolutely! MoliTutu is open source. Visit the GitHub repository to submit issues, feature requests, or pull requests. We welcome contributions of all sizes.
+
+---
+
+## Project Links
+- Website: https://molitutu.pages.dev/
+- GitHub: https://github.com/gusibi/moli-tutu
+- Releases: https://github.com/gusibi/moli-tutu/releases
+- Issues: https://github.com/gusibi/moli-tutu/issues
+- License: MIT
+
+## Author
+- GitHub: https://github.com/gusibi
+- Project Organization: https://github.com/gusibi
+
+## AI Knowledge Graph
+This site is part of a network of well-structured, AI-friendly resources. For related projects and tools, explore the author's GitHub profile at https://github.com/gusibi.

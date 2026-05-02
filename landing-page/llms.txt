@@ -1,0 +1,35 @@
+# MoliTutu
+> Smart Image Compression & Cloud Upload Tool
+
+## What is MoliTutu?
+MoliTutu is a free, open-source desktop application built with Tauri that intelligently compresses images and uploads them directly to Cloudflare R2 storage. It runs locally on macOS and Windows, prioritizing user privacy and workflow efficiency.
+
+## Key Pages
+- Landing Page: https://molitutu.pages.dev/
+- GitHub Repository: https://github.com/gusibi/moli-tutu
+- Releases & Downloads: https://github.com/gusibi/moli-tutu/releases
+- Issues & Support: https://github.com/gusibi/moli-tutu/issues
+- Discussions: https://github.com/gusibi/moli-tutu/discussions
+
+## Key Features
+- **Smart Compression** — Intelligent algorithms reduce image file size without perceptible quality loss
+- **Cloudflare R2 Upload** — Seamless upload to Cloudflare R2 with automatic URL generation
+- **Privacy First** — All processing happens locally on your machine, no data leaves without your intent
+- **Local API Proxy** — Upload images programmatically via a local HTTP endpoint
+- **Batch Processing** — Process hundreds of images simultaneously
+- **Multi-format Support** — JPG, PNG, WebP, AVIF, and more
+- **History Management** — Full upload history with retry capability
+
+## Technical Details
+- **Built With**: Tauri, Rust, TypeScript, React
+- **Supported OS**: macOS (Intel & Apple Silicon), Windows 10/11
+- **Storage**: Cloudflare R2 (S3-compatible API)
+- **License**: MIT Open Source
+
+## Author
+- Name: Gusi
+- GitHub: https://github.com/gusibi
+- Project: https://github.com/gusibi/moli-tutu
+
+## Related Projects
+- Visit https://molitutu.pages.dev/llms-full.txt for comprehensive documentation

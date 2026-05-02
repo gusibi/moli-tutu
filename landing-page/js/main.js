@@ -1,166 +1,289 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // State
-    const state = {
-        lang: 'en',
-        theme: 'light'
-    };
+/**
+ * MoliTutu — Landing Page JavaScript
+ * Handles: i18n, theme, animations, scroll effects, mobile nav, FAQ accordion
+ */
+(function() {
+  'use strict';
 
-    // Elements
-    const langSelect = document.getElementById('lang-select');
-    const themeToggle = document.getElementById('theme-toggle');
-    const htmlElement = document.documentElement;
+  // ======================== STATE ========================
+  const state = {
+    lang: 'en',
+    theme: localStorage.getItem('molitutu-theme') ||
+           (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+  };
 
-    // Supported languages
-    const supportedLangs = Object.keys(translations);
+  const SUPPORTED_LANGS = Object.keys(translations);
+  const HTML = document.documentElement;
+  const BODY = document.body;
 
-    // Initialize Language
-    function initLanguage() {
-        const browserLang = navigator.language.split('-')[0];
-        // Special case for Chinese
-        if (navigator.language === 'zh-TW' || navigator.language === 'zh-HK') {
-            state.lang = 'zh-TW';
-        } else if (navigator.language.startsWith('zh')) {
-            state.lang = 'zh-CN';
+  // ======================== DOM REFS ========================
+  const $ = (sel, ctx) => (ctx || document).querySelector(sel);
+  const $$ = (sel, ctx) => Array.from((ctx || document).querySelectorAll(sel));
+
+  // ======================== I18N ========================
+  function detectLang() {
+    const saved = localStorage.getItem('molitutu-lang');
+    if (saved && SUPPORTED_LANGS.includes(saved)) return saved;
+
+    const navLang = navigator.language;
+    if (navLang === 'zh-TW' || navLang === 'zh-HK') return 'zh-TW';
+    if (navLang.startsWith('zh')) return 'zh-CN';
+    if (SUPPORTED_LANGS.includes(navLang)) return navLang;
+    // Check short form
+    const short = navLang.split('-')[0];
+    if (SUPPORTED_LANGS.includes(short)) return short;
+    return 'en';
+  }
+
+  function setLang(lang) {
+    const t = translations[lang] || translations['en'];
+    state.lang = lang;
+    localStorage.setItem('molitutu-lang', lang);
+
+    // Set all data-i18n elements
+    $$('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      const val = getNestedValue(t, key);
+      if (val) {
+        if (el.tagName === 'META' && el.hasAttribute('content')) {
+          el.setAttribute('content', val);
+        } else if (el.tagName === 'INPUT' && el.hasAttribute('placeholder')) {
+          el.placeholder = val;
         } else {
-            state.lang = supportedLangs.includes(browserLang) ? browserLang : 'en';
+          el.textContent = val;
         }
-
-        // Restore from local storage if available
-        const savedLang = localStorage.getItem('molitutu-lang');
-        if (savedLang && supportedLangs.includes(savedLang)) {
-            state.lang = savedLang;
-        }
-
-        langSelect.value = state.lang;
-        updateText();
-    }
-
-    // Initialize Theme
-    function initTheme() {
-        // Check local storage or system preference
-        const savedTheme = localStorage.getItem('molitutu-theme');
-        if (savedTheme) {
-            state.theme = savedTheme;
-        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            state.theme = 'dark';
-        }
-
-        applyTheme();
-    }
-
-    // Apply Theme
-    function applyTheme() {
-        if (state.theme === 'dark') {
-            htmlElement.classList.add('dark');
-            themeToggle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>';
-        } else {
-            htmlElement.classList.remove('dark');
-            themeToggle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>';
-        }
-        localStorage.setItem('molitutu-theme', state.theme);
-    }
-
-    // Update Text Content
-    function updateText() {
-        const t = translations[state.lang];
-
-        // Helper to safe set text
-        const setText = (id, text) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = text;
-        };
-
-        setText('hero-title', t.title);
-        setText('hero-subtitle', t.subtitle);
-        setText('hero-desc', t.description);
-        setText('hero-download', t.download);
-        setText('hero-github', t.github);
-        setText('footer-text', t.footer);
-
-        // Features
-        setText('features-title', t.features.title);
-        setText('feat-compression-title', t.features.compression.title);
-        setText('feat-compression-desc', t.features.compression.desc);
-        setText('feat-upload-title', t.features.upload.title);
-        setText('feat-upload-desc', t.features.upload.desc);
-        setText('feat-privacy-title', t.features.privacy.title);
-        setText('feat-privacy-desc', t.features.privacy.desc);
-        setText('feat-proxy-title', t.features.proxy.title);
-        setText('feat-proxy-desc', t.features.proxy.desc);
-
-        // How It Works
-        setText('how-title', t.howItWorks.title);
-        setText('step-1-title', t.howItWorks.step1.title);
-        setText('step-1-desc', t.howItWorks.step1.desc);
-        setText('step-2-title', t.howItWorks.step2.title);
-        setText('step-2-desc', t.howItWorks.step2.desc);
-        setText('step-3-title', t.howItWorks.step3.title);
-        setText('step-3-desc', t.howItWorks.step3.desc);
-
-        // Advanced
-        setText('adv-title', t.advanced.title);
-        setText('adv-1-title', t.advanced.batch.title);
-        setText('adv-1-desc', t.advanced.batch.desc);
-        setText('adv-2-title', t.advanced.history.title);
-        setText('adv-2-desc', t.advanced.history.desc);
-        setText('adv-3-title', t.advanced.dev.title);
-        setText('adv-3-desc', t.advanced.dev.desc);
-
-        // FAQ
-        setText('faq-title', t.faq.title);
-        setText('faq-1-q', t.faq.q1.q);
-        setText('faq-1-a', t.faq.q1.a);
-        setText('faq-2-q', t.faq.q2.q);
-        setText('faq-2-a', t.faq.q2.a);
-        setText('faq-3-q', t.faq.q3.q);
-        setText('faq-3-a', t.faq.q3.a);
-
-        // Update document title & meta
-        document.title = `${t.title} - ${t.subtitle}`;
-        document.documentElement.lang = state.lang;
-
-        // Meta Description
-        let metaDesc = document.querySelector('meta[name="description"]');
-        if (!metaDesc) {
-            metaDesc = document.createElement('meta');
-            metaDesc.name = 'description';
-            document.head.appendChild(metaDesc);
-        }
-        metaDesc.content = t.description;
-
-        // Meta Keywords
-        if (t.seo && t.seo.keywords) {
-            let metaKw = document.querySelector('meta[name="keywords"]');
-            if (!metaKw) {
-                metaKw = document.createElement('meta');
-                metaKw.name = 'keywords';
-                document.head.appendChild(metaKw);
-            }
-            metaKw.content = t.seo.keywords;
-        }
-
-        // Update Direction for Arabic
-        if (state.lang === 'ar') {
-            htmlElement.dir = 'rtl';
-        } else {
-            htmlElement.dir = 'ltr';
-        }
-
-        localStorage.setItem('molitutu-lang', state.lang);
-    }
-
-    // Event Listeners
-    langSelect.addEventListener('change', (e) => {
-        state.lang = e.target.value;
-        updateText();
+      }
     });
 
-    themeToggle.addEventListener('click', () => {
-        state.theme = state.theme === 'light' ? 'dark' : 'light';
-        applyTheme();
+    // Document title
+    const metaTitle = getNestedValue(t, 'meta.title');
+    if (metaTitle) document.title = metaTitle;
+
+    // HTML lang attribute
+    HTML.lang = lang;
+
+    // Direction (RTL for Arabic)
+    HTML.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+    // Language selector
+    const sel = document.getElementById('lang-select');
+    if (sel) sel.value = lang;
+  }
+
+  function getNestedValue(obj, path) {
+    return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+  }
+
+  // ======================== THEME ========================
+  function setTheme(theme) {
+    state.theme = theme;
+    localStorage.setItem('molitutu-theme', theme);
+
+    if (theme === 'dark') {
+      HTML.classList.add('dark');
+    } else {
+      HTML.classList.remove('dark');
+    }
+
+    const icon = document.getElementById('theme-icon');
+    if (icon) {
+      icon.innerHTML = theme === 'dark'
+        ? '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>'
+        : '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>';
+    }
+  }
+
+  // ======================== MOBILE NAV ========================
+  function toggleMobileNav(open) {
+    const nav = document.getElementById('mobile-nav');
+    const btn = document.getElementById('mobile-menu-btn');
+    if (!nav || !btn) return;
+
+    if (open === undefined) {
+      open = !nav.classList.contains('open');
+    }
+    nav.classList.toggle('open', open);
+    btn.classList.toggle('active', open);
+    HTML.style.overflow = open ? 'hidden' : '';
+  }
+
+  window.closeMobileNav = function() {
+    toggleMobileNav(false);
+  };
+
+  // ======================== FAQ ACCORDION ========================
+  function initFAQ() {
+    $$('.faq-trigger').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const answer = this.nextElementSibling;
+        const icon = this.querySelector('.faq-toggle');
+        const isOpen = answer.classList.contains('open');
+
+        // Close all
+        $$('.faq-answer.open').forEach(a => {
+          a.classList.remove('open');
+          a.previousElementSibling.setAttribute('aria-expanded', 'false');
+          a.previousElementSibling.querySelector('.faq-toggle')?.classList.remove('open');
+        });
+
+        if (!isOpen) {
+          answer.classList.add('open');
+          this.setAttribute('aria-expanded', 'true');
+          icon?.classList.add('open');
+        }
+      });
+    });
+  }
+
+  // ======================== COUNTER ANIMATION ========================
+
+  function initRevealAnimations() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
     });
 
-    // Run
-    initLanguage();
-    initTheme();
-});
+    // Observe reveal elements
+    $$('.reveal').forEach(el => observer.observe(el));
+    // Observe stagger containers
+    $$('.stagger').forEach(el => observer.observe(el));
+  }
+
+  // ======================== BACK TO TOP ========================
+  function initBackToTop() {
+    const btn = document.getElementById('back-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', () => {
+      btn.classList.toggle('visible', window.scrollY > 500);
+    }, { passive: true });
+
+    btn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+
+  // ======================== NAVBAR SCROLL EFFECT ========================
+  function initNavbarScroll() {
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const nav = document.querySelector('.glass-nav');
+          if (nav) {
+            nav.style.borderBottomColor = window.scrollY > 20
+              ? 'rgba(0,0,0,0.1)'
+              : 'rgba(0,0,0,0.06)';
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+  }
+
+  // ======================== ACTIVE NAV LINK ========================
+  function initActiveNav() {
+    const sections = $$('section[id]');
+    const navLinks = $$('.nav-link');
+
+    if (!sections.length || !navLinks.length) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          navLinks.forEach(link => {
+            link.style.color = link.getAttribute('href') === '#' + id
+              ? '' : '';
+          });
+        }
+      });
+    }, { threshold: 0.3 });
+
+    sections.forEach(s => observer.observe(s));
+  }
+
+  // ======================== SETTINGS DETECT ========================
+  function initThemeDetect() {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      if (!localStorage.getItem('molitutu-theme')) {
+        setTheme(e.matches ? 'dark' : 'light');
+      }
+    });
+  }
+
+  // ======================== INIT ========================
+  function init() {
+    // Detect and set language
+    const detectedLang = detectLang();
+    setLanguageState(detectedLang);
+
+    // Set theme
+    setTheme(state.theme);
+
+    // Event listeners
+    bindEvents();
+
+    // Init components
+    initFAQ();
+    initRevealAnimations();
+    initBackToTop();
+    initNavbarScroll();
+    initActiveNav();
+    initThemeDetect();
+  }
+
+  function setLanguageState(lang) {
+    // We need translations loaded
+    setLang(lang);
+  }
+
+  function bindEvents() {
+    // Language selector
+    const langSel = document.getElementById('lang-select');
+    if (langSel) {
+      langSel.addEventListener('change', (e) => setLang(e.target.value));
+    }
+
+    // Theme toggle
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        setTheme(state.theme === 'light' ? 'dark' : 'light');
+      });
+    }
+
+    // Mobile menu
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    if (menuBtn) {
+      menuBtn.addEventListener('click', () => toggleMobileNav());
+    }
+
+    // Close mobile nav on resize
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 768) toggleMobileNav(false);
+    });
+
+    // Keyboard: Escape closes mobile nav
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') toggleMobileNav(false);
+    });
+  }
+
+  // Start on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();

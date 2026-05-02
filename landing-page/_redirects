@@ -1,0 +1,16 @@
+# Cloudflare Pages redirects
+
+# Root
+/  /index.html  200
+
+# SEO redirects
+/sitemap.xml  /sitemap.xml  200
+/robots.txt  /robots.txt  200
+/llms.txt  /llms.txt  200
+/llms-full.txt  /llms-full.txt  200
+
+# GitHub shortcuts
+/github  https://github.com/gusibi/moli-tutu  302
+/releases  https://github.com/gusibi/moli-tutu/releases  302
+/issues  https://github.com/gusibi/moli-tutu/issues  302
+/discussions  https://github.com/gusibi/moli-tutu/discussions  302

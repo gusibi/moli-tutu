@@ -1,327 +1,907 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" dir="ltr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoliTutu - Smart Image Compression & Cloud Upload</title>
-    <link rel="icon" type="image/png" href="./images/64x64.png">
-    <link rel="apple-touch-icon" href="./images/icon.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#0ea5e9', // Sky 500
-                        secondary: '#64748b', // Slate 500
-                    }
-                }
-            }
-        }
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.tailwindcss.com">
+
+<!-- SEO: Primary -->
+<title data-i18n="meta.title">MoliTutu — Smart Image Compression &amp; Cloud Upload</title>
+<meta name="description" data-i18n="meta.desc" content="MoliTutu is a free, open-source desktop app for intelligent image compression and direct upload to Cloudflare R2. Privacy-first, local-only processing.">
+<meta name="keywords" data-i18n="meta.keywords" content="image compression, cloudflare r2, image uploader, open source, tauri, image optimizer, png compressor, webp converter">
+<link rel="canonical" href="https://molitutu.pages.dev/">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Gusi">
+
+<!-- Open Graph -->
+<meta property="og:title" data-i18n="meta.ogTitle" content="MoliTutu — Smart Image Compression & Cloud Upload">
+<meta property="og:description" data-i18n="meta.ogDesc" content="Free, open-source desktop app for intelligent image compression and direct Cloudflare R2 upload.">
+<meta property="og:url" content="https://molitutu.pages.dev/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://molitutu.pages.dev/images/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" data-i18n="meta.twitterTitle" content="MoliTutu — Smart Image Compression & Cloud Upload">
+<meta name="twitter:description" data-i18n="meta.twitterDesc" content="Free, open-source desktop app for intelligent image compression and direct Cloudflare R2 upload.">
+<meta name="twitter:image" content="https://molitutu.pages.dev/images/og-image.png">
+
+<!-- Hreflang -->
+<link rel="alternate" hreflang="en" href="https://molitutu.pages.dev/">
+<link rel="alternate" hreflang="zh-CN" href="https://molitutu.pages.dev/">
+<link rel="alternate" hreflang="zh-TW" href="https://molitutu.pages.dev/">
+<link rel="alternate" hreflang="es" href="https://molitutu.pages.dev/">
+<link rel="alternate" hreflang="fr" href="https://molitutu.pages.dev/">
+<link rel="alternate" hreflang="de" href="https://molitutu.pages.dev/">
+<link rel="alternate" hreflang="ja" href="https://molitutu.pages.dev/">
+<link rel="alternate" hreflang="ko" href="https://molitutu.pages.dev/">
+<link rel="alternate" hreflang="ru" href="https://molitutu.pages.dev/">
+<link rel="alternate" hreflang="pt" href="https://molitutu.pages.dev/">
+<link rel="alternate" hreflang="ar" href="https://molitutu.pages.dev/">
+<link rel="alternate" hreflang="hi" href="https://molitutu.pages.dev/">
+<link rel="alternate" hreflang="x-default" href="https://molitutu.pages.dev/">
+
+<!-- Icons -->
+<link rel="icon" type="image/png" href="./images/64x64.png">
+<link rel="apple-touch-icon" href="./images/icon.png">
+
+<!-- Fonts & Tailwind -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,500;9..40,600;9..40,700;9..40,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={darkMode:'class',theme:{extend:{colors:{primary:'#0ea5e9','primary-dark':'#0284c7',amber:'#f59e0b',rose:'#f43f5e',teal:'#14b8a6',surface:{light:'#f8fafc',dark:'#0b1120'}},fontFamily:{heading:["DM Sans","sans-serif"],body:["Inter","sans-serif"],code:["JetBrains Mono","monospace"]},animation:{'fade-in':'fadeIn 0.6s ease-out','slide-up':'slideUp 0.6s ease-out','glow':'glow 3s ease-in-out infinite'},keyframes:{fadeIn:{from:{opacity:'0'},to:{opacity:'1'}},slideUp:{from:{opacity:'0',transform:'translateY(30px)'},to:{opacity:'1',transform:'translateY(0)'}},glow:{'0%,100%':{boxShadow:'0 0 20px rgba(14,165,233,0.15)'},'50%':{boxShadow:'0 0 40px rgba(14,165,233,0.3)'}}}}}};
+</script>
+<link rel="alternate" type="text/markdown" href="/llms.txt" title="LLMs.txt">
+
+<style>
+:root{--primary:#0ea5e9;--primary-dark:#0284c7;--amber:#f59e0b;--rose:#f43f5e;--teal:#14b8a6;--bg-light:#faf8f5;--bg-dark:#0b1120}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg-light);color:#1e293b;transition:background .3s,color .3s}
+.dark body{background:var(--bg-dark);color:#f1f5f9}
+
+/* Glass nav */
+.glass-nav{background:rgba(250,248,245,0.85);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,0.06)}
+.dark .glass-nav{background:rgba(11,17,32,0.85);border-bottom:1px solid rgba(255,255,255,0.06)}
+
+/* Glass card */
+.glass-card{background:rgba(255,255,255,0.7);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(0,0,0,0.06);border-radius:16px}
+.dark .glass-card{background:rgba(30,41,59,0.5);border:1px solid rgba(255,255,255,0.06)}
+
+/* Hero gradient mesh */
+.hero-mesh{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.hero-mesh .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.4;animation:orbFloat 8s ease-in-out infinite}
+.hero-mesh .orb:nth-child(1){width:600px;height:600px;background:radial-gradient(circle,rgba(14,165,233,0.3),transparent);top:-200px;left:-100px;animation-delay:0s}
+.hero-mesh .orb:nth-child(2){width:500px;height:500px;background:radial-gradient(circle,rgba(245,158,11,0.2),transparent);bottom:-150px;right:-100px;animation-delay:-3s}
+.hero-mesh .orb:nth-child(3){width:400px;height:400px;background:radial-gradient(circle,rgba(20,184,166,0.15),transparent);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:-6s}
+.dark .hero-mesh .orb{opacity:.25}
+
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(40px,-30px) scale(1.05)}50%{transform:translate(-20px,20px) scale(0.95)}75%{transform:translate(30px,40px) scale(1.02)}}
+
+/* Noise overlay */
+.noise::before{content:'';position:absolute;inset:0;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");background-repeat:repeat;pointer-events:none;z-index:0}
+.dark .noise::before{opacity:.04}
+
+/* Section reveal */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* Stagger children */
+.stagger>*{opacity:0;transform:translateY(24px);transition:opacity .6s cubic-bezier(.22,1,.36,1),transform .6s cubic-bezier(.22,1,.36,1)}
+.stagger.visible>*{opacity:1;transform:translateY(0)}
+.stagger>*:nth-child(1){transition-delay:0ms}
+.stagger>*:nth-child(2){transition-delay:100ms}
+.stagger>*:nth-child(3){transition-delay:200ms}
+.stagger>*:nth-child(4){transition-delay:300ms}
+
+/* Feature card */
+.feature-card{position:relative;overflow:hidden;transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease}
+.feature-card::after{content:'';position:absolute;inset:0;border-radius:inherit;opacity:0;background:linear-gradient(135deg,rgba(14,165,233,0.08),transparent 60%);transition:opacity .4s}
+.feature-card:hover::after{opacity:1}
+.feature-card:hover{transform:translateY(-4px)}
+
+/* Gradient text */
+.gradient-text{background:linear-gradient(135deg,var(--primary),#38bdf8,var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* Nav link */
+.nav-link{position:relative;color:#64748b;transition:color .2s}
+.dark .nav-link{color:#94a3b8}
+.nav-link::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:2px;background:var(--primary);transition:width .3s cubic-bezier(.22,1,.36,1);border-radius:1px}
+.nav-link:hover{color:#1e293b}
+.dark .nav-link:hover{color:#f1f5f9}
+.nav-link:hover::after{width:100%}
+
+/* Button styles */
+.btn-primary{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--primary);color:#fff;font-weight:600;border-radius:12px;transition:all .25s cubic-bezier(.22,1,.36,1);border:none;cursor:pointer;text-decoration:none}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-2px);box-shadow:0 8px 25px rgba(14,165,233,0.3)}
+.btn-secondary{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:rgba(255,255,255,0.8);color:#1e293b;font-weight:600;border-radius:12px;border:1px solid rgba(0,0,0,0.08);transition:all .25s cubic-bezier(.22,1,.36,1);cursor:pointer;text-decoration:none}
+.dark .btn-secondary{background:rgba(30,41,59,0.6);color:#f1f5f9;border:1px solid rgba(255,255,255,0.1)}
+.btn-secondary:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,0.08)}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:4px}
+.dark ::-webkit-scrollbar-thumb{background:#475569}
+::-webkit-scrollbar-thumb:hover{background:#64748b}
+
+/* FAQ accordion */
+.faq-answer{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.22,1,.36,1),opacity .3s,transform .3s;opacity:0;transform:translateY(-8px)}
+.faq-answer.open{max-height:500px;opacity:1;transform:translateY(0)}
+.faq-toggle{transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.faq-toggle.open{transform:rotate(180deg)}
+
+/* Back to top */
+.back-to-top{position:fixed;bottom:32px;right:32px;z-index:50;width:48px;height:48px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(14,165,233,0.3);cursor:pointer;opacity:0;transform:translateY(20px);transition:all .3s cubic-bezier(.22,1,.36,1);pointer-events:none;border:none}
+.back-to-top.visible{opacity:1;transform:translateY(0);pointer-events:auto}
+.back-to-top:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(14,165,233,0.4)}
+
+/* RTL support */
+[dir="rtl"] .nav-link::after{left:auto;right:0}
+[dir="rtl"] .ml-auto{margin-left:0;margin-right:auto}
+[dir="rtl"] .space-x-4>:not([hidden])~:not([hidden]){--tw-space-x-reverse:1}
+
+/* Code block */
+.code-block{font-family:'JetBrains Mono',monospace;font-size:.875rem;line-height:1.6;background:#0b1120;color:#e2e8f0;border-radius:12px;padding:20px;overflow-x:auto}
+.code-block .keyword{color:#38bdf8}
+.code-block .string{color:#a3e635}
+.code-block .comment{color:#64748b}
+
+/* Select styling */
+.lang-select{background:transparent;border:1px solid rgba(0,0,0,0.1);border-radius:8px;padding:6px 12px;font-size:.875rem;cursor:pointer;outline:none;transition:border-color .2s}
+.dark .lang-select{color:#f1f5f9;border:1px solid rgba(255,255,255,0.1)}
+.lang-select:focus{border-color:var(--primary)}
+
+/* Pricing card */
+.pricing-card{transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s}
+.pricing-card:hover{transform:translateY(-6px)}
+.pricing-card.featured{border:2px solid var(--primary);position:relative}
+.pricing-card.featured::before{content:attr(data-badge);position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;padding:4px 16px;border-radius:20px;font-size:.75rem;font-weight:600}
+
+/* Theme toggle icon container */
+#theme-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center}
+
+/* Mobile nav */
+.mobile-nav{position:fixed;top:64px;left:0;right:0;background:rgba(250,248,245,0.98);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,0.06);padding:16px 24px;z-index:40;transform:translateY(-120%);opacity:0;transition:all .4s cubic-bezier(.22,1,.36,1);pointer-events:none}
+.dark .mobile-nav{background:rgba(11,17,32,0.98);border-bottom:1px solid rgba(255,255,255,0.06)}
+.mobile-nav.open{transform:translateY(0);opacity:1;pointer-events:auto}
+.mobile-nav a{display:block;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04);color:#475569;font-weight:500;transition:color .2s}
+.dark .mobile-nav a{color:#94a3b8;border-bottom:1px solid rgba(255,255,255,0.04)}
+.mobile-nav a:hover{color:var(--primary)}
+
+/* Hamburger */
+.hamburger{width:24px;height:24px;position:relative;cursor:pointer;border:none;background:transparent;padding:0}
+.hamburger span{display:block;width:24px;height:2px;background:#475569;border-radius:2px;transition:all .3s cubic-bezier(.22,1,.36,1);position:absolute;left:0}
+.dark .hamburger span{background:#94a3b8}
+.hamburger span:nth-child(1){top:6px}
+.hamburger span:nth-child(2){top:11px}
+.hamburger span:nth-child(3){top:16px}
+.hamburger.active span:nth-child(1){top:11px;transform:rotate(45deg)}
+.hamburger.active span:nth-child(2){opacity:0}
+.hamburger.active span:nth-child(3){top:11px;transform:rotate(-45deg)}
+
+/* Section backgrounds */
+.section-alt{background:#f8fafc}
+.dark .section-alt{background:rgba(15,23,42,0.4)}
+
+/* Testimonial card */
+.testimonial-card{position:relative;padding:24px;border-radius:16px;background:rgba(255,255,255,0.6);border:1px solid rgba(0,0,0,0.06)}
+.dark .testimonial-card{background:rgba(30,41,59,0.4);border:1px solid rgba(255,255,255,0.06)}
+.testimonial-card::before{content:'"';position:absolute;top:12px;left:20px;font-size:4rem;line-height:1;color:var(--primary);opacity:.2;font-family:Georgia,serif}
+
+/* Filter tabs */
+.filter-tab{padding:8px 20px;border-radius:20px;font-size:.875rem;font-weight:500;cursor:pointer;transition:all .25s;border:1px solid rgba(0,0,0,0.08);background:transparent;color:#64748b}
+.dark .filter-tab{color:#94a3b8;border:1px solid rgba(255,255,255,0.08)}
+.filter-tab.active,.filter-tab:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* Use case icon bg */
+.use-case-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+</style>
 </head>
+<body class="antialiased">
 
-<body class="bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-    <!-- Navbar -->
-    <nav
-        class="fixed w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-100 dark:border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex-shrink-0 flex items-center gap-3">
-                    <img src="./images/icon.png" alt="MoliTutu Logo" class="h-8 w-8 rounded-lg shadow-sm">
-                    <span
-                        class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">MoliTutu</span>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <select id="lang-select"
-                        class="bg-gray-100 dark:bg-slate-800 border-none rounded-md py-1 px-3 text-sm focus:ring-2 focus:ring-primary outline-none">
-                        <option value="en">English</option>
-                        <option value="zh-CN">简体中文</option>
-                        <option value="zh-TW">繁體中文</option>
-                        <option value="es">Español</option>
-                        <option value="fr">Français</option>
-                        <option value="de">Deutsch</option>
-                        <option value="ja">日本語</option>
-                        <option value="ko">한국어</option>
-                        <option value="ru">Русский</option>
-                        <option value="pt">Português</option>
-                        <option value="ar">العربية</option>
-                        <option value="hi">हिन्दी</option>
-                    </select>
-                    <button id="theme-toggle"
-                        class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-                        aria-label="Toggle Theme">
-                        <!-- Icon injected by JS -->
-                    </button>
-                    <a href="https://github.com/gusibi/moli-tutu" target="_blank"
-                        class="hidden sm:block text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
-                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path fill-rule="evenodd"
-                                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </a>
-                </div>
+<!-- ======== NAVBAR ======== -->
+<nav class="fixed top-0 left-0 right-0 z-50 glass-nav" role="navigation" aria-label="Main navigation">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-3 no-underline">
+        <img src="./images/icon.png" alt="MoliTutu" class="h-9 w-9 rounded-xl shadow-sm" loading="eager">
+        <span class="text-xl font-bold font-heading gradient-text">MoliTutu</span>
+      </a>
+
+      <!-- Desktop nav links -->
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#features" class="nav-link text-sm font-medium no-underline" data-i18n="nav.features">Features</a>
+        <a href="#how-it-works" class="nav-link text-sm font-medium no-underline" data-i18n="nav.howItWorks">How It Works</a>
+        <a href="#use-cases" class="nav-link text-sm font-medium no-underline" data-i18n="nav.useCases">Use Cases</a>
+        <a href="#pricing" class="nav-link text-sm font-medium no-underline" data-i18n="nav.pricing">Pricing</a>
+        <a href="#faq" class="nav-link text-sm font-medium no-underline" data-i18n="nav.faq">FAQ</a>
+      </div>
+
+      <!-- Right actions -->
+      <div class="flex items-center gap-3">
+        <select id="lang-select" class="lang-select text-sm" aria-label="Select language">
+          <option value="en">EN</option>
+          <option value="zh-CN">中文</option>
+          <option value="zh-TW">繁體</option>
+          <option value="es">ES</option>
+          <option value="fr">FR</option>
+          <option value="de">DE</option>
+          <option value="ja">日</option>
+          <option value="ko">한</option>
+          <option value="ru">RU</option>
+          <option value="pt">PT</option>
+          <option value="ar">AR</option>
+          <option value="hi">हि</option>
+        </select>
+
+        <button id="theme-toggle" class="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 transition-colors" aria-label="Toggle theme">
+          <span id="theme-icon">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+          </span>
+        </button>
+
+        <a href="https://github.com/gusibi/moli-tutu" target="_blank" rel="noopener" class="hidden sm:flex w-9 h-9 rounded-lg items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-slate-500 hover:text-slate-900 dark:hover:text-white" aria-label="GitHub">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        </a>
+
+        <button id="mobile-menu-btn" class="md:hidden hamburger" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile nav -->
+  <div id="mobile-nav" class="mobile-nav md:hidden">
+    <a href="#features" class="nav-link-mobile" data-i18n="nav.features" onclick="closeMobileNav()">Features</a>
+    <a href="#how-it-works" class="nav-link-mobile" data-i18n="nav.howItWorks" onclick="closeMobileNav()">How It Works</a>
+    <a href="#use-cases" class="nav-link-mobile" data-i18n="nav.useCases" onclick="closeMobileNav()">Use Cases</a>
+    <a href="#pricing" class="nav-link-mobile" data-i18n="nav.pricing" onclick="closeMobileNav()">Pricing</a>
+    <a href="#faq" class="nav-link-mobile" data-i18n="nav.faq" onclick="closeMobileNav()">FAQ</a>
+  </div>
+</nav>
+
+<!-- ======== HERO ======== -->
+<section class="relative min-h-screen flex items-center overflow-hidden pt-16 noise">
+  <div class="hero-mesh">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+  </div>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 w-full">
+    <div class="flex flex-col lg:flex-row items-center gap-16">
+      <!-- Hero text -->
+      <div class="flex-1 text-center lg:text-left">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+          <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+          <span data-i18n="hero.badge">Open Source · v0.4.0</span>
+        </div>
+        <h1 class="font-heading text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold tracking-tight leading-[1.1] mb-6">
+          <span data-i18n="hero.titleLine1">Smart Image</span><br>
+          <span class="gradient-text" data-i18n="hero.titleLine2">Compression</span><br>
+          <span data-i18n="hero.titleLine3">Cloud Upload</span>
+        </h1>
+        <p class="text-lg sm:text-xl text-slate-500 dark:text-slate-400 max-w-xl lg:mx-0 mx-auto mb-8 leading-relaxed" data-i18n="hero.desc">
+          Free, open-source desktop app for intelligent image compression and direct upload to Cloudflare R2. Privacy-first. Local-only. No strings attached.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+          <a href="https://github.com/gusibi/moli-tutu/releases" target="_blank" rel="noopener" class="btn-primary">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span data-i18n="hero.download">Download Now</span>
+          </a>
+          <a href="https://github.com/gusibi/moli-tutu" target="_blank" rel="noopener" class="btn-secondary">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+            <span data-i18n="hero.github">View on GitHub</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Hero visual -->
+      <div class="flex-1 relative">
+        <div class="relative">
+          <div class="absolute inset-0 bg-gradient-to-br from-primary/20 via-amber/10 to-teal/10 rounded-3xl blur-2xl opacity-60 dark:opacity-40"></div>
+          <div class="glass-card p-8 relative">
+            <div class="flex items-center gap-2 mb-6">
+              <span class="w-3 h-3 rounded-full bg-rose-400"></span>
+              <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+              <span class="w-3 h-3 rounded-full bg-green-400"></span>
+              <span class="text-xs text-slate-400 ml-2 font-mono">MoliTutu v1.0</span>
             </div>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="pt-32 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col md:flex-row items-center">
-        <div class="md:w-1/2 text-center md:text-left mb-12 md:mb-0">
-            <h1 id="hero-title" class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4">MoliTutu
-            </h1>
-            <p id="hero-subtitle" class="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-6 font-medium">Smart
-                Image Compression & Cloud Upload</p>
-            <p id="hero-desc" class="text-lg text-gray-500 dark:text-gray-400 mb-8 max-w-lg mx-auto md:mx-0">The
-                ultimate tool for optimizing images and uploading them directly to Cloudflare R2. Save space, speed up
-                your workflow.</p>
-            <div class="flex flex-col sm:flex-row justify-center md:justify-start gap-4">
-                <a href="https://github.com/gusibi/moli-tutu/releases" id="hero-download"
-                    class="px-8 py-3 bg-primary hover:bg-blue-600 text-white font-semibold rounded-lg shadow-lg transition-colors transform hover:-translate-y-0.5"
-                    target="_blank">Download Now</a>
-                <a href="https://github.com/gusibi/moli-tutu" id="hero-github"
-                    class="px-8 py-3 bg-white dark:bg-slate-800 text-gray-900 dark:text-white border border-gray-200 dark:border-slate-700 font-semibold rounded-lg shadow hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
-                    target="_blank">View on GitHub</a>
+            <div class="space-y-4">
+              <div class="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-sm font-bold">PNG</div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="text-slate-600 dark:text-slate-400" data-i18n="hero.exampleBefore">Before</span>
+                    <span class="font-medium">2.4 MB</span>
+                  </div>
+                  <div class="h-2 rounded-full bg-slate-200 dark:bg-slate-700"><div class="h-2 rounded-full bg-primary w-full"></div></div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center text-white text-sm font-bold">WEBP</div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="text-green-600 dark:text-green-400 font-medium" data-i18n="hero.exampleAfter">After</span>
+                    <span class="font-medium text-green-600 dark:text-green-400">312 KB</span>
+                  </div>
+                  <div class="h-2 rounded-full bg-slate-200 dark:bg-slate-700"><div class="h-2 rounded-full bg-green-500 w-[13%]"></div></div>
+                </div>
+                <span class="text-xs font-bold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/40 px-2 py-1 rounded-md">-87%</span>
+              </div>
+              <div class="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <span data-i18n="hero.exampleFormats">JPG · PNG · WebP · AVIF</span>
+                <span class="text-primary font-medium" data-i18n="hero.exampleUpload">→ R2 Upload Ready</span>
+              </div>
             </div>
+          </div>
         </div>
-        <div class="md:w-1/2 flex justify-center relative">
-            <div
-                class="absolute inset-0 bg-gradient-to-r from-blue-300 to-purple-300 blur-3xl opacity-30 dark:opacity-20 rounded-full">
+      </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="flex justify-center mt-16 animate-bounce">
+      <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ======== FEATURES ======== -->
+<section id="features" class="py-24 md:py-32 relative">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+      <h2 class="font-heading text-3xl sm:text-4xl font-extrabold mb-4" data-i18n="features.title">Everything You Need</h2>
+      <p class="text-lg text-slate-500 dark:text-slate-400" data-i18n="features.subtitle">From intelligent compression to one-click cloud upload — MoliTutu handles the entire workflow.</p>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 stagger">
+      <div class="feature-card glass-card p-8">
+        <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-primary mb-5">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        </div>
+        <h3 class="font-heading font-bold text-lg mb-3" data-i18n="features.compression.title">Smart Compression</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="features.compression.desc">Intelligent algorithms reduce file size by up to 80% without perceptible quality loss. Supports lossy and lossless modes.</p>
+      </div>
+      <div class="feature-card glass-card p-8">
+        <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber mb-5">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+        </div>
+        <h3 class="font-heading font-bold text-lg mb-3" data-i18n="features.upload.title">R2 Upload</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="features.upload.desc">Seamless integration with Cloudflare R2. Configure once, upload instantly. Automatic public URL generation.</p>
+      </div>
+      <div class="feature-card glass-card p-8">
+        <div class="w-12 h-12 rounded-xl bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center text-teal mb-5">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </div>
+        <h3 class="font-heading font-bold text-lg mb-3" data-i18n="features.privacy.title">Privacy First</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="features.privacy.desc">All processing runs locally on your machine. Your images go directly to your own R2 bucket. We never see your data.</p>
+      </div>
+      <div class="feature-card glass-card p-8">
+        <div class="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center text-rose mb-5">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </div>
+        <h3 class="font-heading font-bold text-lg mb-3" data-i18n="features.proxy.title">Local API Proxy</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="features.proxy.desc">Built-in HTTP server for programmatic uploads. Integrate MoliTutu into your scripts, CI/CD, or custom workflows.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== HOW IT WORKS ======== -->
+<section id="how-it-works" class="py-24 md:py-32 section-alt relative">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+      <h2 class="font-heading text-3xl sm:text-4xl font-extrabold mb-4" data-i18n="how.title">How It Works</h2>
+      <p class="text-lg text-slate-500 dark:text-slate-400" data-i18n="how.subtitle">Three simple steps to go from image to published URL.</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8 stagger">
+      <div class="text-center reveal">
+        <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-primary/20">1</div>
+        <h3 class="font-heading font-bold text-xl mb-3" data-i18n="how.step1.title">Configure R2</h3>
+        <p class="text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="how.step1.desc">Enter your Cloudflare R2 credentials in the settings. One-time setup, permanent use. Multiple bucket profiles supported.</p>
+      </div>
+      <div class="text-center reveal">
+        <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-amber to-orange-500 flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-amber/20">2</div>
+        <h3 class="font-heading font-bold text-xl mb-3" data-i18n="how.step2.title">Drag & Drop</h3>
+        <p class="text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="how.step2.desc">Pull your images into the app. Compression and optimization start automatically. Process hundreds at once.</p>
+      </div>
+      <div class="text-center reveal">
+        <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-teal to-emerald-500 flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-teal/20">3</div>
+        <h3 class="font-heading font-bold text-xl mb-3" data-i18n="how.step3.title">Get Link</h3>
+        <p class="text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="how.step3.desc">Copy the public URL with one click. Ready to embed in blogs, apps, or share with your team.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== WHY MOLITUTU ======== -->
+<section id="why" class="py-24 md:py-32 relative">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+      <h2 class="font-heading text-3xl sm:text-4xl font-extrabold mb-4" data-i18n="why.title">Why MoliTutu?</h2>
+      <p class="text-lg text-slate-500 dark:text-slate-400" data-i18n="why.subtitle">Built different. No subscriptions. No cloud dependency. Just a tool that respects your privacy and productivity.</p>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6 stagger">
+      <div class="glass-card p-8 flex gap-5 reveal">
+        <div class="w-14 h-14 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-primary shrink-0 text-2xl">⚡</div>
+        <div>
+          <h3 class="font-heading font-bold text-lg mb-2" data-i18n="why.pillar1.title">Lightning Fast</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="why.pillar1.desc">Process ~50 images per second with parallel compression pipelines. No waiting, no queuing.</p>
+        </div>
+      </div>
+      <div class="glass-card p-8 flex gap-5 reveal">
+        <div class="w-14 h-14 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber shrink-0 text-2xl">🎯</div>
+        <div>
+          <h3 class="font-heading font-bold text-lg mb-2" data-i18n="why.pillar2.title">Lossless Quality</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="why.pillar2.desc">Intelligent algorithms preserve visual fidelity while dramatically reducing file size.</p>
+        </div>
+      </div>
+      <div class="glass-card p-8 flex gap-5 reveal">
+        <div class="w-14 h-14 rounded-xl bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center text-teal shrink-0 text-2xl">🔒</div>
+        <div>
+          <h3 class="font-heading font-bold text-lg mb-2" data-i18n="why.pillar3.title">100% Private</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="why.pillar3.desc">Everything runs locally. No data ever touches our servers. Your images stay yours.</p>
+        </div>
+      </div>
+      <div class="glass-card p-8 flex gap-5 reveal">
+        <div class="w-14 h-14 rounded-xl bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center text-rose shrink-0 text-2xl">🔧</div>
+        <div>
+          <h3 class="font-heading font-bold text-lg mb-2" data-i18n="why.pillar4.title">Zero Config</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="why.pillar4.desc">Download, launch, and go. Minimal setup with sensible defaults that just work.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== USE CASES ======== -->
+<section id="use-cases" class="py-24 md:py-32 section-alt relative">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+      <h2 class="font-heading text-3xl sm:text-4xl font-extrabold mb-4" data-i18n="useCases.title">Who It's For</h2>
+      <p class="text-lg text-slate-500 dark:text-slate-400" data-i18n="useCases.subtitle">MoliTutu fits into any workflow that involves images and the web.</p>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 stagger">
+      <div class="glass-card p-8 text-center hover:-translate-y-1 transition-transform reveal">
+        <div class="use-case-icon mx-auto mb-5 bg-blue-50 dark:bg-blue-900/20 text-primary">✍️</div>
+        <h3 class="font-heading font-bold text-lg mb-3" data-i18n="useCases.blogger.title">Bloggers &amp; Creators</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="useCases.blogger.desc">Optimize featured images and screenshots for faster page loads. CDN-backed URLs for your CMS.</p>
+      </div>
+      <div class="glass-card p-8 text-center hover:-translate-y-1 transition-transform reveal">
+        <div class="use-case-icon mx-auto mb-5 bg-amber-50 dark:bg-amber-900/20 text-amber">💻</div>
+        <h3 class="font-heading font-bold text-lg mb-3" data-i18n="useCases.developer.title">Developers</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="useCases.developer.desc">Integrate via local API proxy into build pipelines, CI/CD, or custom automation scripts.</p>
+      </div>
+      <div class="glass-card p-8 text-center hover:-translate-y-1 transition-transform reveal">
+        <div class="use-case-icon mx-auto mb-5 bg-teal-50 dark:bg-teal-900/20 text-teal">🎨</div>
+        <h3 class="font-heading font-bold text-lg mb-3" data-i18n="useCases.designer.title">Designers</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="useCases.designer.desc">Compress portfolios and mockups before sharing. Maintain visual fidelity at 60-80% smaller sizes.</p>
+      </div>
+      <div class="glass-card p-8 text-center hover:-translate-y-1 transition-transform reveal">
+        <div class="use-case-icon mx-auto mb-5 bg-rose-50 dark:bg-rose-900/20 text-rose">🚀</div>
+        <h3 class="font-heading font-bold text-lg mb-3" data-i18n="useCases.devops.title">DevOps &amp; Platform</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="useCases.devops.desc">Batch optimize product images and user uploads. Integrate into your media pipeline.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== TECH DETAILS ======== -->
+<section id="tech" class="py-24 md:py-32 relative">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+      <h2 class="font-heading text-3xl sm:text-4xl font-extrabold mb-4" data-i18n="tech.title">Technical Details</h2>
+      <p class="text-lg text-slate-500 dark:text-slate-400" data-i18n="tech.subtitle">Built with Tauri and Rust for maximum performance and minimal footprint.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6 stagger">
+      <!-- Formats -->
+      <div class="glass-card p-8 reveal">
+        <h3 class="font-heading font-bold text-lg mb-5 flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-primary text-sm">📁</span>
+          <span data-i18n="tech.formatsTitle">Supported Formats</span>
+        </h3>
+        <ul class="space-y-3">
+          <li class="flex items-center justify-between text-sm"><span class="font-medium">JPEG</span><span class="text-xs text-slate-400" data-i18n="tech.formatJPEG">Lossy + Progressive</span></li>
+          <li class="flex items-center justify-between text-sm"><span class="font-medium">PNG</span><span class="text-xs text-slate-400" data-i18n="tech.formatPNG">Lossless + Palette Opt</span></li>
+          <li class="flex items-center justify-between text-sm"><span class="font-medium">WebP</span><span class="text-xs text-slate-400" data-i18n="tech.formatWebP">Lossy + Lossless</span></li>
+          <li class="flex items-center justify-between text-sm"><span class="font-medium">AVIF</span><span class="text-xs text-slate-400" data-i18n="tech.formatAVIF">High Efficiency</span></li>
+          <li class="flex items-center justify-between text-sm"><span class="font-medium">GIF</span><span class="text-xs text-slate-400" data-i18n="tech.formatGIF">Frame Optimization</span></li>
+        </ul>
+      </div>
+
+      <!-- Benchmarks -->
+      <div class="glass-card p-8 reveal">
+        <h3 class="font-heading font-bold text-lg mb-5 flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber text-sm">📊</span>
+          <span data-i18n="tech.benchmarksTitle">Benchmarks</span>
+        </h3>
+        <ul class="space-y-3">
+          <li class="flex items-center justify-between text-sm"><span data-i18n="tech.benchRatio">Compression Ratio</span><span class="font-semibold text-primary">60-80%</span></li>
+          <li class="flex items-center justify-between text-sm"><span data-i18n="tech.benchSpeed">Processing Speed</span><span class="font-semibold text-primary">~50 img/s</span></li>
+          <li class="flex items-center justify-between text-sm"><span data-i18n="tech.benchMemory">Memory (idle)</span><span class="font-semibold text-primary">~50 MB</span></li>
+          <li class="flex items-center justify-between text-sm"><span data-i18n="tech.benchMemoryLoad">Memory (load)</span><span class="font-semibold text-primary">~200 MB</span></li>
+          <li class="flex items-center justify-between text-sm"><span data-i18n="tech.benchAPI">API Latency</span><span class="font-semibold text-primary">&lt;100ms</span></li>
+        </ul>
+      </div>
+
+      <!-- Architecture -->
+      <div class="glass-card p-8 reveal">
+        <h3 class="font-heading font-bold text-lg mb-5 flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center text-teal text-sm">⚙️</span>
+          <span data-i18n="tech.stackTitle">Tech Stack</span>
+        </h3>
+        <ul class="space-y-3">
+          <li class="flex items-center justify-between text-sm"><span>Frontend</span><span class="font-mono text-xs text-slate-400">React + TypeScript</span></li>
+          <li class="flex items-center justify-between text-sm"><span>Desktop</span><span class="font-mono text-xs text-slate-400">Tauri (Rust)</span></li>
+          <li class="flex items-center justify-between text-sm"><span>Image Processing</span><span class="font-mono text-xs text-slate-400">Rust crates</span></li>
+          <li class="flex items-center justify-between text-sm"><span>Storage</span><span class="font-mono text-xs text-slate-400">Cloudflare R2 (S3)</span></li>
+          <li class="flex items-center justify-between text-sm"><span>License</span><span class="font-mono text-xs text-primary font-semibold">MIT</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Code example -->
+    <div class="mt-8 reveal">
+      <div class="glass-card p-6">
+        <h3 class="font-heading font-bold text-base mb-4 flex items-center gap-2">
+          <span class="w-6 h-6 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs text-slate-500">&gt;_</span>
+          <span data-i18n="tech.apiExample">API Example — Upload via cURL</span>
+        </h3>
+        <div class="code-block">
+          <span class="comment"># Compress and upload in one command</span><br>
+          <span class="keyword">curl</span> -X POST http://localhost:3001/upload \<br>
+          &nbsp;&nbsp;-F <span class="string">"file=@screenshot.png"</span> \<br>
+          &nbsp;&nbsp;-F <span class="string">"quality=80"</span> \<br>
+          &nbsp;&nbsp;-F <span class="string">"format=webp"</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== TESTIMONIALS ======== -->
+<section id="testimonials" class="py-24 md:py-32 section-alt relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+      <h2 class="font-heading text-3xl sm:text-4xl font-extrabold mb-4" data-i18n="testimonials.title">Loved by the Community</h2>
+      <p class="text-lg text-slate-500 dark:text-slate-400" data-i18n="testimonials.subtitle">What early users are saying about MoliTutu.</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6 stagger">
+      <div class="testimonial-card reveal">
+        <div class="relative z-10">
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-5" data-i18n="testimonials.quote1">Finally, an image tool that respects my privacy. The local API proxy is a game-changer for my automation workflow.</p>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white text-xs font-bold">S</div>
+            <div>
+              <div class="text-sm font-semibold" data-i18n="testimonials.author1">Sarah Chen</div>
+              <div class="text-xs text-slate-400" data-i18n="testimonials.role1">Full-stack Developer</div>
             </div>
-            <img src="./images/hero-mockup.png" alt="MoliTutu Interface"
-                class="relative rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 max-w-full h-auto transform hover:scale-[1.02] transition-transform duration-500">
+          </div>
         </div>
-    </section>
-
-    <!-- Features Section -->
-    <section id="features" class="py-20 bg-gray-50 dark:bg-slate-900/50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 id="features-title" class="text-3xl font-bold text-center mb-12">Core Features</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Feature 1 -->
-                <div
-                    class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md transition-shadow">
-                    <div
-                        class="h-12 w-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4 text-primary">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                    </div>
-                    <h3 id="feat-compression-title" class="text-lg font-semibold mb-2">Smart Compression</h3>
-                    <p id="feat-compression-desc" class="text-gray-500 dark:text-gray-400">Intelligent algorithms reduce
-                        file size without losing quality.</p>
-                </div>
-                <!-- Feature 2 -->
-                <div
-                    class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md transition-shadow">
-                    <div
-                        class="h-12 w-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-4 text-purple-500">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                        </svg>
-                    </div>
-                    <h3 id="feat-upload-title" class="text-lg font-semibold mb-2">R2 Upload</h3>
-                    <p id="feat-upload-desc" class="text-gray-500 dark:text-gray-400">Seamless integration with
-                        Cloudflare R2 for instant hosting.</p>
-                </div>
-                <!-- Feature 3 -->
-                <div
-                    class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md transition-shadow">
-                    <div
-                        class="h-12 w-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-4 text-green-500">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                    </div>
-                    <h3 id="feat-privacy-title" class="text-lg font-semibold mb-2">Privacy First</h3>
-                    <p id="feat-privacy-desc" class="text-gray-500 dark:text-gray-400">Everything runs locally. Your
-                        data is yours.</p>
-                </div>
-                <!-- Feature 4 -->
-                <div
-                    class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md transition-shadow">
-                    <div
-                        class="h-12 w-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center mb-4 text-orange-500">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <h3 id="feat-proxy-title" class="text-lg font-semibold mb-2">Local API Proxy</h3>
-                    <p id="feat-proxy-desc" class="text-gray-500 dark:text-gray-400">Upload images via a local HTTP
-                        proxy without opening the app.</p>
-                </div>
+      </div>
+      <div class="testimonial-card reveal">
+        <div class="relative z-10">
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-5" data-i18n="testimonials.quote2">I compress hundreds of product images weekly. MoliTutu cut my workflow time in half. The R2 integration is seamless.</p>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber to-orange-500 flex items-center justify-center text-white text-xs font-bold">M</div>
+            <div>
+              <div class="text-sm font-semibold" data-i18n="testimonials.author2">Marcus Rivera</div>
+              <div class="text-xs text-slate-400" data-i18n="testimonials.role2">E-commerce Manager</div>
             </div>
+          </div>
         </div>
-    </section>
-
-    <!-- How It Works Section -->
-    <section id="how-it-works" class="py-20 bg-white dark:bg-slate-900">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 id="how-title" class="text-3xl font-bold text-center mb-16">How It Works</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-                <!-- Step 1 -->
-                <div class="flex flex-col items-center text-center">
-                    <div
-                        class="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-2xl font-bold text-primary mb-6">
-                        1</div>
-                    <h3 id="step-1-title" class="text-xl font-semibold mb-4">Configure R2</h3>
-                    <p id="step-1-desc" class="text-gray-500 dark:text-gray-400">Enter your Cloudflare R2 credentials in
-                        the settings. Setup once, use forever.</p>
-                </div>
-                <!-- Step 2 -->
-                <div class="flex flex-col items-center text-center">
-                    <div
-                        class="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-2xl font-bold text-primary mb-6">
-                        2</div>
-                    <h3 id="step-2-title" class="text-xl font-semibold mb-4">Drag & Drop</h3>
-                    <p id="step-2-desc" class="text-gray-500 dark:text-gray-400">Pull your images into the app.
-                        Optimization and compression start automatically.</p>
-                </div>
-                <!-- Step 3 -->
-                <div class="flex flex-col items-center text-center">
-                    <div
-                        class="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-2xl font-bold text-primary mb-6">
-                        3</div>
-                    <h3 id="step-3-title" class="text-xl font-semibold mb-4">Get Link</h3>
-                    <p id="step-3-desc" class="text-gray-500 dark:text-gray-400">Copy the public URL with one click.
-                        Ready to share or embed in your blog.</p>
-                </div>
+      </div>
+      <div class="testimonial-card reveal">
+        <div class="relative z-10">
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-5" data-i18n="testimonials.quote3">Open source, local-first, and beautifully simple. This is how desktop tools should be built. Excited to contribute!</p>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-teal to-emerald-500 flex items-center justify-center text-white text-xs font-bold">K</div>
+            <div>
+              <div class="text-sm font-semibold" data-i18n="testimonials.author3">Kenji Tanaka</div>
+              <div class="text-xs text-slate-400" data-i18n="testimonials.role3">Open Source Contributor</div>
             </div>
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- Detailed Features / Advanced -->
-    <section id="advanced" class="py-20 bg-gray-50 dark:bg-slate-900/50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row items-center gap-12">
-                <div class="md:w-1/2">
-                    <h2 id="adv-title" class="text-3xl font-bold mb-6">More Than Just Uploads</h2>
-                    <ul class="space-y-4">
-                        <li class="flex items-start">
-                            <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <div>
-                                <strong id="adv-1-title" class="block text-lg font-medium">Batch Processing</strong>
-                                <span id="adv-1-desc" class="text-gray-500 dark:text-gray-400">Process hundreds of
-                                    images at once. Supports JPG, PNG, WebP.</span>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <div>
-                                <strong id="adv-2-title" class="block text-lg font-medium">History & Management</strong>
-                                <span id="adv-2-desc" class="text-gray-500 dark:text-gray-400">View upload history,
-                                    retry failed uploads, and clear records easily.</span>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <div>
-                                <strong id="adv-3-title" class="block text-lg font-medium">Developer Friendly</strong>
-                                <span id="adv-3-desc" class="text-gray-500 dark:text-gray-400">Includes a local API
-                                    proxy. Integrate MoliTutu into your scripts or other apps.</span>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-                <div
-                    class="md:w-1/2 bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-slate-700">
-                    <div class="prose dark:prose-invert">
-                        <h3 class="text-xl font-bold mb-4">API Example</h3>
-                        <pre class="bg-gray-100 dark:bg-slate-900 p-4 rounded-lg overflow-x-auto text-sm"><code>curl -X POST \
-  http://localhost:3001/upload \
-  -F "file=@image.png"</code></pre>
-                    </div>
-                </div>
-            </div>
+<!-- ======== PRICING ======== -->
+<section id="pricing" class="py-24 md:py-32 relative">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+      <h2 class="font-heading text-3xl sm:text-4xl font-extrabold mb-4" data-i18n="pricing.title">Simple Pricing</h2>
+      <p class="text-lg text-slate-500 dark:text-slate-400" data-i18n="pricing.subtitle">MoliTutu itself is free. Forever. You only pay for the cloud storage you use.</p>
+    </div>
+    <div class="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto stagger">
+      <div class="glass-card p-8 text-center reveal pricing-card featured" data-badge="Most Popular">
+        <h3 class="font-heading text-xl font-bold mb-2" data-i18n="pricing.free.title">MoliTutu</h3>
+        <div class="text-5xl font-extrabold font-heading gradient-text my-6">$0</div>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-8" data-i18n="pricing.free.priceDesc">Free forever. Open source.</p>
+        <ul class="text-left space-y-4 mb-8">
+          <li class="flex items-start gap-3 text-sm"><svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span data-i18n="pricing.free.f1">Unlimited image compression</span></li>
+          <li class="flex items-start gap-3 text-sm"><svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span data-i18n="pricing.free.f2">All formats: JPG, PNG, WebP, AVIF, GIF</span></li>
+          <li class="flex items-start gap-3 text-sm"><svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span data-i18n="pricing.free.f3">Local API proxy for automation</span></li>
+          <li class="flex items-start gap-3 text-sm"><svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span data-i18n="pricing.free.f4">Batch processing (unlimited)</span></li>
+          <li class="flex items-start gap-3 text-sm"><svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span data-i18n="pricing.free.f5">MIT open source license</span></li>
+        </ul>
+        <a href="https://github.com/gusibi/moli-tutu/releases" target="_blank" rel="noopener" class="btn-primary w-full justify-center">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span data-i18n="pricing.download">Download Free</span>
+        </a>
+      </div>
+      <div class="glass-card p-8 text-center reveal pricing-card">
+        <h3 class="font-heading text-xl font-bold mb-2" data-i18n="pricing.r2.title">Cloudflare R2</h3>
+        <div class="text-5xl font-extrabold font-heading my-6 text-slate-700 dark:text-slate-300">~$0</div>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-8" data-i18n="pricing.r2.priceDesc">Pay-as-you-go cloud storage</p>
+        <ul class="text-left space-y-4 mb-8">
+          <li class="flex items-start gap-3 text-sm"><svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span data-i18n="pricing.r2.f1">10 GB storage — free</span></li>
+          <li class="flex items-start gap-3 text-sm"><svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span data-i18n="pricing.r2.f2">1M reads/month — free</span></li>
+          <li class="flex items-start gap-3 text-sm"><svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span data-i18n="pricing.r2.f3">No egress fees</span></li>
+          <li class="flex items-start gap-3 text-sm"><svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span data-i18n="pricing.r2.f4">Global CDN via Cloudflare</span></li>
+          <li class="flex items-start gap-3 text-sm"><svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span data-i18n="pricing.r2.f5">S3-compatible API</span></li>
+        </ul>
+        <a href="https://www.cloudflare.com/r2/" target="_blank" rel="noopener" class="btn-secondary w-full justify-center">
+          <span data-i18n="pricing.r2.cta">Learn About R2</span>
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== OPEN SOURCE ======== -->
+<section class="py-24 md:py-32 section-alt relative">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="glass-card p-10 md:p-16 text-center reveal" style="background:linear-gradient(135deg,rgba(14,165,233,0.05),rgba(245,158,11,0.05))">
+      <div class="max-w-2xl mx-auto">
+        <span class="text-5xl mb-6 inline-block">🫶</span>
+        <h2 class="font-heading text-3xl sm:text-4xl font-extrabold mb-4" data-i18n="opensource.title">Open Source, Open Future</h2>
+        <p class="text-lg text-slate-500 dark:text-slate-400 mb-8 leading-relaxed" data-i18n="opensource.desc">MoliTutu is MIT-licensed and built in the open. Contributions, issues, and feature requests are welcome from everyone.</p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a href="https://github.com/gusibi/moli-tutu" target="_blank" rel="noopener" class="btn-primary">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+            <span data-i18n="opensource.cta">Star on GitHub</span>
+          </a>
+          <a href="https://github.com/gusibi/moli-tutu/issues" target="_blank" rel="noopener" class="btn-secondary">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span data-i18n="opensource.issues">Report Issue</span>
+          </a>
+          <a href="https://github.com/gusibi/moli-tutu/blob/main/LICENSE" target="_blank" rel="noopener" class="btn-secondary">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            <span data-i18n="opensource.license">MIT License</span>
+          </a>
         </div>
-    </section>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- FAQ Section -->
-    <section id="faq" class="py-20 bg-white dark:bg-slate-900">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 id="faq-title" class="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
-            <div class="space-y-6">
-                <!-- QQ 1 -->
-                <div class="border-b border-gray-200 dark:border-slate-800 pb-6">
-                    <h3 id="faq-1-q" class="text-lg font-semibold mb-2">Is MoliTutu free?</h3>
-                    <p id="faq-1-a" class="text-gray-500 dark:text-gray-400">Yes, MoliTutu is completely free and open
-                        source. You only pay for your own Cloudflare R2 usage (which has a generous free tier).</p>
-                </div>
-                <!-- QQ 2 -->
-                <div class="border-b border-gray-200 dark:border-slate-800 pb-6">
-                    <h3 id="faq-2-q" class="text-lg font-semibold mb-2">Where is my data stored?</h3>
-                    <p id="faq-2-a" class="text-gray-500 dark:text-gray-400">Your images are stored directly in your
-                        Cloudflare R2 bucket. MoliTutu does not store or process your data on any third-party servers.
-                    </p>
-                </div>
-                <!-- QQ 3 -->
-                <div class="pb-6">
-                    <h3 id="faq-3-q" class="text-lg font-semibold mb-2">Does it support macOS and Windows?</h3>
-                    <p id="faq-3-a" class="text-gray-500 dark:text-gray-400">Yes, MoliTutu is built with Tauri and
-                        supports both macOS (Intel & Apple Silicon) and Windows 10/11.</p>
-                </div>
-            </div>
+<!-- ======== FAQ ======== -->
+<section id="faq" class="py-24 md:py-32 relative">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16 reveal">
+      <h2 class="font-heading text-3xl sm:text-4xl font-extrabold mb-4" data-i18n="faq.title">Frequently Asked Questions</h2>
+    </div>
+    <div class="space-y-4 stagger" itemscope itemtype="https://schema.org/FAQPage">
+      <div class="glass-card overflow-hidden reveal" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left" aria-expanded="false">
+          <span class="font-heading font-semibold text-base" itemprop="name" data-i18n="faq.q1.q">Is MoliTutu really free?</span>
+          <svg class="faq-toggle w-5 h-5 text-slate-400 shrink-0 ml-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+          <div class="px-6 pb-6 text-sm text-slate-500 dark:text-slate-400 leading-relaxed" itemprop="text" data-i18n="faq.q1.a">Yes, MoliTutu is completely free and open source under the MIT license. You only pay for your Cloudflare R2 storage usage, which has a very generous free tier (10 GB storage, 1 million reads per month). No subscriptions, no hidden fees, no feature gates.</div>
         </div>
-    </section>
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "MoliTutu",
-      "operatingSystem": "macOS, Windows",
-      "applicationCategory": "UtilitiesApplication",
-      "genre": "Productivity",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "description": "Smart Image Compression & Cloud Upload tool for Cloudflare R2.",
-      "softwareVersion": "1.0.0",
-      "author": {
-          "@type": "Person",
-          "name": "Gusi"
-      },
-      "downloadUrl": "https://github.com/gusibi/moli-tutu/releases"
-    }
-    </script>
-
-
-    <!-- Footer -->
-    <footer class="bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p id="footer-text" class="text-gray-500 dark:text-gray-400">© 2026 MoliTutu. Open Source Project.</p>
+      </div>
+      <div class="glass-card overflow-hidden reveal" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left" aria-expanded="false">
+          <span class="font-heading font-semibold text-base" itemprop="name" data-i18n="faq.q2.q">How does MoliTutu handle my privacy?</span>
+          <svg class="faq-toggle w-5 h-5 text-slate-400 shrink-0 ml-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+          <div class="px-6 pb-6 text-sm text-slate-500 dark:text-slate-400 leading-relaxed" itemprop="text" data-i18n="faq.q2.a">All image processing is done locally on your machine — no data ever touches our servers. Images upload directly from your computer to your Cloudflare R2 bucket. MoliTutu has no cloud infrastructure that processes or stores your data. We literally cannot see your images.</div>
         </div>
-    </footer>
+      </div>
+      <div class="glass-card overflow-hidden reveal" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left" aria-expanded="false">
+          <span class="font-heading font-semibold text-base" itemprop="name" data-i18n="faq.q3.q">What operating systems are supported?</span>
+          <svg class="faq-toggle w-5 h-5 text-slate-400 shrink-0 ml-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+          <div class="px-6 pb-6 text-sm text-slate-500 dark:text-slate-400 leading-relaxed" itemprop="text" data-i18n="faq.q3.a">MoliTutu currently supports macOS (Intel and Apple Silicon) and Windows 10/11. It is built with Tauri, which provides native performance and a small footprint. Linux support is on the roadmap.</div>
+        </div>
+      </div>
+      <div class="glass-card overflow-hidden reveal" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left" aria-expanded="false">
+          <span class="font-heading font-semibold text-base" itemprop="name" data-i18n="faq.q4.q">Can I use MoliTutu from the command line?</span>
+          <svg class="faq-toggle w-5 h-5 text-slate-400 shrink-0 ml-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+          <div class="px-6 pb-6 text-sm text-slate-500 dark:text-slate-400 leading-relaxed" itemprop="text" data-i18n="faq.q4.a">Yes! MoliTutu includes a built-in local API proxy server. You can send HTTP requests from any tool or script. Use curl, wget, Postman, or write a custom integration. The endpoint accepts multipart form data and returns JSON with the upload URL and metadata.</div>
+        </div>
+      </div>
+      <div class="glass-card overflow-hidden reveal" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left" aria-expanded="false">
+          <span class="font-heading font-semibold text-base" itemprop="name" data-i18n="faq.q5.q">Does MoliTutu support multiple R2 buckets?</span>
+          <svg class="faq-toggle w-5 h-5 text-slate-400 shrink-0 ml-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+          <div class="px-6 pb-6 text-sm text-slate-500 dark:text-slate-400 leading-relaxed" itemprop="text" data-i18n="faq.q5.a">Absolutely. You can configure multiple bucket profiles and switch between them. Each profile stores the bucket name, endpoint URL, access key ID, and secret access key. This is perfect if you manage separate buckets for development, staging, and production, or for different clients and projects.</div>
+        </div>
+      </div>
+      <div class="glass-card overflow-hidden reveal" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left" aria-expanded="false">
+          <span class="font-heading font-semibold text-base" itemprop="name" data-i18n="faq.q6.q">How can I contribute to MoliTutu?</span>
+          <svg class="faq-toggle w-5 h-5 text-slate-400 shrink-0 ml-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+          <div class="px-6 pb-6 text-sm text-slate-500 dark:text-slate-400 leading-relaxed" itemprop="text" data-i18n="faq.q6.a">Contributions of all sizes are welcome! Visit our GitHub repository to submit bug reports, suggest features, or open pull requests. Whether it's fixing a typo, improving documentation, adding a feature, or testing — every contribution helps make MoliTutu better for everyone.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <script src="./js/locales.js"></script>
-    <script src="./js/main.js"></script>
+
+<!-- ======== CTA ======== -->
+<section class="py-24 md:py-32 relative">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center reveal">
+    <div class="glass-card p-12 md:p-20 relative overflow-hidden">
+      <div class="hero-mesh opacity-30"><div class="orb"></div><div class="orb"></div></div>
+      <div class="relative z-10">
+        <h2 class="font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-6 leading-tight" data-i18n="cta.title">Ready to Transform<br>Your Image Workflow?</h2>
+        <p class="text-lg text-slate-500 dark:text-slate-400 mb-10 max-w-lg mx-auto" data-i18n="cta.subtitle">Download MoliTutu free today. No sign-up, no credit card, no data collection.</p>
+        <a href="https://github.com/gusibi/moli-tutu/releases" target="_blank" rel="noopener" class="btn-primary text-lg px-10 py-4">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span data-i18n="cta.button">Download MoliTutu Free</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== FOOTER ======== -->
+<footer class="border-t border-slate-200 dark:border-slate-800 py-16 relative">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+      <!-- Brand -->
+      <div class="sm:col-span-2 lg:col-span-1">
+        <a href="#" class="flex items-center gap-3 mb-4 no-underline">
+          <img src="./images/icon.png" alt="MoliTutu" class="h-8 w-8 rounded-lg shadow-sm" loading="lazy">
+          <span class="text-lg font-bold font-heading gradient-text">MoliTutu</span>
+        </a>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6" data-i18n="footer.tagline">Smart image compression &amp; cloud upload. Free, open source, privacy-first.</p>
+        <div class="flex gap-3">
+          <a href="https://github.com/gusibi/moli-tutu" target="_blank" rel="noopener" class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-all" aria-label="GitHub">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          </a>
+          <a href="https://molitutu.pages.dev/llms.txt" target="_blank" rel="noopener" class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-all text-xs font-bold" aria-label="LLMs.txt" title="AI-friendly site index">AI</a>
+        </div>
+      </div>
+
+      <!-- Product -->
+      <div>
+        <h4 class="font-heading font-semibold text-sm uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-5" data-i18n="footer.productTitle">Product</h4>
+        <ul class="space-y-3">
+          <li><a href="#features" class="text-sm text-slate-600 dark:text-slate-300 hover:text-primary transition-colors no-underline" data-i18n="nav.features">Features</a></li>
+          <li><a href="#pricing" class="text-sm text-slate-600 dark:text-slate-300 hover:text-primary transition-colors no-underline">Pricing</a></li>
+          <li><a href="https://github.com/gusibi/moli-tutu/releases" target="_blank" rel="noopener" class="text-sm text-slate-600 dark:text-slate-300 hover:text-primary transition-colors no-underline" data-i18n="footer.releases">Releases</a></li>
+          <li><a href="https://github.com/gusibi/moli-tutu/blob/main/CHANGELOG.md" target="_blank" rel="noopener" class="text-sm text-slate-600 dark:text-slate-300 hover:text-primary transition-colors no-underline" data-i18n="footer.changelog">Changelog</a></li>
+        </ul>
+      </div>
+
+      <!-- Resources -->
+      <div>
+        <h4 class="font-heading font-semibold text-sm uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-5" data-i18n="footer.resourcesTitle">Resources</h4>
+        <ul class="space-y-3">
+          <li><a href="https://github.com/gusibi/moli-tutu/issues" target="_blank" rel="noopener" class="text-sm text-slate-600 dark:text-slate-300 hover:text-primary transition-colors no-underline" data-i18n="footer.support">Support</a></li>
+          <li><a href="https://onlinestool.com/" target="_blank" rel="noopener" class="text-sm text-slate-600 dark:text-slate-300 hover:text-primary transition-colors no-underline" data-i18n="footer.friendLink">友情链接</a></li>
+          <li><a href="https://github.com/gusibi/moli-tutu/security" target="_blank" rel="noopener" class="text-sm text-slate-600 dark:text-slate-300 hover:text-primary transition-colors no-underline" data-i18n="footer.security">Security</a></li>
+        </ul>
+      </div>
+
+      <!-- About -->
+      <div>
+        <h4 class="font-heading font-semibold text-sm uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-5" data-i18n="footer.aboutTitle">About</h4>
+        <ul class="space-y-3">
+          <li><a href="https://github.com/gusibi" target="_blank" rel="noopener" class="text-sm text-slate-600 dark:text-slate-300 hover:text-primary transition-colors no-underline" data-i18n="footer.author">Author: Gusi</a></li>
+          <li><a href="https://github.com/gusibi/moli-tutu/blob/main/LICENSE" target="_blank" rel="noopener" class="text-sm text-slate-600 dark:text-slate-300 hover:text-primary transition-colors no-underline" data-i18n="footer.license">MIT License</a></li>
+          <li><a href="https://molitutu.pages.dev/llms.txt" target="_blank" rel="noopener" class="text-sm text-slate-600 dark:text-slate-300 hover:text-primary transition-colors no-underline">📄 llms.txt</a></li>
+          <li><a href="https://molitutu.pages.dev/robots.txt" target="_blank" rel="noopener" class="text-sm text-slate-600 dark:text-slate-300 hover:text-primary transition-colors no-underline">robots.txt</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-sm text-slate-400" data-i18n="footer.copyright">© 2026 MoliTutu. Open Source. MIT License.</p>
+      <p class="text-xs text-slate-400" data-i18n="footer.builtWith">Built with Tauri · Rust · React</p>
+    </div>
+  </div>
+</footer>
+
+<!-- Back to Top -->
+<button id="back-to-top" class="back-to-top" aria-label="Back to top">
+  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+</button>
+
+<!-- ======== JSON-LD STRUCTURED DATA ======== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "MoliTutu",
+  "operatingSystem": "macOS, Windows",
+  "applicationCategory": "Multimedia",
+  "applicationSubCategory": "Image Compression",
+  "genre": "Utility, Productivity",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "priceValidUntil": "2030-12-31"
+  },
+  "description": "Free, open-source desktop app for intelligent image compression and direct upload to Cloudflare R2. Privacy-first, local-only processing.",
+  "softwareVersion": "1.0.0",
+  "softwareRequirements": "macOS 11+ or Windows 10+",
+  "author": {
+    "@type": "Person",
+    "name": "Gusi",
+    "url": "https://github.com/gusibi"
+  },
+  "downloadUrl": "https://github.com/gusibi/moli-tutu/releases",
+  "url": "https://molitutu.pages.dev/",
+  "image": "https://molitutu.pages.dev/images/og-image.png",
+  "screenshot": "https://molitutu.pages.dev/images/hero-mockup.png",
+  "license": "https://github.com/gusibi/moli-tutu/blob/main/LICENSE"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "MoliTutu",
+  "url": "https://molitutu.pages.dev/",
+  "description": "Smart Image Compression & Cloud Upload Tool",
+  "author": {
+    "@type": "Person",
+    "name": "Gusi",
+    "url": "https://github.com/gusibi"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Gusi",
+  "url": "https://github.com/gusibi",
+  "knowsAbout": ["Image Compression", "Cloud Storage", "Rust", "Tauri", "React", "TypeScript"]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://molitutu.pages.dev/"},
+    {"@type": "ListItem", "position": 2, "name": "Features", "item": "https://molitutu.pages.dev/#features"},
+    {"@type": "ListItem", "position": 3, "name": "Pricing", "item": "https://molitutu.pages.dev/#pricing"},
+    {"@type": "ListItem", "position": 4, "name": "FAQ", "item": "https://molitutu.pages.dev/#faq"}
+  ]
+}
+</script>
+
+<script src="./js/locales.js"></script>
+<script src="./js/main.js"></script>
 </body>
-
 </html>
