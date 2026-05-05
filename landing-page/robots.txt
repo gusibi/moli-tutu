@@ -1,29 +1,8 @@
-# MoliTutu — AI & Search Crawler Configuration
-# ==============================================
+User-agent: *
+Allow: /
+Disallow: /api/
 
-# AI training crawlers — respectfully disallowed
-User-agent: GPTBot
-Disallow: /
-
-User-agent: ClaudeBot
-Disallow: /
-
-User-agent: Claude-Web
-Disallow: /
-
-User-agent: anthropic-ai
-Disallow: /
-
-User-agent: Google-Extended
-Disallow: /
-
-User-agent: CCBot
-Disallow: /
-
-User-agent: FacebookBot
-Disallow: /
-
-# AI search crawlers — allowed (indexing for search, not training)
+# Search & retrieval crawlers — allow (power AI search results)
 User-agent: OAI-SearchBot
 Allow: /
 Disallow: /api/
@@ -32,33 +11,49 @@ User-agent: Claude-SearchBot
 Allow: /
 Disallow: /api/
 
+User-agent: PerplexityBot
+Allow: /
+Disallow: /api/
+
+# User-triggered crawlers — allow (fire when user explicitly shares URL with AI)
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /api/
+
+User-agent: Claude-User
+Allow: /
+Disallow: /api/
+
 User-agent: Perplexity-User
 Allow: /
 Disallow: /api/
 
-# General search crawlers
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: DuckDuckBot
-Allow: /
-
-User-agent: Baiduspider
-Allow: /
-
-User-agent: YandexBot
-Allow: /
-
-User-agent: Slurp
-Allow: /
-
-# Default
-User-agent: *
+User-agent: Google-Agent
 Allow: /
 Disallow: /api/
-Disallow: /*.json$
 
-Sitemap: https://molitutu.pages.dev/sitemap.xml
+# Training crawlers — disallow
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+# Opt-out tokens — disallow
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+# Undeclared crawlers — disallow
+User-agent: Bytespider
+Disallow: /
+
+Sitemap: https://tutu.eztoolab.com/sitemap.xml

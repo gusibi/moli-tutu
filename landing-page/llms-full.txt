@@ -132,7 +132,7 @@ Absolutely! MoliTutu is open source. Visit the GitHub repository to submit issue
 ---
 
 ## Project Links
-- Website: https://molitutu.pages.dev/
+- Website: https://tutu.eztoolab.com/
 - GitHub: https://github.com/gusibi/moli-tutu
 - Releases: https://github.com/gusibi/moli-tutu/releases
 - Issues: https://github.com/gusibi/moli-tutu/issues
