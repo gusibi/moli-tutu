@@ -1,0 +1,7 @@
+/build/
+/.mygo/
+/dist/
+*.app
+*.dmg
+*.exe
+*.deb
