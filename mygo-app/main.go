@@ -52,7 +52,7 @@ func main() {
 			MinHeight:     560,
 			StateKey:      "main",
 			TitleBarStyle: mygo.TitleBarHiddenInset,
-			Vibrancy:      mygo.VibrancyGlass,
+			Vibrancy:      mygo.VibrancyGlassClear,
 			Content:       ui.View(a.View),
 		})
 		a.SetWindow(win)

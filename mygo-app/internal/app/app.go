@@ -364,22 +364,19 @@ func (a *App) sidebar(c *ui.Context) {
 		top = 12
 	}
 	side := ui.Column(c).Width(220).Shrink(0)
-	if c.Vibrancy() {
-		// A light tint keeps the sidebar readable over bright desktops while
-		// leaving the window's Liquid Glass visible.
-		side.Background(t.Background.Alpha(0.42))
-	} else {
+	if !c.Vibrancy() {
 		side.Background(t.Surface)
 	}
 	side.Children(func() {
 		ui.Row(c).Height(top+44).Padding(16, 16).AlignItems(ui.End).DragWindow().Children(func() {
-			ui.Text(c, "Moli TuTu").FontSize(18).Bold()
+			ui.Text(c, "Moli TuTu").FontSize(18).Bold().TextShadow(0, 1, 5, ui.RGBA(0, 0, 0, 0.55))
 		})
+		shadow := ui.RGBA(0, 0, 0, 0.65)
 		nav := ui.Sidebar(c, &a.page, func() {
-			ui.SidebarItem(c, pageUpload, iconUpload, a.tr("图片上传", "Upload"))
-			ui.SidebarItem(c, pageHistory, iconHistory, a.tr("上传历史", "History"))
-			ui.SidebarItem(c, pageCompress, iconZap, a.tr("图片压缩", "Compress"))
-			ui.SidebarItem(c, pageCompressHistory, iconHistory, a.tr("压缩历史", "Compressed"))
+			ui.SidebarItem(c, pageUpload, iconUpload, a.tr("图片上传", "Upload")).TextShadow(0, 1, 4, shadow)
+			ui.SidebarItem(c, pageHistory, iconHistory, a.tr("上传历史", "History")).TextShadow(0, 1, 4, shadow)
+			ui.SidebarItem(c, pageCompress, iconZap, a.tr("图片压缩", "Compress")).TextShadow(0, 1, 4, shadow)
+			ui.SidebarItem(c, pageCompressHistory, iconHistory, a.tr("压缩历史", "Compressed")).TextShadow(0, 1, 4, shadow)
 		}).Grow(1).Label("Navigation")
 		if nav.Changed() {
 			a.Refresh()
