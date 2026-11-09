@@ -258,3 +258,33 @@ func TestChooseAndPasteShortcuts(t *testing.T) {
 		t.Fatal("Cmd+Shift+V did not call ReadClipboardImage")
 	}
 }
+
+func TestRefreshPicksUpNewHistory(t *testing.T) {
+	f := newFake()
+	a := New(f)
+	tt := ui.NewTester(a.View, 1000, 700)
+	f.history = []model.UploadRecord{{
+		ID: "new", OriginalFilename: "new.png", FileHash: "h", FileSize: 10,
+		URL: "https://cdn/new.png", UploadTime: 1794233726,
+	}}
+	a.Refresh()
+	tt.Frame()
+	if !tt.HasText("new.png") {
+		t.Fatalf("refresh did not update the table: %q", tt.Texts())
+	}
+}
+
+func TestRefreshShortcut(t *testing.T) {
+	f := newFake()
+	a := New(f)
+	tt := ui.NewTester(a.View, 1000, 700)
+	f.history = []model.UploadRecord{{
+		ID: "shortcut", OriginalFilename: "shortcut.png", FileHash: "h", FileSize: 10,
+		URL: "https://cdn/shortcut.png", UploadTime: 1794233726,
+	}}
+	tt.Key(ui.Cmd, ui.KeyR)
+	tt.Frame()
+	if !tt.HasText("shortcut.png") {
+		t.Fatalf("Cmd+R did not refresh: %q", tt.Texts())
+	}
+}

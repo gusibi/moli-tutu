@@ -52,11 +52,12 @@ type App struct {
 	uploads    []UploadStatus
 	uploadBusy bool
 
-	historySearch string
-	historyPage   int
-	historyState  ui.ListState
-	preview       *model.UploadRecord
-	previewOpen   bool
+	historySearch  string
+	historyPage    int
+	historyState   ui.ListState
+	historyVersion int
+	preview        *model.UploadRecord
+	previewOpen    bool
 
 	compOriginal     []byte
 	compName         string
@@ -197,7 +198,20 @@ func (a *App) loadHistory() {
 		log.Printf("load history: %v", err)
 		return
 	}
+	changed := len(h) != len(a.history)
+	if !changed {
+		for i := range h {
+			if h[i].ID != a.history[i].ID || h[i].UploadTime != a.history[i].UploadTime {
+				changed = true
+				break
+			}
+		}
+	}
 	a.history = h
+	if changed {
+		a.historyVersion++
+		a.historyState = ui.ListState{}
+	}
 }
 
 // Refresh reloads data that another window, the proxy or an external tool
@@ -296,6 +310,10 @@ func (a *App) setTheme(theme string) {
 // View builds a frame.
 func (a *App) View(c *ui.Context) {
 	t := c.Theme()
+	if c.Shortcut(ui.Cmd, ui.KeyR) {
+		a.Refresh()
+		a.pushInfo(a.tr("已刷新", "Refreshed"))
+	}
 	if a.migrationNotice {
 		c.AddToast(ui.Toast{
 			Title:       a.tr("已从旧版本迁移配置和上传历史", "Configuration and uploads migrated from the old app"),

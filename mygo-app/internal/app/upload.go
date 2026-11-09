@@ -96,8 +96,9 @@ func (a *App) uploadView(c *ui.Context) {
 	ui.Box(c).Height(20)
 	ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
 		ui.Text(c, a.tr("最近上传", "Recent uploads")).FontSize(16).Bold().Grow(1)
-		if ui.Button(c, a.tr("刷新", "Refresh")).Clicked() {
-			a.loadHistory()
+		if ui.Button(c, a.tr("刷新", "Refresh")).Tooltip("⌘R").Clicked() {
+			a.Refresh()
+			a.pushInfo(a.tr("已刷新", "Refreshed"))
 		}
 		if ui.Button(c, a.tr("查看全部", "View all")).Clicked() {
 			a.page = pageHistory

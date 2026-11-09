@@ -19,8 +19,9 @@ func (a *App) historyPageView(c *ui.Context) {
 		if ui.SearchField(c, &a.historySearch).Label(a.tr("搜索文件名", "Search file names")).Grow(1).Changed() {
 			a.historyPage = 1
 		}
-		if ui.Button(c, a.tr("刷新", "Refresh")).Clicked() {
-			a.loadHistory()
+		if ui.Button(c, a.tr("刷新", "Refresh")).Tooltip("⌘R").Clicked() {
+			a.Refresh()
+			a.pushInfo(a.tr("已刷新", "Refreshed"))
 		}
 		if ui.Button(c, a.tr("清空", "Clear")).Clicked() {
 			a.ask(a.tr("清空上传历史？", "Clear upload history?"),
@@ -108,7 +109,8 @@ func (a *App) historyTable(c *ui.Context, records []model.UploadRecord, compact 
 	}
 	a.historyState.Key = func(i int) any { return records[i].ID }
 	a.historyState.Label = func(i int) string { return records[i].OriginalFilename }
-	ui.Table(c, &a.historyState, cols, len(records), func(row, col int) {
+	tableCtx := c.Key("history-table-" + itoa(a.historyVersion))
+	ui.Table(tableCtx, &a.historyState, cols, len(records), func(row, col int) {
 		rec := records[row]
 		switch col {
 		case 0:
