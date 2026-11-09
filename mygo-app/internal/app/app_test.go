@@ -211,7 +211,7 @@ func TestLanguageToggleWithoutAppReady(t *testing.T) {
 	if !tt.HasText("图片上传") {
 		t.Fatalf("texts = %q", tt.Texts())
 	}
-	if err := tt.Click("中文 / English"); err != nil {
+	if err := tt.Click("中文"); err != nil {
 		t.Fatal(err)
 	}
 	if !tt.HasText("Image upload") {

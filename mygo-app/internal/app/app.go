@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/egoist/mygo"
+	"github.com/egoist/mygo/plugins/glass"
 	"github.com/egoist/mygo/ui"
 
 	"github.com/gusibi/moli-tutu/mygo-app/internal/model"
@@ -329,9 +330,18 @@ func (a *App) View(c *ui.Context) {
 	for _, msg := range toasts {
 		c.AddToast(ui.Toast{Title: msg.Text, Type: msg.Type, Timeout: msg.Timeout})
 	}
-	ui.Row(c).Fill().AlignItems(ui.Stretch).Background(t.Background).Children(func() {
+	bg := t.Background
+	if c.Vibrancy() {
+		c.Root().Background(ui.Transparent)
+		bg = ui.Transparent
+	}
+	contentBg := t.Background
+	if c.Vibrancy() {
+		contentBg = t.Background.Alpha(0.78)
+	}
+	ui.Row(c).Fill().AlignItems(ui.Stretch).Background(bg).Children(func() {
 		a.sidebar(c)
-		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
+		ui.Column(c).Grow(1).MinWidth(0).Background(contentBg).Children(func() {
 			a.titlebar(c)
 			ui.Column(c).Grow(1).Padding(24, 24).MinWidth(0).Children(func() {
 				switch a.page {
@@ -358,7 +368,13 @@ func (a *App) sidebar(c *ui.Context) {
 	if top < 12 {
 		top = 12
 	}
-	ui.Column(c).Width(220).Shrink(0).Background(t.Surface).Children(func() {
+	side := ui.Column(c).Width(220).Shrink(0)
+	if c.Vibrancy() {
+		side.Material(glass.Glass{Style: glass.Regular, Clarity: 0.28, Tint: t.Background.Alpha(0.22)})
+	} else {
+		side.Background(t.Surface)
+	}
+	side.Children(func() {
 		ui.Row(c).Height(top+44).Padding(16, 16).AlignItems(ui.End).DragWindow().Children(func() {
 			ui.Text(c, "Moli TuTu").FontSize(18).Bold()
 		})
@@ -367,36 +383,77 @@ func (a *App) sidebar(c *ui.Context) {
 			ui.SidebarItem(c, pageHistory, iconHistory, a.tr("上传历史", "History"))
 			ui.SidebarItem(c, pageCompress, iconZap, a.tr("图片压缩", "Compress"))
 			ui.SidebarItem(c, pageCompressHistory, iconHistory, a.tr("压缩历史", "Compressed"))
-			ui.SidebarItem(c, pageSettings, iconSettings, a.tr("设置", "Settings"))
 		}).Grow(1).Label("Navigation")
 		if nav.Changed() {
 			a.Refresh()
 		}
-		ui.Column(c).Padding(12).Gap(6).Children(func() {
-			if ui.Button(c, a.tr("中文 / English", "English / 中文")).Clicked() {
-				if a.lang == "zh" {
-					a.setLanguage("en")
-				} else {
-					a.setLanguage("zh")
+		ui.Column(c).Padding(12).Gap(8).Children(func() {
+			ui.Row(c).Gap(6).AlignItems(ui.Center).Children(func() {
+				lang := a.tr("中文", "EN")
+				langBtn := ui.Button(c, lang).Width(56).Height(30).
+					Tooltip(a.tr("切换语言", "Switch language"))
+				langBtn.Background(t.Surface.Alpha(0.72)).Border(1, t.Border.Alpha(0.70)).Radius(8)
+				if langBtn.Clicked() {
+					if a.lang == "zh" {
+						a.setLanguage("en")
+					} else {
+						a.setLanguage("zh")
+					}
 				}
+				themeIcon := iconMoon
+				if a.theme == "dark" {
+					themeIcon = iconSun
+				}
+				themeLabel := map[string]string{
+					"system": a.tr("系统", "System"),
+					"light":  a.tr("浅色", "Light"),
+					"dark":   a.tr("深色", "Dark"),
+				}[a.theme]
+				theme := ui.Button(c, "").Width(72).Height(30).
+					Label(a.tr("切换主题", "Switch theme")).Tooltip(a.tr("切换主题", "Switch theme"))
+				theme.Background(t.Surface.Alpha(0.72)).Border(1, t.Border.Alpha(0.70)).Radius(8)
+				theme.Children(func() {
+					ui.Row(c).Gap(6).AlignItems(ui.Center).Children(func() {
+						ui.Icon(c, themeIcon).Size(14, 14)
+						ui.Text(c, themeLabel).FontSize(12)
+					})
+				})
+				if theme.Clicked() {
+					switch a.theme {
+					case "system":
+						a.setTheme("light")
+					case "light":
+						a.setTheme("dark")
+					default:
+						a.setTheme("system")
+					}
+				}
+			})
+			settings := ui.Button(c, "").Height(32).Label(a.tr("设置", "Settings"))
+			settings.Background(t.Surface.Alpha(0.72)).Border(1, t.Border.Alpha(0.70)).Radius(8)
+			if a.page == pageSettings {
+				settings.Background(t.Accent.Alpha(0.20)).Border(1, t.Accent.Alpha(0.55))
 			}
-			label := map[string]string{
-				"system": a.tr("主题：跟随系统", "Theme: System"),
-				"light":  a.tr("主题：浅色", "Theme: Light"),
-				"dark":   a.tr("主题：深色", "Theme: Dark"),
-			}[a.theme]
-			if ui.Button(c, label).Clicked() {
-				switch a.theme {
-				case "system":
-					a.setTheme("light")
-				case "light":
-					a.setTheme("dark")
-				default:
-					a.setTheme("system")
-				}
+			settings.Children(func() {
+				ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
+					ui.Icon(c, iconSettings).Size(15, 15)
+					ui.Text(c, a.tr("设置", "Settings")).FontSize(13)
+				})
+			})
+			if settings.Clicked() {
+				a.page = pageSettings
+				a.Refresh()
 			}
 		})
 	})
+}
+
+// glassPanel applies Liquid Glass to a panel when the window can show it.
+func (a *App) glassPanel(c *ui.Context, e ui.Element) ui.Element {
+	if c.Vibrancy() {
+		return e.Material(glass.Glass{Clarity: 0.10, Tint: c.Theme().Background.Alpha(0.12)})
+	}
+	return e
 }
 
 func (a *App) titlebar(c *ui.Context) {

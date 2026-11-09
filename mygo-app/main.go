@@ -45,15 +45,15 @@ func main() {
 		}))
 
 		win := mygo.NewWindow(mygo.WindowOptions{
-			Title:                "Moli TuTu",
-			Width:                1000,
-			Height:               700,
-			MinWidth:             800,
-			MinHeight:            560,
-			StateKey:             "main",
-			TitleBarStyle:        mygo.TitleBarHidden,
-			TrafficLightPosition: &mygo.Point{X: 16, Y: 16},
-			Content:              ui.View(a.View),
+			Title:         "Moli TuTu",
+			Width:         1000,
+			Height:        700,
+			MinWidth:      800,
+			MinHeight:     560,
+			StateKey:      "main",
+			TitleBarStyle: mygo.TitleBarHiddenInset,
+			Vibrancy:      mygo.VibrancyGlass,
+			Content:       ui.View(a.View),
 		})
 		a.SetWindow(win)
 		svc.SetWindow(win)

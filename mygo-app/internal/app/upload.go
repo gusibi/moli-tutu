@@ -34,6 +34,7 @@ func (a *App) uploadView(c *ui.Context) {
 
 	zone := ui.Column(c).Height(190).Padding(24).Gap(12).Radius(12).Border(2, t.Border).
 		AlignItems(ui.Center).Justify(ui.Center)
+	zone = a.glassPanel(c, zone)
 	if files := zone.DroppedFiles(); files != nil {
 		a.startUploadPaths(files)
 	}
@@ -66,7 +67,7 @@ func (a *App) uploadView(c *ui.Context) {
 
 	if len(a.uploads) > 0 {
 		ui.Box(c).Height(12)
-		ui.Column(c).Gap(4).Padding(10).Radius(8).Background(t.Surface).Children(func() {
+		a.glassPanel(c, ui.Column(c).Gap(4).Padding(10).Radius(8).Background(t.Surface)).Children(func() {
 			for i := range a.uploads {
 				u := &a.uploads[i]
 				row := ui.Row(c).Gap(8).AlignItems(ui.Center)
