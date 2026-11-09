@@ -52,7 +52,8 @@ func main() {
 			MinHeight:     560,
 			StateKey:      "main",
 			TitleBarStyle: mygo.TitleBarHiddenInset,
-			Vibrancy:      mygo.VibrancyGlassClear,
+			Vibrancy:      mygo.VibrancyGlass,
+			VibrancyTint:  "light-dark(rgba(0,0,0,0.08), rgba(0,0,0,0.24))",
 			Content:       ui.View(a.View),
 		})
 		a.SetWindow(win)

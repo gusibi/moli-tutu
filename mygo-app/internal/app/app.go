@@ -365,12 +365,16 @@ func (a *App) sidebar(c *ui.Context) {
 		top = 12
 	}
 	side := ui.Column(c).Width(220).Shrink(0)
-	if !c.Vibrancy() {
+	if c.Vibrancy() {
+		// Enough tint to keep the sidebar readable while still showing the
+		// desktop through the window's Liquid Glass.
+		side.Background(t.Background.Alpha(0.45))
+	} else {
 		side.Background(t.Surface)
 	}
 	side.Children(func() {
-		ui.Row(c).Height(top+44).Padding(16, 16).AlignItems(ui.End).DragWindow().Children(func() {
-			ui.Text(c, "Moli TuTu").FontSize(18).Bold().TextShadow(0, 1, 5, ui.RGBA(0, 0, 0, 0.55))
+		ui.Row(c).Height(top+24).Padding(0, 16).AlignItems(ui.End).DragWindow().Children(func() {
+			ui.Text(c, "Moli TuTu").FontSize(19).Bold().TextShadow(0, 1, 5, ui.RGBA(0, 0, 0, 0.55))
 		})
 		navItems := []struct {
 			id, label string
@@ -381,9 +385,9 @@ func (a *App) sidebar(c *ui.Context) {
 			{pageCompress, a.tr("图片压缩", "Compress"), iconZap},
 			{pageCompressHistory, a.tr("压缩历史", "Compressed"), iconHistory},
 		}
-		ui.Column(c).Grow(1).Padding(0, 8).Gap(2).Children(func() {
+		ui.Column(c).Grow(1).Padding(0, 10).Gap(4).Children(func() {
 			for _, item := range navItems {
-				row := ui.ButtonBase(c.Key(item.id)).Padding(6, 8).Radius(7).Label(item.label)
+				row := ui.ButtonBase(c.Key(item.id)).Padding(7, 10).Gap(10).Radius(8).Label(item.label)
 				fg := t.Text
 				switch {
 				case a.page == item.id:
@@ -393,8 +397,8 @@ func (a *App) sidebar(c *ui.Context) {
 					row.Background(t.SurfaceHover.Alpha(0.45))
 				}
 				row.Children(func() {
-					ui.Icon(c, item.icon).FontSize(15).TextColor(fg)
-					ui.Text(c, item.label).TextColor(fg).Grow(1)
+					ui.Icon(c, item.icon).FontSize(17).TextColor(fg)
+					ui.Text(c, item.label).FontSize(15).TextColor(fg).Grow(1)
 				})
 				if row.Clicked() && a.page != item.id {
 					a.page = item.id
@@ -403,13 +407,13 @@ func (a *App) sidebar(c *ui.Context) {
 			}
 		})
 		ui.Column(c).Padding(12).Gap(6).Children(func() {
-			ui.Row(c).Gap(4).AlignItems(ui.Center).Children(func() {
+			ui.Row(c).Width(196).Gap(4).AlignItems(ui.Center).Children(func() {
 				lang := a.tr("中文", "EN")
-				langBtn := ui.ButtonBase(c).Padding(5, 8).Radius(6).Label(a.tr("切换语言", "Switch language"))
+				langBtn := ui.ButtonBase(c).Grow(1).Padding(5, 8).Radius(6).Label(a.tr("切换语言", "Switch language"))
 				if langBtn.Hovered() {
 					langBtn.Background(t.SurfaceHover.Alpha(0.35))
 				}
-				langBtn.Children(func() { ui.Text(c, lang).FontSize(12).TextColor(t.Text) })
+				langBtn.Children(func() { ui.Text(c, lang).Grow(1).TextAlign(ui.Center).FontSize(12).TextColor(t.Text) })
 				if langBtn.Clicked() {
 					if a.lang == "zh" {
 						a.setLanguage("en")
@@ -426,12 +430,12 @@ func (a *App) sidebar(c *ui.Context) {
 					"light":  a.tr("浅色", "Light"),
 					"dark":   a.tr("深色", "Dark"),
 				}[a.theme]
-				theme := ui.ButtonBase(c).Padding(5, 8).Radius(6).Label(a.tr("切换主题", "Switch theme"))
+				theme := ui.ButtonBase(c).Grow(1).Padding(5, 8).Radius(6).Label(a.tr("切换主题", "Switch theme"))
 				if theme.Hovered() {
 					theme.Background(t.SurfaceHover.Alpha(0.35))
 				}
 				theme.Children(func() {
-					ui.Row(c).Gap(5).AlignItems(ui.Center).Children(func() {
+					ui.Row(c).Grow(1).Gap(5).Justify(ui.Center).AlignItems(ui.Center).Children(func() {
 						ui.Icon(c, themeIcon).FontSize(12).TextColor(t.Text)
 						ui.Text(c, themeLabel).FontSize(12).TextColor(t.Text)
 					})
@@ -447,7 +451,7 @@ func (a *App) sidebar(c *ui.Context) {
 					}
 				}
 			})
-			settings := ui.ButtonBase(c).Padding(6, 8).Radius(7).Label(a.tr("设置", "Settings"))
+			settings := ui.ButtonBase(c).Width(196).Padding(6, 8).Radius(7).Label(a.tr("设置", "Settings"))
 			if settings.Hovered() {
 				settings.Background(t.SurfaceHover.Alpha(0.35))
 			}
