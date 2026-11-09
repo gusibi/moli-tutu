@@ -28,7 +28,7 @@ The packaged app is written to `dist/darwin-arm64/Moli TuTu.app`.
 ## Liquid Glass and sidebar layout
 
 - The window uses mygo's `VibrancyGlass` material: real Liquid Glass on macOS 26+, the closest system material on older macOS, and Acrylic/none on Windows/Linux.
-- The sidebar and cards use the mygo `plugins/glass` shader, so the glass look is consistent even where the OS material is unavailable.
+- The sidebar uses the mygo `plugins/glass` shader; the content area stays opaque, as in a normal macOS sidebar layout.
 - Settings now lives at the bottom of the sidebar. The language and theme controls are two compact buttons directly above it.
 
 ## History refresh

@@ -105,9 +105,7 @@ func (a *App) compressView(c *ui.Context) {
 
 func (a *App) previewPane(c *ui.Context, label string, src ui.ImageSource) {
 	t := c.Theme()
-	pane := ui.Column(c).Fill().Background(t.Surface).Radius(8)
-	pane = a.glassPanel(c, pane)
-	pane.Children(func() {
+	ui.Column(c).Fill().Background(t.Surface).Radius(8).Children(func() {
 		ui.Row(c).Padding(10, 12).Children(func() {
 			ui.Text(c, label).FontSize(12).Bold().TextColor(t.TextMuted)
 		})

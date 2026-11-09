@@ -335,13 +335,9 @@ func (a *App) View(c *ui.Context) {
 		c.Root().Background(ui.Transparent)
 		bg = ui.Transparent
 	}
-	contentBg := t.Background
-	if c.Vibrancy() {
-		contentBg = t.Background.Alpha(0.78)
-	}
 	ui.Row(c).Fill().AlignItems(ui.Stretch).Background(bg).Children(func() {
 		a.sidebar(c)
-		ui.Column(c).Grow(1).MinWidth(0).Background(contentBg).Children(func() {
+		ui.Column(c).Grow(1).MinWidth(0).Background(t.Background).Children(func() {
 			a.titlebar(c)
 			ui.Column(c).Grow(1).Padding(24, 24).MinWidth(0).Children(func() {
 				switch a.page {
@@ -370,7 +366,7 @@ func (a *App) sidebar(c *ui.Context) {
 	}
 	side := ui.Column(c).Width(220).Shrink(0)
 	if c.Vibrancy() {
-		side.Material(glass.Glass{Style: glass.Regular, Clarity: 0.28, Tint: t.Background.Alpha(0.22)})
+		side.Material(glass.Glass{Style: glass.Regular, Clarity: 0.46, Tint: t.Background.Alpha(0.14)})
 	} else {
 		side.Background(t.Surface)
 	}
@@ -446,14 +442,6 @@ func (a *App) sidebar(c *ui.Context) {
 			}
 		})
 	})
-}
-
-// glassPanel applies Liquid Glass to a panel when the window can show it.
-func (a *App) glassPanel(c *ui.Context, e ui.Element) ui.Element {
-	if c.Vibrancy() {
-		return e.Material(glass.Glass{Clarity: 0.10, Tint: c.Theme().Background.Alpha(0.12)})
-	}
-	return e
 }
 
 func (a *App) titlebar(c *ui.Context) {

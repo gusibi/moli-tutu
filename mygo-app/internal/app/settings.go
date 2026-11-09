@@ -95,10 +95,8 @@ func (a *App) settingsView(c *ui.Context) {
 		for _, cfg := range a.configs.Configs {
 			cfg := cfg
 			active := cfg.ID == a.configs.ActiveID
-			row := ui.Row(c).Gap(10).Padding(12).Radius(10).Background(t.Surface).
-				Border(1, t.Border).AlignItems(ui.Center)
-			row = a.glassPanel(c, row)
-			row.Children(func() {
+			ui.Row(c).Gap(10).Padding(12).Radius(10).Background(t.Surface).
+				Border(1, t.Border).AlignItems(ui.Center).Children(func() {
 				ui.Column(c).Gap(2).Grow(1).Children(func() {
 					ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
 						ui.Text(c, cfg.Name).Bold()
@@ -141,9 +139,7 @@ func (a *App) settingsView(c *ui.Context) {
 
 func (a *App) settingsCard(c *ui.Context, title string, fn func()) {
 	t := c.Theme()
-	card := ui.Column(c).Gap(10).Padding(16).Radius(12).Background(t.Surface).Border(1, t.Border)
-	card = a.glassPanel(c, card)
-	card.Children(func() {
+	ui.Column(c).Gap(10).Padding(16).Radius(12).Background(t.Surface).Border(1, t.Border).Children(func() {
 		ui.Text(c, title).FontSize(15).Bold()
 		fn()
 	})
