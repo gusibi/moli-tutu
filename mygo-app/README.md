@@ -25,6 +25,10 @@ GOTOOLCHAIN=auto GOSUMDB=sum.golang.org \
 
 The packaged app is written to `dist/darwin-arm64/Moli TuTu.app`.
 
+## History refresh
+
+The recent-upload list refreshes after each file finishes, and has its own Refresh button. A repeated image that hits the SHA-256 cache moves its existing history row to the top instead of adding a duplicate row.
+
 ## Shortcuts
 
 - `Cmd+O` — choose images (upload and compress pages)

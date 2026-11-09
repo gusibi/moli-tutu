@@ -94,8 +94,11 @@ func (a *App) uploadView(c *ui.Context) {
 	}
 
 	ui.Box(c).Height(20)
-	ui.Row(c).AlignItems(ui.Center).Children(func() {
+	ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
 		ui.Text(c, a.tr("最近上传", "Recent uploads")).FontSize(16).Bold().Grow(1)
+		if ui.Button(c, a.tr("刷新", "Refresh")).Clicked() {
+			a.loadHistory()
+		}
 		if ui.Button(c, a.tr("查看全部", "View all")).Clicked() {
 			a.page = pageHistory
 		}
@@ -218,7 +221,10 @@ func (a *App) startUploadPaths(paths []string) {
 				defer func() { <-sem }()
 				a.update(func() { a.setStatus(p.name, "uploading", "") })
 				res, err := a.svc.Upload(context.Background(), p.data, p.name, a.progressFunc(p.name))
-				a.update(func() { a.finishStatus(p.name, res, err) })
+				a.update(func() {
+					a.finishStatus(p.name, res, err)
+					a.loadHistory()
+				})
 			}()
 		}
 		wg.Wait()

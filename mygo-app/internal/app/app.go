@@ -336,13 +336,18 @@ func (a *App) sidebar(c *ui.Context) {
 		ui.Row(c).Height(top+44).Padding(16, 16).AlignItems(ui.End).DragWindow().Children(func() {
 			ui.Text(c, "Moli TuTu").FontSize(18).Bold()
 		})
-		ui.Sidebar(c, &a.page, func() {
+		nav := ui.Sidebar(c, &a.page, func() {
 			ui.SidebarItem(c, pageUpload, iconUpload, a.tr("图片上传", "Upload"))
 			ui.SidebarItem(c, pageHistory, iconHistory, a.tr("上传历史", "History"))
 			ui.SidebarItem(c, pageCompress, iconZap, a.tr("图片压缩", "Compress"))
 			ui.SidebarItem(c, pageCompressHistory, iconHistory, a.tr("压缩历史", "Compressed"))
 			ui.SidebarItem(c, pageSettings, iconSettings, a.tr("设置", "Settings"))
 		}).Grow(1).Label("Navigation")
+		if nav.Changed() {
+			a.loadHistory()
+			a.loadConfigs()
+			a.proxy = a.svc.ProxyStatus()
+		}
 		ui.Column(c).Padding(12).Gap(6).Children(func() {
 			if ui.Button(c, a.tr("中文 / English", "English / 中文")).Clicked() {
 				if a.lang == "zh" {

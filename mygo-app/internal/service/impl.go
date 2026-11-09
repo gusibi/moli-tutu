@@ -182,6 +182,9 @@ func (r *Real) Upload(ctx context.Context, data []byte, filename string, progres
 	}
 	hash := sha256Hex(data)
 	if rec, err := r.store.FindByHash(hash); err == nil && rec != nil {
+		// A repeated image is still a new use: move it to the top of the
+		// history so the list reflects what the user just did.
+		_ = r.store.TouchRecord(rec.ID, time.Now().Unix())
 		return model.UploadResult{Success: true, URL: rec.URL, FromCache: true}, nil
 	}
 	m, err := r.managerSnapshot()

@@ -313,6 +313,12 @@ func (s *Store) InsertRecord(r model.UploadRecord) error {
 	return err
 }
 
+// TouchRecord moves a cached record to the top of the history.
+func (s *Store) TouchRecord(id string, when int64) error {
+	_, err := s.db.Exec(`UPDATE uploads SET upload_time = ? WHERE id = ?`, when, id)
+	return err
+}
+
 // DeleteRecord removes one upload.
 func (s *Store) DeleteRecord(id string) error {
 	_, err := s.db.Exec(`DELETE FROM uploads WHERE id = ?`, id)

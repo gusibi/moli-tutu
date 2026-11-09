@@ -57,6 +57,20 @@ func TestRealUploadCacheHistory(t *testing.T) {
 	if history[0].URL != first.URL || history[0].OriginalFilename != "a.png" {
 		t.Fatalf("record = %+v", history[0])
 	}
+	// A cache hit moves the record to the top instead of adding a row.
+	if err := r.store.TouchRecord(history[0].ID, 100); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := r.Upload(context.Background(), data, "a.png", nil); err != nil {
+		t.Fatal(err)
+	}
+	history, err = r.History()
+	if err != nil || len(history) != 1 {
+		t.Fatalf("after cache hit = %+v, %v", history, err)
+	}
+	if history[0].UploadTime <= 100 {
+		t.Fatalf("cache hit did not move record: %+v", history[0])
+	}
 	if err := r.DeleteRecord(history[0].ID); err != nil {
 		t.Fatal(err)
 	}
