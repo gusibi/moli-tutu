@@ -25,6 +25,13 @@ GOTOOLCHAIN=auto GOSUMDB=sum.golang.org \
 
 The packaged app is written to `dist/darwin-arm64/Moli TuTu.app`.
 
+## Shortcuts
+
+- `Cmd+O` — choose images (upload and compress pages)
+- `Shift+Cmd+V` — paste an image from the clipboard (upload and compress pages)
+
+macOS may use the first click on an inactive window only to activate it. If a button click seems to do nothing, click the window once and try again, or use the shortcuts above.
+
 ## Structure
 
 | Package | Responsibility |

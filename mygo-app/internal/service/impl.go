@@ -453,6 +453,9 @@ func (r *Real) SaveFile(defaultName string, data []byte) (string, error) {
 	r.mu.Lock()
 	win := r.win
 	r.mu.Unlock()
+	if win != nil {
+		win.Focus()
+	}
 	name, err := mygo.Dialog.Save(mygo.SaveDialogOptions{Parent: win, DefaultPath: defaultName})
 	if err != nil || name == "" {
 		return "", err
@@ -471,9 +474,16 @@ func (r *Real) ReadClipboardImage() ([]byte, error) {
 	if files, err := mygo.Clipboard.ReadFiles(); err == nil && len(files) > 0 {
 		return os.ReadFile(files[0])
 	}
-	if text := strings.TrimSpace(mygo.Clipboard.ReadText()); strings.HasPrefix(text, "data:image/") {
-		if i := strings.IndexByte(text, ','); i >= 0 {
-			return decodeDataURL(text[i+1:])
+	if text := strings.TrimSpace(mygo.Clipboard.ReadText()); text != "" {
+		if strings.HasPrefix(text, "data:image/") {
+			if i := strings.IndexByte(text, ','); i >= 0 {
+				return decodeDataURL(text[i+1:])
+			}
+		}
+		if isImageFile(text) {
+			if b, err := os.ReadFile(text); err == nil && len(b) > 0 {
+				return b, nil
+			}
 		}
 	}
 	return nil, errors.New("no image in clipboard")
@@ -486,6 +496,14 @@ func (r *Real) OpenURL(s string) { _ = mygo.Shell.OpenExternal(s) }
 func sha256Hex(data []byte) string {
 	sum := sha256.Sum256(data)
 	return hex.EncodeToString(sum[:])
+}
+
+func isImageFile(path string) bool {
+	switch strings.ToLower(filepath.Ext(path)) {
+	case ".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp":
+		return true
+	}
+	return false
 }
 
 func extensionForType(contentType string) string {

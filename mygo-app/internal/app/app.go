@@ -6,6 +6,7 @@ import (
 	"log"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/egoist/mygo"
@@ -93,14 +94,16 @@ type App struct {
 	confirmAction  func()
 
 	thumbs          *ThumbCache
+	toastMu         sync.Mutex
 	toasts          []toastMsg
 	migration       store.MigrationResult
 	migrationNotice bool
 }
 
 type toastMsg struct {
-	Text string
-	Type string
+	Text    string
+	Type    string
+	Timeout time.Duration
 }
 
 // New loads the initial state from the service.
@@ -228,11 +231,21 @@ func (a *App) update(fn func()) {
 }
 
 func (a *App) pushToast(msg string) {
+	a.toastMu.Lock()
 	a.toasts = append(a.toasts, toastMsg{Text: msg})
+	a.toastMu.Unlock()
+}
+
+func (a *App) pushInfo(msg string) {
+	a.toastMu.Lock()
+	a.toasts = append(a.toasts, toastMsg{Text: msg, Timeout: 2 * time.Second})
+	a.toastMu.Unlock()
 }
 
 func (a *App) pushError(msg string) {
+	a.toastMu.Lock()
 	a.toasts = append(a.toasts, toastMsg{Text: a.localizeError(msg), Type: "error"})
+	a.toastMu.Unlock()
 }
 
 func (a *App) localizeError(msg string) string {
@@ -283,10 +296,13 @@ func (a *App) View(c *ui.Context) {
 		})
 		a.migrationNotice = false
 	}
-	for _, msg := range a.toasts {
-		c.AddToast(ui.Toast{Title: msg.Text, Type: msg.Type})
-	}
+	a.toastMu.Lock()
+	toasts := a.toasts
 	a.toasts = nil
+	a.toastMu.Unlock()
+	for _, msg := range toasts {
+		c.AddToast(ui.Toast{Title: msg.Text, Type: msg.Type, Timeout: msg.Timeout})
+	}
 	ui.Row(c).Fill().AlignItems(ui.Stretch).Background(t.Background).Children(func() {
 		a.sidebar(c)
 		ui.Column(c).Grow(1).MinWidth(0).Children(func() {

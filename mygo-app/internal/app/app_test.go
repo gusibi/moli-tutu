@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/egoist/mygo/ui"
 
@@ -21,6 +22,8 @@ type fakeService struct {
 	opened       []string
 	uploaded     []string
 	compressData model.CompressResult
+	pickCalls    chan struct{}
+	clipCalls    chan struct{}
 }
 
 func newFake() *fakeService {
@@ -31,6 +34,8 @@ func newFake() *fakeService {
 			Data: []byte("compressed"), OriginalSize: 100, CompressedSize: 50,
 			CompressionRatio: 50, Format: "jpeg", Width: 10, Height: 10,
 		},
+		pickCalls: make(chan struct{}, 1),
+		clipCalls: make(chan struct{}, 1),
 	}
 }
 
@@ -114,13 +119,25 @@ func (f *fakeService) SaveSettings(s model.AppSettings) error {
 	return nil
 }
 func (f *fakeService) Migration() store.MigrationResult { return store.MigrationResult{} }
-func (f *fakeService) PickImages() ([]string, error)    { return nil, errors.New("not in tests") }
+func (f *fakeService) PickImages() ([]string, error) {
+	select {
+	case f.pickCalls <- struct{}{}:
+	default:
+	}
+	return nil, errors.New("not in tests")
+}
 func (f *fakeService) SaveFile(string, []byte) (string, error) {
 	return "saved", nil
 }
-func (f *fakeService) ReadClipboardImage() ([]byte, error) { return nil, errors.New("no image") }
-func (f *fakeService) CopyText(s string)                   { f.copied = append(f.copied, s) }
-func (f *fakeService) OpenURL(s string)                    { f.opened = append(f.opened, s) }
+func (f *fakeService) ReadClipboardImage() ([]byte, error) {
+	select {
+	case f.clipCalls <- struct{}{}:
+	default:
+	}
+	return nil, errors.New("no image")
+}
+func (f *fakeService) CopyText(s string) { f.copied = append(f.copied, s) }
+func (f *fakeService) OpenURL(s string)  { f.opened = append(f.opened, s) }
 
 func TestUploadPageRenders(t *testing.T) {
 	f := newFake()
@@ -199,5 +216,45 @@ func TestLanguageToggleWithoutAppReady(t *testing.T) {
 	}
 	if !tt.HasText("Image upload") {
 		t.Fatalf("after toggle: %q", tt.Texts())
+	}
+}
+
+func TestChooseAndPasteButtonsReact(t *testing.T) {
+	f := newFake()
+	a := New(f)
+	tt := ui.NewTester(a.View, 1000, 700)
+	if err := tt.Click("Choose images"); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-f.pickCalls:
+	case <-time.After(2 * time.Second):
+		t.Fatal("choose button did not call PickImages")
+	}
+	if err := tt.Click("Paste from clipboard"); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-f.clipCalls:
+	case <-time.After(2 * time.Second):
+		t.Fatal("paste button did not call ReadClipboardImage")
+	}
+}
+
+func TestChooseAndPasteShortcuts(t *testing.T) {
+	f := newFake()
+	a := New(f)
+	tt := ui.NewTester(a.View, 1000, 700)
+	tt.Key(ui.Cmd, ui.KeyO)
+	select {
+	case <-f.pickCalls:
+	case <-time.After(2 * time.Second):
+		t.Fatal("Cmd+O did not call PickImages")
+	}
+	tt.Key(ui.Cmd|ui.Shift, ui.KeyV)
+	select {
+	case <-f.clipCalls:
+	case <-time.After(2 * time.Second):
+		t.Fatal("Cmd+Shift+V did not call ReadClipboardImage")
 	}
 }

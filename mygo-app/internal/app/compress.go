@@ -19,6 +19,12 @@ var (
 
 func (a *App) compressView(c *ui.Context) {
 	t := c.Theme()
+	if c.Shortcut(ui.Cmd, ui.KeyO) {
+		go a.chooseCompressImage()
+	}
+	if c.Shortcut(ui.Cmd|ui.Shift, ui.KeyV) {
+		go a.pasteCompressImage()
+	}
 	a.pageHeader(c, a.tr("图片压缩", "Image compression"), a.tr("在本地压缩、缩放并预览，再保存或直接上传。", "Compress, resize and compare locally, then save or upload."))
 	ui.Box(c).Height(12)
 	if len(a.compOriginal) == 0 {
@@ -34,10 +40,10 @@ func (a *App) compressView(c *ui.Context) {
 			ui.Text(c, a.tr("拖入一张图片开始压缩", "Drop an image to compress")).FontSize(18).Bold()
 			ui.Text(c, a.tr("支持 JPEG、PNG、WebP、GIF、BMP", "JPEG, PNG, WebP, GIF and BMP are supported")).FontSize(13).TextColor(t.TextMuted)
 			ui.Row(c).Gap(10).Children(func() {
-				if ui.PrimaryButton(c, a.tr("选择图片", "Choose image")).Clicked() {
+				if ui.PrimaryButton(c, a.tr("选择图片", "Choose image")).Tooltip("⌘O").Clicked() {
 					go a.chooseCompressImage()
 				}
-				if ui.Button(c, a.tr("从剪贴板粘贴", "Paste from clipboard")).Clicked() {
+				if ui.Button(c, a.tr("从剪贴板粘贴", "Paste from clipboard")).Tooltip("⇧⌘V").Clicked() {
 					go a.pasteCompressImage()
 				}
 			})
@@ -194,6 +200,7 @@ func (a *App) compressSettings(c *ui.Context) {
 }
 
 func (a *App) chooseCompressImage() {
+	a.update(func() { a.pushInfo(a.tr("正在打开文件选择器…", "Opening the file picker…")) })
 	paths, err := a.svc.PickImages()
 	if err != nil || len(paths) == 0 {
 		return
@@ -202,6 +209,7 @@ func (a *App) chooseCompressImage() {
 }
 
 func (a *App) pasteCompressImage() {
+	a.update(func() { a.pushInfo(a.tr("正在读取剪贴板…", "Reading the clipboard…")) })
 	data, err := a.svc.ReadClipboardImage()
 	if err != nil || len(data) == 0 {
 		a.update(func() { a.pushToast(a.tr("剪贴板里没有图片", "No image in the clipboard")) })

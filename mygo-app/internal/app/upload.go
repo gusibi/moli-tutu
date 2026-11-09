@@ -14,6 +14,12 @@ import (
 
 func (a *App) uploadView(c *ui.Context) {
 	t := c.Theme()
+	if c.Shortcut(ui.Cmd, ui.KeyO) {
+		go a.chooseImages()
+	}
+	if c.Shortcut(ui.Cmd|ui.Shift, ui.KeyV) {
+		go a.pasteImage()
+	}
 	a.pageHeader(c, a.tr("图片上传", "Image upload"), a.tr("拖拽、选择、粘贴或输入图片链接，上传到当前启用的存储。", "Drop, pick, paste or enter an image URL. Uploads go to the active storage."))
 	ui.Box(c).Height(8)
 
@@ -38,10 +44,10 @@ func (a *App) uploadView(c *ui.Context) {
 		ui.Text(c, a.tr("把图片拖到这里", "Drop images here")).FontSize(18).Bold()
 		ui.Text(c, a.tr("或选择一个/多个文件，也可以直接粘贴截图", "Or choose one or more files, or paste a screenshot")).FontSize(13).TextColor(t.TextMuted)
 		ui.Row(c).Gap(10).Children(func() {
-			if ui.PrimaryButton(c, a.tr("选择图片", "Choose images")).Clicked() {
+			if ui.PrimaryButton(c, a.tr("选择图片", "Choose images")).Tooltip("⌘O").Clicked() {
 				go a.chooseImages()
 			}
-			if ui.Button(c, a.tr("从剪贴板粘贴", "Paste from clipboard")).Clicked() {
+			if ui.Button(c, a.tr("从剪贴板粘贴", "Paste from clipboard")).Tooltip("⇧⌘V").Clicked() {
 				go a.pasteImage()
 			}
 		})
@@ -103,6 +109,7 @@ func (a *App) uploadView(c *ui.Context) {
 }
 
 func (a *App) chooseImages() {
+	a.update(func() { a.pushInfo(a.tr("正在打开文件选择器…", "Opening the file picker…")) })
 	paths, err := a.svc.PickImages()
 	if err != nil || len(paths) == 0 {
 		return
@@ -111,6 +118,7 @@ func (a *App) chooseImages() {
 }
 
 func (a *App) pasteImage() {
+	a.update(func() { a.pushInfo(a.tr("正在读取剪贴板…", "Reading the clipboard…")) })
 	data, err := a.svc.ReadClipboardImage()
 	if err != nil || len(data) == 0 {
 		a.update(func() { a.pushToast(a.tr("剪贴板里没有图片", "No image in the clipboard")) })
