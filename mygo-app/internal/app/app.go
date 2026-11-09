@@ -336,6 +336,7 @@ func (a *App) View(c *ui.Context) {
 	}
 	ui.Row(c).Fill().AlignItems(ui.Stretch).Background(bg).Children(func() {
 		a.sidebar(c)
+		ui.Box(c).Width(1).Background(t.Border.Alpha(0.35))
 		ui.Column(c).Grow(1).MinWidth(0).Background(t.Background).Children(func() {
 			a.titlebar(c)
 			ui.Column(c).Grow(1).Padding(24, 24).MinWidth(0).Children(func() {
@@ -371,22 +372,44 @@ func (a *App) sidebar(c *ui.Context) {
 		ui.Row(c).Height(top+44).Padding(16, 16).AlignItems(ui.End).DragWindow().Children(func() {
 			ui.Text(c, "Moli TuTu").FontSize(18).Bold().TextShadow(0, 1, 5, ui.RGBA(0, 0, 0, 0.55))
 		})
-		shadow := ui.RGBA(0, 0, 0, 0.65)
-		nav := ui.Sidebar(c, &a.page, func() {
-			ui.SidebarItem(c, pageUpload, iconUpload, a.tr("图片上传", "Upload")).TextShadow(0, 1, 4, shadow)
-			ui.SidebarItem(c, pageHistory, iconHistory, a.tr("上传历史", "History")).TextShadow(0, 1, 4, shadow)
-			ui.SidebarItem(c, pageCompress, iconZap, a.tr("图片压缩", "Compress")).TextShadow(0, 1, 4, shadow)
-			ui.SidebarItem(c, pageCompressHistory, iconHistory, a.tr("压缩历史", "Compressed")).TextShadow(0, 1, 4, shadow)
-		}).Grow(1).Label("Navigation")
-		if nav.Changed() {
-			a.Refresh()
+		navItems := []struct {
+			id, label string
+			icon      *ui.SVG
+		}{
+			{pageUpload, a.tr("图片上传", "Upload"), iconUpload},
+			{pageHistory, a.tr("上传历史", "History"), iconHistory},
+			{pageCompress, a.tr("图片压缩", "Compress"), iconZap},
+			{pageCompressHistory, a.tr("压缩历史", "Compressed"), iconHistory},
 		}
-		ui.Column(c).Padding(12).Gap(8).Children(func() {
-			ui.Row(c).Gap(6).AlignItems(ui.Center).Children(func() {
+		ui.Column(c).Grow(1).Padding(0, 8).Gap(2).Children(func() {
+			for _, item := range navItems {
+				row := ui.ButtonBase(c.Key(item.id)).Padding(6, 8).Radius(7).Label(item.label)
+				fg := t.Text
+				switch {
+				case a.page == item.id:
+					row.Background(t.Accent)
+					fg = t.AccentText
+				case row.Hovered():
+					row.Background(t.SurfaceHover.Alpha(0.45))
+				}
+				row.Children(func() {
+					ui.Icon(c, item.icon).FontSize(15).TextColor(fg)
+					ui.Text(c, item.label).TextColor(fg).Grow(1)
+				})
+				if row.Clicked() && a.page != item.id {
+					a.page = item.id
+					a.Refresh()
+				}
+			}
+		})
+		ui.Column(c).Padding(12).Gap(6).Children(func() {
+			ui.Row(c).Gap(4).AlignItems(ui.Center).Children(func() {
 				lang := a.tr("中文", "EN")
-				langBtn := ui.Button(c, lang).Width(56).Height(30).
-					Tooltip(a.tr("切换语言", "Switch language"))
-				langBtn.Background(t.Surface.Alpha(0.72)).Border(1, t.Border.Alpha(0.70)).Radius(8)
+				langBtn := ui.ButtonBase(c).Padding(5, 8).Radius(6).Label(a.tr("切换语言", "Switch language"))
+				if langBtn.Hovered() {
+					langBtn.Background(t.SurfaceHover.Alpha(0.35))
+				}
+				langBtn.Children(func() { ui.Text(c, lang).FontSize(12).TextColor(t.Text) })
 				if langBtn.Clicked() {
 					if a.lang == "zh" {
 						a.setLanguage("en")
@@ -403,13 +426,14 @@ func (a *App) sidebar(c *ui.Context) {
 					"light":  a.tr("浅色", "Light"),
 					"dark":   a.tr("深色", "Dark"),
 				}[a.theme]
-				theme := ui.Button(c, "").Width(72).Height(30).
-					Label(a.tr("切换主题", "Switch theme")).Tooltip(a.tr("切换主题", "Switch theme"))
-				theme.Background(t.Surface.Alpha(0.72)).Border(1, t.Border.Alpha(0.70)).Radius(8)
+				theme := ui.ButtonBase(c).Padding(5, 8).Radius(6).Label(a.tr("切换主题", "Switch theme"))
+				if theme.Hovered() {
+					theme.Background(t.SurfaceHover.Alpha(0.35))
+				}
 				theme.Children(func() {
-					ui.Row(c).Gap(6).AlignItems(ui.Center).Children(func() {
-						ui.Icon(c, themeIcon).Size(14, 14)
-						ui.Text(c, themeLabel).FontSize(12)
+					ui.Row(c).Gap(5).AlignItems(ui.Center).Children(func() {
+						ui.Icon(c, themeIcon).FontSize(12).TextColor(t.Text)
+						ui.Text(c, themeLabel).FontSize(12).TextColor(t.Text)
 					})
 				})
 				if theme.Clicked() {
@@ -423,15 +447,18 @@ func (a *App) sidebar(c *ui.Context) {
 					}
 				}
 			})
-			settings := ui.Button(c, "").Height(32).Label(a.tr("设置", "Settings"))
-			settings.Background(t.Surface.Alpha(0.72)).Border(1, t.Border.Alpha(0.70)).Radius(8)
-			if a.page == pageSettings {
-				settings.Background(t.Accent.Alpha(0.20)).Border(1, t.Accent.Alpha(0.55))
+			settings := ui.ButtonBase(c).Padding(6, 8).Radius(7).Label(a.tr("设置", "Settings"))
+			if settings.Hovered() {
+				settings.Background(t.SurfaceHover.Alpha(0.35))
 			}
 			settings.Children(func() {
 				ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
-					ui.Icon(c, iconSettings).Size(15, 15)
-					ui.Text(c, a.tr("设置", "Settings")).FontSize(13)
+					fg := t.Text
+					if a.page == pageSettings {
+						fg = t.Accent
+					}
+					ui.Icon(c, iconSettings).FontSize(14).TextColor(fg)
+					ui.Text(c, a.tr("设置", "Settings")).FontSize(12).TextColor(fg)
 				})
 			})
 			if settings.Clicked() {
