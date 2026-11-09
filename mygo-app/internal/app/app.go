@@ -373,8 +373,8 @@ func (a *App) sidebar(c *ui.Context) {
 		side.Background(t.Surface)
 	}
 	side.Children(func() {
-		ui.Row(c).Height(top+24).Padding(0, 16).AlignItems(ui.End).DragWindow().Children(func() {
-			ui.Text(c, "Moli TuTu").FontSize(19).Bold().TextShadow(0, 1, 5, ui.RGBA(0, 0, 0, 0.55))
+		ui.Row(c).Height(top+12).Padding(0, 16).AlignItems(ui.End).DragWindow().Children(func() {
+			ui.Text(c, "Moli TuTu").FontSize(18).Bold().TextShadow(0, 1, 5, ui.RGBA(0, 0, 0, 0.55))
 		})
 		navItems := []struct {
 			id, label string
@@ -385,6 +385,7 @@ func (a *App) sidebar(c *ui.Context) {
 			{pageCompress, a.tr("图片压缩", "Compress"), iconZap},
 			{pageCompressHistory, a.tr("压缩历史", "Compressed"), iconHistory},
 		}
+		ui.Box(c).Height(12)
 		ui.Column(c).Grow(1).Padding(0, 10).Gap(4).Children(func() {
 			for _, item := range navItems {
 				row := ui.ButtonBase(c.Key(item.id)).Padding(7, 10).Gap(10).Radius(8).Label(item.label)
@@ -397,8 +398,8 @@ func (a *App) sidebar(c *ui.Context) {
 					row.Background(t.SurfaceHover.Alpha(0.45))
 				}
 				row.Children(func() {
-					ui.Icon(c, item.icon).FontSize(17).TextColor(fg)
-					ui.Text(c, item.label).FontSize(15).TextColor(fg).Grow(1)
+					ui.Icon(c, item.icon).FontSize(16).TextColor(fg)
+					ui.Text(c, item.label).FontSize(14).TextColor(fg).Grow(1)
 				})
 				if row.Clicked() && a.page != item.id {
 					a.page = item.id
@@ -474,10 +475,7 @@ func (a *App) sidebar(c *ui.Context) {
 }
 
 func (a *App) titlebar(c *ui.Context) {
-	t := c.Theme()
-	ui.Row(c).Height(34).Padding(0, 24).AlignItems(ui.Center).DragWindow().Children(func() {
-		ui.Text(c, a.pageTitle()).FontSize(12).TextColor(t.TextMuted)
-	})
+	ui.Row(c).Height(34).DragWindow()
 }
 
 func (a *App) pageTitle() string {
