@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/egoist/mygo"
-	"github.com/egoist/mygo/plugins/glass"
 	"github.com/egoist/mygo/ui"
 
 	"github.com/gusibi/moli-tutu/mygo-app/internal/model"
@@ -366,7 +365,9 @@ func (a *App) sidebar(c *ui.Context) {
 	}
 	side := ui.Column(c).Width(220).Shrink(0)
 	if c.Vibrancy() {
-		side.Material(glass.Glass{Style: glass.Regular, Clarity: 0.46, Tint: t.Background.Alpha(0.14)})
+		// A light tint keeps the sidebar readable over bright desktops while
+		// leaving the window's Liquid Glass visible.
+		side.Background(t.Background.Alpha(0.42))
 	} else {
 		side.Background(t.Surface)
 	}
