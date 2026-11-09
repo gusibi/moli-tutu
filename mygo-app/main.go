@@ -57,6 +57,8 @@ func main() {
 		})
 		a.SetWindow(win)
 		svc.SetWindow(win)
+		win.OnFocus(a.Refresh)
+		win.OnShow(a.Refresh)
 	})
 	if err := mygo.App.Run(); err != nil {
 		log.Fatal(err)

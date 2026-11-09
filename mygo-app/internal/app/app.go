@@ -200,6 +200,14 @@ func (a *App) loadHistory() {
 	a.history = h
 }
 
+// Refresh reloads data that another window, the proxy or an external tool
+// may have changed.
+func (a *App) Refresh() {
+	a.loadHistory()
+	a.loadConfigs()
+	a.proxy = a.svc.ProxyStatus()
+}
+
 func (a *App) loadCompressHistory() {
 	h, err := a.svc.CompressHistory()
 	if err != nil {
@@ -344,9 +352,7 @@ func (a *App) sidebar(c *ui.Context) {
 			ui.SidebarItem(c, pageSettings, iconSettings, a.tr("设置", "Settings"))
 		}).Grow(1).Label("Navigation")
 		if nav.Changed() {
-			a.loadHistory()
-			a.loadConfigs()
-			a.proxy = a.svc.ProxyStatus()
+			a.Refresh()
 		}
 		ui.Column(c).Padding(12).Gap(6).Children(func() {
 			if ui.Button(c, a.tr("中文 / English", "English / 中文")).Clicked() {
