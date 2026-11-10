@@ -11,15 +11,15 @@
 
 <!-- SEO: Primary -->
 <title data-i18n="meta.title">MoliTutu — Smart Image Compression &amp; Cloud Upload</title>
-<meta name="description" data-i18n="meta.desc" content="MoliTutu is a free, open-source desktop app for intelligent image compression and direct upload to Cloudflare R2. Privacy-first, local-only processing.">
-<meta name="keywords" data-i18n="meta.keywords" content="image compression, cloudflare r2, image uploader, open source, tauri, image optimizer, png compressor, webp converter">
+<meta name="description" data-i18n="meta.desc" content="MoliTutu is a free, open-source native desktop app for intelligent image compression and direct upload to Cloudflare R2. Built with Go and mygo, no WebView, local-only processing.">
+<meta name="keywords" data-i18n="meta.keywords" content="image compression, cloudflare r2, image uploader, open source, go, native desktop, liquid glass, image optimizer, png compressor, webp converter">
 <link rel="canonical" href="https://tutu.eztoolab.com/">
 <meta name="robots" content="index, follow">
 <meta name="author" content="Gusi">
 
 <!-- Open Graph -->
 <meta property="og:title" data-i18n="meta.ogTitle" content="MoliTutu — Smart Image Compression & Cloud Upload">
-<meta property="og:description" data-i18n="meta.ogDesc" content="Free, open-source desktop app for intelligent image compression and direct Cloudflare R2 upload.">
+<meta property="og:description" data-i18n="meta.ogDesc" content="Free, open-source native desktop app for intelligent image compression and direct Cloudflare R2 upload. Built with Go and mygo.">
 <meta property="og:url" content="https://tutu.eztoolab.com/">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://tutu.eztoolab.com/images/og-image.png">
@@ -30,7 +30,7 @@
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" data-i18n="meta.twitterTitle" content="MoliTutu — Smart Image Compression & Cloud Upload">
-<meta name="twitter:description" data-i18n="meta.twitterDesc" content="Free, open-source desktop app for intelligent image compression and direct Cloudflare R2 upload.">
+<meta name="twitter:description" data-i18n="meta.twitterDesc" content="Free, open-source native desktop app for intelligent image compression and direct Cloudflare R2 upload. Built with Go and mygo.">
 <meta name="twitter:image" content="https://tutu.eztoolab.com/images/og-image.png">
 
 <!-- Hreflang -->
@@ -283,7 +283,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-light);color:#1e293b;tra
       <div class="flex-1 text-center lg:text-left">
         <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
           <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-          <span data-i18n="hero.badge">Open Source · v0.4.0</span>
+          <span data-i18n="hero.badge">Open Source · v0.5.0</span>
         </div>
         <h1 class="font-heading text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold tracking-tight leading-[1.1] mb-6">
           <span data-i18n="hero.titleLine1">Smart Image</span><br>
@@ -291,7 +291,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-light);color:#1e293b;tra
           <span data-i18n="hero.titleLine3">Cloud Upload</span>
         </h1>
         <p class="text-lg sm:text-xl text-slate-500 dark:text-slate-400 max-w-xl lg:mx-0 mx-auto mb-8 leading-relaxed" data-i18n="hero.desc">
-          Free, open-source desktop app for intelligent image compression and direct upload to Cloudflare R2. Privacy-first. Local-only. No strings attached.
+          Free, open-source native desktop app for intelligent image compression and upload to Cloudflare R2 and 13 other providers. Built with Go and mygo, no WebView. Privacy-first. Local-only.
         </p>
         <div class="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
           <a href="https://github.com/gusibi/moli-tutu/releases" target="_blank" rel="noopener" class="btn-primary">
@@ -483,7 +483,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-light);color:#1e293b;tra
       <div class="glass-card p-8 text-center hover:-translate-y-1 transition-transform reveal">
         <div class="use-case-icon mx-auto mb-5 bg-teal-50 dark:bg-teal-900/20 text-teal">🎨</div>
         <h3 class="font-heading font-bold text-lg mb-3" data-i18n="useCases.designer.title">Designers</h3>
-        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="useCases.designer.desc">Compress portfolios and mockups before sharing. Maintain visual fidelity at 60-80% smaller sizes.</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed" data-i18n="useCases.designer.desc">Compress portfolios and mockups before sharing. Maintain visual fidelity at up to 80% smaller sizes.</p>
       </div>
       <div class="glass-card p-8 text-center hover:-translate-y-1 transition-transform reveal">
         <div class="use-case-icon mx-auto mb-5 bg-rose-50 dark:bg-rose-900/20 text-rose">🚀</div>
@@ -499,7 +499,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-light);color:#1e293b;tra
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center max-w-2xl mx-auto mb-16 reveal">
       <h2 class="font-heading text-3xl sm:text-4xl font-extrabold mb-4" data-i18n="tech.title">Technical Details</h2>
-      <p class="text-lg text-slate-500 dark:text-slate-400" data-i18n="tech.subtitle">Built with Tauri and Rust for maximum performance and minimal footprint.</p>
+      <p class="text-lg text-slate-500 dark:text-slate-400" data-i18n="tech.subtitle">Built with mygo and Go for maximum performance and minimal footprint.</p>
     </div>
 
     <div class="grid md:grid-cols-3 gap-6 stagger">
@@ -525,11 +525,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg-light);color:#1e293b;tra
           <span data-i18n="tech.benchmarksTitle">Benchmarks</span>
         </h3>
         <ul class="space-y-3">
-          <li class="flex items-center justify-between text-sm"><span data-i18n="tech.benchRatio">Compression Ratio</span><span class="font-semibold text-primary">60-80%</span></li>
-          <li class="flex items-center justify-between text-sm"><span data-i18n="tech.benchSpeed">Processing Speed</span><span class="font-semibold text-primary">~50 img/s</span></li>
-          <li class="flex items-center justify-between text-sm"><span data-i18n="tech.benchMemory">Memory (idle)</span><span class="font-semibold text-primary">~50 MB</span></li>
-          <li class="flex items-center justify-between text-sm"><span data-i18n="tech.benchMemoryLoad">Memory (load)</span><span class="font-semibold text-primary">~200 MB</span></li>
-          <li class="flex items-center justify-between text-sm"><span data-i18n="tech.benchAPI">API Latency</span><span class="font-semibold text-primary">&lt;100ms</span></li>
+          <li class="flex items-center justify-between text-sm"><span data-i18n="tech.benchRatio">Compression Ratio</span><span class="font-semibold text-primary">up to 80%</span></li>
+          <li class="flex items-center justify-between text-sm"><span data-i18n="tech.benchSpeed">Processing Speed</span><span class="font-semibold text-primary">Native</span></li>
+          <li class="flex items-center justify-between text-sm"><span data-i18n="tech.benchMemory">Memory (idle)</span><span class="font-semibold text-primary">Low</span></li>
+          <li class="flex items-center justify-between text-sm"><span data-i18n="tech.benchMemoryLoad">Memory (load)</span><span class="font-semibold text-primary">Bounded</span></li>
+          <li class="flex items-center justify-between text-sm"><span data-i18n="tech.benchAPI">API Latency</span><span class="font-semibold text-primary">Local</span></li>
         </ul>
       </div>
 
@@ -540,9 +540,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-light);color:#1e293b;tra
           <span data-i18n="tech.stackTitle">Tech Stack</span>
         </h3>
         <ul class="space-y-3">
-          <li class="flex items-center justify-between text-sm"><span>Frontend</span><span class="font-mono text-xs text-slate-400">React + TypeScript</span></li>
-          <li class="flex items-center justify-between text-sm"><span>Desktop</span><span class="font-mono text-xs text-slate-400">Tauri (Rust)</span></li>
-          <li class="flex items-center justify-between text-sm"><span>Image Processing</span><span class="font-mono text-xs text-slate-400">Rust crates</span></li>
+          <li class="flex items-center justify-between text-sm"><span>UI</span><span class="font-mono text-xs text-slate-400">mygo native UI</span></li>
+          <li class="flex items-center justify-between text-sm"><span>Desktop</span><span class="font-mono text-xs text-slate-400">Go (no WebView)</span></li>
+          <li class="flex items-center justify-between text-sm"><span>Image Processing</span><span class="font-mono text-xs text-slate-400">Go image pipeline</span></li>
           <li class="flex items-center justify-between text-sm"><span>Storage</span><span class="font-mono text-xs text-slate-400">Cloudflare R2 (S3)</span></li>
           <li class="flex items-center justify-between text-sm"><span>License</span><span class="font-mono text-xs text-primary font-semibold">MIT</span></li>
         </ul>
@@ -557,11 +557,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-light);color:#1e293b;tra
           <span data-i18n="tech.apiExample">API Example — Upload via cURL</span>
         </h3>
         <div class="code-block">
-          <span class="comment"># Compress and upload in one command</span><br>
-          <span class="keyword">curl</span> -X POST http://localhost:3001/upload \<br>
-          &nbsp;&nbsp;-F <span class="string">"file=@screenshot.png"</span> \<br>
-          &nbsp;&nbsp;-F <span class="string">"quality=80"</span> \<br>
-          &nbsp;&nbsp;-F <span class="string">"format=webp"</span>
+          <span class="comment"># Upload from scripts and CI</span><br>
+          <span class="keyword">curl</span> -X POST http://127.0.0.1:38123/upload \<br>
+          &nbsp;&nbsp;-F <span class="string">"file=@screenshot.png"</span>
         </div>
       </div>
     </div>
@@ -718,7 +716,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-light);color:#1e293b;tra
           <svg class="faq-toggle w-5 h-5 text-slate-400 shrink-0 ml-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
         </button>
         <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-          <div class="px-6 pb-6 text-sm text-slate-500 dark:text-slate-400 leading-relaxed" itemprop="text" data-i18n="faq.q3.a">MoliTutu currently supports macOS (Intel and Apple Silicon) and Windows 10/11. It is built with Tauri, which provides native performance and a small footprint. Linux support is on the roadmap.</div>
+          <div class="px-6 pb-6 text-sm text-slate-500 dark:text-slate-400 leading-relaxed" itemprop="text" data-i18n="faq.q3.a">MoliTutu supports macOS 12+, Windows 10+ and Linux. It is built with mygo and Go: a native UI drawn on the GPU, with no WebView and no frontend runtime.</div>
         </div>
       </div>
       <div class="glass-card overflow-hidden reveal" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
@@ -824,7 +822,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-light);color:#1e293b;tra
 
     <div class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
       <p class="text-sm text-slate-400" data-i18n="footer.copyright">© 2026 MoliTutu. Open Source. MIT License.</p>
-      <p class="text-xs text-slate-400" data-i18n="footer.builtWith">Built with Tauri · Rust · React</p>
+      <p class="text-xs text-slate-400" data-i18n="footer.builtWith">Built with mygo · Go · Native UI</p>
     </div>
   </div>
 </footer>
@@ -840,7 +838,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-light);color:#1e293b;tra
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "MoliTutu",
-  "operatingSystem": "macOS, Windows",
+  "operatingSystem": "macOS 12+, Windows 10+, Linux",
   "applicationCategory": "Multimedia",
   "applicationSubCategory": "Image Compression",
   "genre": "Utility, Productivity",
@@ -850,9 +848,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-light);color:#1e293b;tra
     "priceCurrency": "USD",
     "priceValidUntil": "2030-12-31"
   },
-  "description": "Free, open-source desktop app for intelligent image compression and direct upload to Cloudflare R2. Privacy-first, local-only processing.",
-  "softwareVersion": "1.0.0",
-  "softwareRequirements": "macOS 11+ or Windows 10+",
+  "description": "Free, open-source native desktop app for intelligent image compression and direct upload to Cloudflare R2. Built with Go and mygo, with no WebView.",
+  "softwareVersion": "0.5.0",
+  "softwareRequirements": "macOS 12+, Windows 10+, Linux",
   "author": {
     "@type": "Person",
     "name": "Gusi",
@@ -885,7 +883,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-light);color:#1e293b;tra
   "@type": "Person",
   "name": "Gusi",
   "url": "https://github.com/gusibi",
-  "knowsAbout": ["Image Compression", "Cloud Storage", "Rust", "Tauri", "React", "TypeScript"]
+  "knowsAbout": ["Image Compression", "Cloud Storage", "Go", "mygo", "Native UI", "Liquid Glass"]
 }
 </script>
 <script type="application/ld+json">

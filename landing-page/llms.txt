@@ -2,7 +2,7 @@
 > Smart Image Compression & Cloud Upload Tool
 
 ## What is MoliTutu?
-MoliTutu is a free, open-source desktop application built with Tauri that intelligently compresses images and uploads them directly to Cloudflare R2 storage. It runs locally on macOS and Windows, prioritizing user privacy and workflow efficiency.
+MoliTutu is a free, open-source native desktop application built with Go and mygo. It compresses images and uploads them directly to Cloudflare R2 or 13 other storage providers. It runs locally on macOS 12+, Windows 10+ and Linux, with no WebView, no frontend runtime, and no data collection.
 
 ## Key Pages
 - Landing Page: https://tutu.eztoolab.com/
@@ -17,12 +17,14 @@ MoliTutu is a free, open-source desktop application built with Tauri that intell
 - **Privacy First** — All processing happens locally on your machine, no data leaves without your intent
 - **Local API Proxy** — Upload images programmatically via a local HTTP endpoint
 - **Batch Processing** — Process hundreds of images simultaneously
-- **Multi-format Support** — JPG, PNG, WebP, AVIF, and more
-- **History Management** — Full upload history with retry capability
+- **Multi-format Support** — JPG, PNG, WebP input and output; GIF/BMP input
+- **History Management** — Upload history with SHA-256 cache, search, preview and download
+- **14 Storage Providers** — R2, S3, B2, DO Spaces, MinIO, Wasabi, Aliyun OSS, Tencent COS, Qiniu, custom S3, Imgur, SM.MS, GitHub, Upyun
+- **Liquid Glass UI** — Native GPU-drawn interface with a Liquid Glass sidebar
 
 ## Technical Details
-- **Built With**: Tauri, Rust, TypeScript, React
-- **Supported OS**: macOS (Intel & Apple Silicon), Windows 10/11
+- **Built With**: Go, mygo native UI, no WebView
+- **Supported OS**: macOS 12+, Windows 10+, Linux
 - **Storage**: Cloudflare R2 (S3-compatible API)
 - **License**: MIT Open Source
 

@@ -1,6 +1,6 @@
 # MoliTutu — Complete Project Reference
-> Generated: 2026-05-02
-> Version: 1.0.0
+> Generated: 2026-11-11
+> Version: 0.5.0
 > Author: Gusi
 > Repository: https://github.com/gusibi/moli-tutu
 
@@ -8,7 +8,7 @@
 
 ## Overview
 
-MoliTutu is a privacy-focused, open-source desktop application for image compression and cloud storage upload. It combines intelligent image optimization algorithms with seamless Cloudflare R2 integration, providing a streamlined workflow for developers, designers, content creators, and anyone who regularly works with images.
+MoliTutu is a privacy-focused, open-source native desktop application for image compression and cloud storage upload. Version 0.5 is a full rewrite in Go with the mygo native UI toolkit: the interface is drawn on the GPU with no WebView, no HTML/JavaScript and no frontend build. It supports 14 storage providers, including Cloudflare R2 and other S3-compatible services.
 
 ### Why MoliTutu?
 - **Local-first**: All compression happens on your machine. No cloud processing, no data leaks.
@@ -27,12 +27,11 @@ MoliTutu is a privacy-focused, open-source desktop application for image compres
 - Real-time preview showing before/after comparison
 - File size savings displayed immediately
 
-### Cloudflare R2 Upload
-- Direct upload to your Cloudflare R2 storage buckets
+### Storage Upload
+- 14 providers: Cloudflare R2, AWS S3, Backblaze B2, DigitalOcean Spaces, MinIO, Wasabi, Aliyun OSS, Tencent COS, Qiniu Kodo, custom S3, Imgur, SM.MS, GitHub and Upyun
 - Automatic public URL generation after upload
-- Configurable bucket and path settings
-- Support for custom domains and CDN integration
-- Automatic retry on failure with exponential backoff
+- Configurable bucket, path prefix, public URL base and custom domain
+- SHA-256 cache returns an existing URL for duplicate images
 
 ### Batch Processing
 - Drag-and-drop multiple images simultaneously
@@ -43,10 +42,10 @@ MoliTutu is a privacy-focused, open-source desktop application for image compres
 
 ### Local API Proxy
 - Built-in HTTP server for programmatic uploads
-- RESTful endpoint: `POST http://localhost:3001/upload`
+- RESTful endpoint: `POST http://127.0.0.1:38123/upload`
 - Accepts multipart form data
 - Returns JSON response with URL and metadata
-- Configurable port and authentication
+- Configurable port, localhost-only binding
 
 ### History & Management
 - Complete upload history with timestamps
@@ -76,11 +75,12 @@ Use MoliTutu as part of your media pipeline. Batch optimize and upload product i
 ## Technical Architecture
 
 ### Tech Stack
-- **Frontend**: React + TypeScript + Tailwind CSS
-- **Backend Runtime**: Tauri (Rust)
-- **Image Processing**: Rust image crates (image, mozjpeg, oxipng, webp)
-- **Storage API**: S3-compatible (Cloudflare R2)
-- **Local Proxy**: Actix-web (embedded HTTP server)
+- **UI**: mygo native UI (`ui.View`), GPU-drawn; Liquid Glass sidebar on macOS 26+
+- **Runtime**: Go 1.27.3+, single binary, no cgo, no WebView
+- **Image Processing**: Go image pipeline (JPEG/PNG/WebP, resize, EXIF orientation, palette/dithering)
+- **Storage API**: S3-compatible providers via a built-in SigV4 signer, plus Imgur/SM.MS/GitHub/Upyun
+- **History**: SQLite via `modernc.org/sqlite`
+- **Local Proxy**: Go `net/http`
 
 ### Supported Input Formats
 | Format | Compression | Notes |
@@ -88,14 +88,14 @@ Use MoliTutu as part of your media pipeline. Batch optimize and upload product i
 | JPEG | Lossy + Lossless | Progressive JPEG supported |
 | PNG | Lossless | Palette optimization |
 | WebP | Lossy + Lossless | Best modern format |
-| AVIF | Lossy | High efficiency |
+| AVIF | Alias | Currently encodes WebP, matching the previous app |
 | GIF | Lossy | Frame optimization |
 
-### Performance Benchmarks
-- Average compression ratio: 60-80% size reduction
-- Processing speed: ~50 images/second (1080p JPEG)
-- Memory usage: ~50MB idle, ~200MB under load
-- API response time: <100ms for upload endpoint
+### Performance Notes
+- Native GPU UI with no WebView process or frontend runtime
+- Compression and uploads run off the UI thread
+- Batch uploads use bounded concurrency
+- Throughput depends on image size, provider and network conditions
 
 ---
 
@@ -108,13 +108,13 @@ Yes, MoliTutu is completely free and open source (MIT license). You only pay for
 All image processing is done locally on your machine. Images are uploaded directly from your computer to your Cloudflare R2 bucket. MoliTutu has no cloud infrastructure that processes or stores your data.
 
 ### What operating systems are supported?
-MoliTutu supports macOS (Intel and Apple Silicon) and Windows 10/11. Linux support is on the roadmap.
+MoliTutu supports macOS 12+, Windows 10+ and Linux. It is a native Go application with no WebView.
 
 ### Can I use MoliTutu from the command line?
 Yes! MoliTutu includes a local API proxy that provides a RESTful endpoint. You can use curl, wget, or any HTTP client to upload images programmatically.
 
 ### What image formats are supported?
-Currently supports JPEG, PNG, WebP, AVIF, and GIF. Support for HEIC and SVG is planned.
+Supports JPEG, PNG, WebP, GIF and BMP input. Output is JPEG, PNG or WebP; the AVIF option currently maps to WebP.
 
 ### How do I set up Cloudflare R2?
 1. Create a Cloudflare account

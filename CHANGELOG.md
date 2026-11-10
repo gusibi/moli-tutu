@@ -1,5 +1,28 @@
 # 更新日志
 
+## [0.5.0] - 2026-11-10
+
+### 重构
+- 🚀 **完全迁移到 mygo 原生应用**：删除 Tauri + React 前端与 Rust 后端，改为纯 Go 单二进制
+- 🖥️ **无 WebView**：界面由 mygo 在 GPU 上直接绘制（macOS Metal / Windows Direct3D 11 / Linux OpenGL）
+- 🪟 **Liquid Glass 侧边栏**：macOS 26+ 使用系统 Liquid Glass，正文区域保持实色
+- ⚡ 原生文件对话框、剪贴板、拖拽、通知、窗口状态和菜单
+- 📦 更小的运行依赖，不再需要 Node.js、Rust 或 WebView 运行时
+
+### 保留
+- 14 种存储提供方（R2、S3、B2、DO Spaces、MinIO、Wasabi、阿里云 OSS、腾讯云 COS、七牛、自定义 S3、Imgur、SM.MS、GitHub、又拍云）
+- 拖拽 / 文件选择 / 剪贴板 / URL 上传
+- SHA-256 上传缓存、上传历史、搜索、分页、预览、下载
+- 图片压缩、前后对比、压缩历史和恢复
+- 多套存储配置、本地 API 代理、中英切换、明暗主题
+- 旧版 `config.json`、`settings.json`、`uploads.db` 首次启动自动迁移
+
+### 改进
+- Apple 风格 spring 页面切换、按压反馈和排版字距
+- `⌘O` 选择图片、`⇧⌘V` 粘贴图片、`⌘R` 刷新历史
+- 上传进度、逐文件状态和上传后自动刷新历史
+- 旋转日志文件、失败提示和更清晰的错误文案
+
 ## [0.4.0] - 2025-12-07
 
 ### 新增
