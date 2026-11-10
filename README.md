@@ -1,86 +1,74 @@
-# Moli TuTu 🖼️
+# Moli TuTu
 
-一个集图片压缩与图床上传于一体的工具，支持智能压缩优化和 Cloudflare R2 存储服务。
+A native image uploader and compressor for macOS, Windows and Linux, written in Go with [mygo](https://github.com/egoist/mygo). No WebView, no HTML, no JavaScript, and no frontend build step.
 
-## ✨ 特性
+- Landing page: <https://tutu.eztoolab.com/>
+- Releases: <https://github.com/gusibi/moli-tutu/releases>
+- Changelog: [CHANGELOG.md](./CHANGELOG.md)
+- Migration spec: [SPEC.md](./SPEC.md)
 
-- 🎨 现代化的用户界面
-- 🖼️ 支持拖拽上传图片
-- 🗜️ **智能图片压缩** - 自动优化图片大小，节省存储空间
-- ☁️ Cloudflare R2 存储集成
-- 📋 一键复制图片链接
-- 🔧 简单的配置管理
-- 🚀 跨平台支持（Windows、macOS）
-- ⚡ 快速批量处理
+## What changed in 0.5
 
-## 📦 安装
+The previous Tauri + React app has been fully replaced by a native Go application:
 
-### 从 Release 下载
+- Native UI drawn on the GPU: Metal on macOS, Direct3D 11 on Windows, OpenGL on Linux
+- Liquid Glass sidebar on macOS 26+, with a solid content pane
+- Single Go binary, no WebView or frontend runtime
+- Same 14 storage providers, upload history, compression, compression history, multi-config and local API proxy
+- First-run migration of the old Tauri `config.json`, `settings.json` and `uploads.db`
+- Apple-style motion and typography: spring page transitions, press feedback, size-aware tracking
 
-1. 前往 [Releases](https://github.com/gusibi/moli-tutu/releases) 页面
-2. 下载对应平台的安装包：
-   - **Windows**: `.msi` 文件
-   - **macOS**: `.dmg` 文件（支持 Intel 和 Apple Silicon）
-3. 双击安装包按提示安装
+## Build and run
 
-### 从源码构建
+Go 1.27.3+ is required by mygo.
 
-```bash
-# 克隆仓库
-git clone https://github.com/gusibi/moli-tutu.git
-cd MoliTutu
+```sh
+GOTOOLCHAIN=auto GOSUMDB=sum.golang.org go test ./...
 
-# 安装依赖
-npm install
+# Native development app
+GOTOOLCHAIN=auto GOSUMDB=sum.golang.org go tool mygo dev
 
-# 开发模式运行
-npm run tauri dev
-
-# 构建应用
-npm run tauri build
+# Package for the current machine (macOS example)
+GOTOOLCHAIN=auto GOSUMDB=sum.golang.org \
+  go tool mygo build -platform darwin/arm64 -skip-dmg -skip-notarize -sign -
 ```
 
-## 🔧 配置
+The packaged app is written to `dist/darwin-arm64/Moli TuTu.app`.
 
-首次运行时，点击"R2 配置"按钮，填入你的 Cloudflare R2 配置信息：
+## Features
 
-- **Endpoint**: R2 存储桶的端点 URL
-- **Access Key ID**: R2 访问密钥 ID
-- **Secret Access Key**: R2 秘密访问密钥
-- **Bucket Name**: 存储桶名称
-- **Region**: 区域（通常为 auto）
+- Drag/drop, file picker, clipboard and URL upload
+- 14 storage providers: Cloudflare R2, AWS S3, Backblaze B2, DigitalOcean Spaces, MinIO, Wasabi, Aliyun OSS, Tencent COS, Qiniu Kodo, custom S3, Imgur, SM.MS, GitHub and Upyun
+- SHA-256 upload cache, recent history, search, pagination, preview, copy, download, delete and clear
+- Image compression: JPEG, PNG and WebP; quality, resize, aspect ratio, premultiply alpha, linear RGB, palette reduction and dithering
+- Before/after split preview, save and direct upload
+- Compression history with restore, delete and clear
+- Local API proxy on `127.0.0.1` with port validation
+- Chinese/English, light/dark/system theme
+- Native menus, window state, toasts, confirmations and rotating file logs
 
-## 🚀 使用
+## Shortcuts
 
-1. 启动应用
-2. 拖拽图片到上传区域，或点击选择文件
-3. 应用会自动压缩图片以优化文件大小
-4. 等待上传完成
-5. 点击复制按钮获取图片链接
+- `Cmd+O` — choose images (upload and compress pages)
+- `Shift+Cmd+V` — paste an image from the clipboard (upload and compress pages)
+- `Cmd+R` — refresh upload history
 
-### 📸 图片压缩功能
+## Structure
 
-- **自动压缩**: 上传时自动优化图片大小，减少存储成本
-- **智能算法**: 在保持图片质量的同时最大化压缩效果
-- **多格式支持**: 支持 JPEG、PNG、WebP 等常见图片格式
-- **批量处理**: 可同时处理多张图片
-- **压缩预览**: 显示压缩前后的文件大小对比
+| Package | Responsibility |
+|---|---|
+| `internal/app` | Native view, pages, dialogs, thumbnail cache |
+| `internal/service` | The single testing seam: view-facing API plus the real implementation |
+| `internal/model` | JSON-compatible data shapes |
+| `internal/store` | Config/settings JSON, SQLite upload history, compression history, old-data migration |
+| `internal/storage` | S3 SigV4 uploader and Imgur/SM.MS/GitHub/Upyun uploaders |
+| `internal/imaging` | Decode, EXIF orientation, resize, palette/dithering, JPEG/PNG/WebP encode |
+| `internal/proxy` | Localhost multipart upload endpoint |
+| `internal/logging` | Rotating log file |
 
-## 🛠️ 技术栈
+## Known gaps
 
-- **前端**: React + TypeScript + Tailwind CSS + DaisyUI
-- **后端**: Rust + Tauri
-- **存储**: Cloudflare R2
-- **构建**: Vite + Tauri CLI
-
-## 📄 许可证
-
-MIT License - 详见 [LICENSE](LICENSE) 文件
-
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-## 📞 支持
-
-如有问题，请在 [Issues](https://github.com/gusibi/moli-tutu/issues) 页面提交。
+- Real AVIF encoding is not implemented; the AVIF choice keeps the old WebP fallback.
+- Old compression history in the previous WebView's IndexedDB is not migrated; it is explained on first launch.
+- Menu bar mode and auto-update are not implemented yet.
+- The packaged macOS app uses ad-hoc signing unless `macos.signingIdentity` is configured in `mygo.json`.

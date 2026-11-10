@@ -1,30 +1,22 @@
+# Build output
+/dist/
+/build/
+/.mygo/
+*.app
+*.dmg
+*.exe
+*.deb
+
+# Go
+*.test
+*.out
+
 # Logs
-logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+logs/
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# Editors and OS
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# editor settings
-.editorconfig
+.vscode/
+.idea/
 .codebuddy/
-
-target/

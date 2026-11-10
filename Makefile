@@ -1,15 +1,21 @@
-# Makefile for Moli TuTu
+.PHONY: test vet dev build build-macos clean
 
-# Phony targets to avoid conflicts with file names
-.PHONY: dmg clean
+GO_ENV = GOTOOLCHAIN=auto GOSUMDB=sum.golang.org
 
-# Default target
-all: dmg
+test:
+	$(GO_ENV) go test ./...
 
-# Build the macOS DMG
-dmg:
-	npm run tauri build
+vet:
+	$(GO_ENV) go vet ./...
 
-# Clean build artifacts
+dev:
+	$(GO_ENV) go tool mygo dev
+
+build:
+	$(GO_ENV) go tool mygo build
+
+build-macos:
+	$(GO_ENV) go tool mygo build -platform darwin/arm64 -skip-dmg -skip-notarize -sign -
+
 clean:
-	rm -rf src-tauri/target
+	rm -rf dist build .mygo

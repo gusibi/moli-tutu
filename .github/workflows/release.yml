@@ -1,83 +1,98 @@
 name: Release
 
 on:
+  workflow_dispatch:
   push:
     tags:
-      - 'v*'
-  workflow_dispatch:
+      - "v*"
+
+permissions:
+  contents: write
 
 jobs:
-  release:
-    permissions:
-      contents: write
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.27.x"
+          cache: true
+          cache-dependency-path: go.sum
+      - name: Test
+        env:
+          GOTOOLCHAIN: auto
+          GOSUMDB: sum.golang.org
+        run: |
+          go test ./...
+          go vet ./...
+
+  build:
+    needs: test
     strategy:
       fail-fast: false
       matrix:
         include:
-          - platform: 'macos-latest'
-            args: '--target universal-apple-darwin'
-          - platform: 'windows-latest'
-            args: ''
-          - platform: 'ubuntu-latest'
-            args: ''
-
-    runs-on: ${{ matrix.platform }}
+          - os: macos-latest
+            platform: darwin/universal
+            artifact: mygo-macos
+          - os: windows-latest
+            platform: windows/amd64
+            artifact: mygo-windows
+          - os: ubuntu-latest
+            platform: linux/amd64
+            artifact: mygo-linux
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.27.x"
+          cache: true
+          cache-dependency-path: go.sum
 
-      - name: Install dependencies (Linux only)
+      - name: Install Linux runtime libraries
         if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+        run: sudo apt-get update && sudo apt-get install -y libgtk-3-0
 
-      - name: Rust setup
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+      - name: Install NSIS
+        if: runner.os == 'Windows'
+        run: choco install nsis -y
 
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-
-      - name: Sync node version and setup cache
-        uses: actions/setup-node@v4
-        with:
-          node-version: 'lts/*'
-          cache: 'npm'
-
-      - name: Install frontend dependencies
-        run: npm ci
-
-      - name: Sync package version
-        run: npm run tauri -- info
-
-      - name: Build the app
-        uses: tauri-apps/tauri-action@v0
+      - name: Build
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          GOTOOLCHAIN: auto
+          GOSUMDB: sum.golang.org
+          # Replace with a Developer ID identity and remove -skip-notarize
+          # for production macOS releases.
+          MYGO_SIGN_IDENTITY: "-"
+        shell: bash
+        run: |
+          go tool mygo build \
+            -platform "${{ matrix.platform }}" \
+            -skip-notarize \
+            -sign "$MYGO_SIGN_IDENTITY"
+
+      - uses: actions/upload-artifact@v4
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Moli TuTu v__VERSION__'
-          releaseBody: |
-            ## 🎉 Moli TuTu v__VERSION__ 发布
+          name: ${{ matrix.artifact }}
+          path: dist
 
-            ### 📦 下载安装包
-            - **Windows**: 下载 `.msi` 文件
-            - **macOS**: 下载 `.dmg` 文件（支持 Intel 和 Apple Silicon）
-            - **Linux**: 下载 `.AppImage` 或 `.deb` 文件（如有生成）
-
-            ### 🔧 安装说明
-            1. 下载对应平台的安装包
-            2. 双击安装包按提示安装
-            3. 首次运行时配置你的 R2 存储信息
-
-            ---
-            完整更新日志请查看 [CHANGELOG.md](https://github.com/gusibi/moli-tutu/blob/main/CHANGELOG.md)
-          releaseDraft: false
-          prerelease: false
-          args: ${{ matrix.args }}
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          fail_on_unmatched_files: false
+          files: |
+            artifacts/**/*.dmg
+            artifacts/**/*.exe
+            artifacts/**/*.deb
+            artifacts/**/*.tar.gz
