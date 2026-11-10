@@ -139,8 +139,9 @@ func (a *App) settingsView(c *ui.Context) {
 
 func (a *App) settingsCard(c *ui.Context, title string, fn func()) {
 	t := c.Theme()
-	ui.Column(c).Gap(10).Padding(16).Radius(12).Background(t.Surface).Border(1, t.Border).Children(func() {
-		ui.Text(c, title).FontSize(15).Bold()
+	ui.Column(c).Gap(10).Padding(16).Radius(12).Background(t.Surface).Border(1, t.Border).
+		Shadow(0, 1, 4, 0, ui.RGBA(0, 0, 0, 0.06)).Children(func() {
+		ui.Text(c, title).FontSize(15).Bold().LetterSpacing(-0.1)
 		fn()
 	})
 }

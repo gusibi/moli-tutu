@@ -33,12 +33,15 @@ func (a *App) uploadView(c *ui.Context) {
 	}
 
 	zone := ui.Column(c).Height(190).Padding(24).Gap(12).Radius(12).Border(2, t.Border).
-		AlignItems(ui.Center).Justify(ui.Center)
+		AlignItems(ui.Center).Justify(ui.Center).
+		Transition(ui.ElementTransition{Colors: true, Shadows: true, Duration: 160 * time.Millisecond})
 	if files := zone.DroppedFiles(); files != nil {
 		a.startUploadPaths(files)
 	}
 	if zone.FileDragOver() {
-		zone.Border(2, t.Accent)
+		zone.Border(2, t.Accent).Shadow(0, 8, 22, 0, ui.RGBA(0, 0, 0, 0.22))
+	} else {
+		zone.Shadow(0, 2, 10, 0, ui.RGBA(0, 0, 0, 0.08))
 	}
 	zone.Children(func() {
 		ui.Text(c, a.tr("把图片拖到这里", "Drop images here")).FontSize(18).Bold()
@@ -95,7 +98,7 @@ func (a *App) uploadView(c *ui.Context) {
 
 	ui.Box(c).Height(20)
 	ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
-		ui.Text(c, a.tr("最近上传", "Recent uploads")).FontSize(16).Bold().Grow(1)
+		ui.Text(c, a.tr("最近上传", "Recent uploads")).FontSize(16).Bold().LetterSpacing(-0.2).Grow(1)
 		if ui.Button(c, a.tr("刷新", "Refresh")).Tooltip("⌘R").Clicked() {
 			a.Refresh()
 			a.pushInfo(a.tr("已刷新", "Refreshed"))

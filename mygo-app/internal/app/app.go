@@ -339,7 +339,13 @@ func (a *App) View(c *ui.Context) {
 		ui.Box(c).Width(1).Background(t.Border.Alpha(0.35))
 		ui.Column(c).Grow(1).MinWidth(0).Background(t.Background).Children(func() {
 			a.titlebar(c)
-			ui.Column(c).Grow(1).Padding(24, 24).MinWidth(0).Children(func() {
+			page := ui.Column(c.Key(a.page)).Grow(1).Padding(24, 24).MinWidth(0)
+			page.Transition(ui.ElementTransition{
+				Animation: &ui.Snappy,
+				Enter:     &ui.Motion{Y: 8},
+				Exit:      &ui.Motion{Y: -6},
+			})
+			page.Children(func() {
 				switch a.page {
 				case pageHistory:
 					a.historyPageView(c)
@@ -374,7 +380,8 @@ func (a *App) sidebar(c *ui.Context) {
 	}
 	side.Children(func() {
 		ui.Row(c).Height(top+12).Padding(0, 16).AlignItems(ui.End).DragWindow().Children(func() {
-			ui.Text(c, "Moli TuTu").FontSize(18).Bold().TextShadow(0, 1, 5, ui.RGBA(0, 0, 0, 0.55))
+			ui.Text(c, "Moli TuTu").FontSize(18).Bold().LetterSpacing(-0.3).
+				TextShadow(0, 1, 5, ui.RGBA(0, 0, 0, 0.55))
 		})
 		navItems := []struct {
 			id, label string
@@ -388,7 +395,10 @@ func (a *App) sidebar(c *ui.Context) {
 		ui.Box(c).Height(12)
 		ui.Column(c).Grow(1).Padding(0, 10).Gap(4).Children(func() {
 			for _, item := range navItems {
-				row := ui.ButtonBase(c.Key(item.id)).Padding(7, 10).Gap(10).Radius(8).Label(item.label)
+				row := ui.ButtonBase(c.Key(item.id)).Padding(7, 10).Gap(10).Radius(8).Label(item.label).
+					Transition(ui.ElementTransition{Colors: true, Duration: 140 * time.Millisecond})
+				scale := row.Animate("press", map[bool]float32{true: 0.985, false: 1}[row.Pressed()], 100*time.Millisecond)
+				row.Scale(scale, scale)
 				fg := t.Text
 				switch {
 				case a.page == item.id:
@@ -399,7 +409,7 @@ func (a *App) sidebar(c *ui.Context) {
 				}
 				row.Children(func() {
 					ui.Icon(c, item.icon).FontSize(16).TextColor(fg)
-					ui.Text(c, item.label).FontSize(14).TextColor(fg).Grow(1)
+					ui.Text(c, item.label).FontSize(14).LetterSpacing(0.1).TextColor(fg).Grow(1)
 				})
 				if row.Clicked() && a.page != item.id {
 					a.page = item.id
@@ -410,7 +420,8 @@ func (a *App) sidebar(c *ui.Context) {
 		ui.Column(c).Padding(12).Gap(6).Children(func() {
 			ui.Row(c).Width(196).Gap(4).AlignItems(ui.Center).Children(func() {
 				lang := a.tr("中文", "EN")
-				langBtn := ui.ButtonBase(c).Grow(1).Padding(5, 8).Radius(6).Label(a.tr("切换语言", "Switch language"))
+				langBtn := ui.ButtonBase(c).Grow(1).Padding(5, 8).Radius(6).Label(a.tr("切换语言", "Switch language")).
+					Transition(ui.ElementTransition{Colors: true, Duration: 120 * time.Millisecond})
 				if langBtn.Hovered() {
 					langBtn.Background(t.SurfaceHover.Alpha(0.35))
 				}
@@ -431,7 +442,8 @@ func (a *App) sidebar(c *ui.Context) {
 					"light":  a.tr("浅色", "Light"),
 					"dark":   a.tr("深色", "Dark"),
 				}[a.theme]
-				theme := ui.ButtonBase(c).Grow(1).Padding(5, 8).Radius(6).Label(a.tr("切换主题", "Switch theme"))
+				theme := ui.ButtonBase(c).Grow(1).Padding(5, 8).Radius(6).Label(a.tr("切换主题", "Switch theme")).
+					Transition(ui.ElementTransition{Colors: true, Duration: 120 * time.Millisecond})
 				if theme.Hovered() {
 					theme.Background(t.SurfaceHover.Alpha(0.35))
 				}
@@ -452,7 +464,8 @@ func (a *App) sidebar(c *ui.Context) {
 					}
 				}
 			})
-			settings := ui.ButtonBase(c).Width(196).Padding(6, 8).Radius(7).Label(a.tr("设置", "Settings"))
+			settings := ui.ButtonBase(c).Width(196).Padding(6, 8).Radius(7).Label(a.tr("设置", "Settings")).
+				Transition(ui.ElementTransition{Colors: true, Duration: 120 * time.Millisecond})
 			if settings.Hovered() {
 				settings.Background(t.SurfaceHover.Alpha(0.35))
 			}
@@ -526,9 +539,9 @@ func (a *App) ask(title, message string, action func()) {
 func (a *App) pageHeader(c *ui.Context, title, subtitle string) {
 	t := c.Theme()
 	ui.Column(c).Gap(4).Children(func() {
-		ui.Text(c, title).FontSize(24).Bold()
+		ui.Text(c, title).FontSize(24).Bold().LetterSpacing(-0.4).LineHeight(1.15)
 		if subtitle != "" {
-			ui.Text(c, subtitle).FontSize(13).TextColor(t.TextMuted)
+			ui.Text(c, subtitle).FontSize(13).LetterSpacing(0.1).LineHeight(1.4).TextColor(t.TextMuted)
 		}
 	})
 }
