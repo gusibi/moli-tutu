@@ -7,7 +7,7 @@ A native image uploader and compressor for macOS, Windows and Linux, written in 
 - Changelog: [CHANGELOG.md](./CHANGELOG.md)
 - Migration spec: [SPEC.md](./SPEC.md)
 
-## What changed in 0.5
+## What changed in 0.6
 
 The previous Tauri + React app has been fully replaced by a native Go application:
 

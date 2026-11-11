@@ -1,6 +1,6 @@
 # Spec: Moli TuTu 全量迁移到 mygo 原生桌面应用
 
-> Status: implemented in 0.5.0. The old Tauri app has been removed; this document is kept as the migration record.
+> Status: implemented in 0.6.0. The old Tauri app has been removed; this document is kept as the migration record.
 
 - Status: ready-for-agent
 - New code root: repository root

@@ -1,6 +1,6 @@
 # MoliTutu — Complete Project Reference
 > Generated: 2026-11-11
-> Version: 0.5.0
+> Version: 0.6.0
 > Author: Gusi
 > Repository: https://github.com/gusibi/moli-tutu
 
@@ -8,7 +8,7 @@
 
 ## Overview
 
-MoliTutu is a privacy-focused, open-source native desktop application for image compression and cloud storage upload. Version 0.5 is a full rewrite in Go with the mygo native UI toolkit: the interface is drawn on the GPU with no WebView, no HTML/JavaScript and no frontend build. It supports 14 storage providers, including Cloudflare R2 and other S3-compatible services.
+MoliTutu is a privacy-focused, open-source native desktop application for image compression and cloud storage upload. Version 0.6 is a full rewrite in Go with the mygo native UI toolkit: the interface is drawn on the GPU with no WebView, no HTML/JavaScript and no frontend build. It supports 14 storage providers, including Cloudflare R2 and other S3-compatible services.
 
 ### Why MoliTutu?
 - **Local-first**: All compression happens on your machine. No cloud processing, no data leaks.

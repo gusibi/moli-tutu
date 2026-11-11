@@ -15,7 +15,7 @@ import (
 
 func main() {
 	mygo.App.SetName("Moli TuTu")
-	mygo.App.SetVersion("0.5.0")
+	mygo.App.SetVersion("0.6.0")
 	mygo.App.WhenReady(func() {
 		dir, err := mygo.App.Path(mygo.PathUserData)
 		if err != nil {
