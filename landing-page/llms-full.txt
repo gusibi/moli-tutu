@@ -12,7 +12,7 @@ MoliTutu is a privacy-focused, open-source native desktop application for image 
 
 ### Why MoliTutu?
 - **Local-first**: All compression happens on your machine. No cloud processing, no data leaks.
-- **Free & Open Source**: MIT licensed. No subscriptions, no hidden costs.
+- **Free for noncommercial use**: MoliTutu NC-SA 1.0 licensed (noncommercial, share-alike). No subscriptions, no hidden costs.
 - **Developer Friendly**: Includes a local API proxy for script and workflow integration.
 - **Privacy Guaranteed**: Your images go directly to your own Cloudflare R2 bucket. We never see them.
 
@@ -102,7 +102,7 @@ Use MoliTutu as part of your media pipeline. Batch optimize and upload product i
 ## FAQ
 
 ### Is MoliTutu really free?
-Yes, MoliTutu is completely free and open source (MIT license). You only pay for your Cloudflare R2 usage, which has a generous free tier (10GB storage, 1M reads/month).
+Yes, MoliTutu is completely free for noncommercial use under the MoliTutu NC-SA 1.0 license (share-alike). You only pay for your Cloudflare R2 usage, which has a generous free tier (10GB storage, 1M reads/month). Commercial use requires a separate license.
 
 ### How does MoliTutu handle my privacy?
 All image processing is done locally on your machine. Images are uploaded directly from your computer to your Cloudflare R2 bucket. MoliTutu has no cloud infrastructure that processes or stores your data.
@@ -136,7 +136,7 @@ Absolutely! MoliTutu is open source. Visit the GitHub repository to submit issue
 - GitHub: https://github.com/gusibi/moli-tutu
 - Releases: https://github.com/gusibi/moli-tutu/releases
 - Issues: https://github.com/gusibi/moli-tutu/issues
-- License: MIT
+- License: MoliTutu NC-SA 1.0 (noncommercial, share-alike)
 
 ## Author
 - GitHub: https://github.com/gusibi

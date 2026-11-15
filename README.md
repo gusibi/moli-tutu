@@ -72,3 +72,15 @@ The packaged app is written to `dist/darwin-arm64/Moli TuTu.app`.
 - Old compression history in the previous WebView's IndexedDB is not migrated; it is explained on first launch.
 - Menu bar mode and auto-update are not implemented yet.
 - The packaged macOS app uses ad-hoc signing unless `macos.signingIdentity` is configured in `mygo.json`.
+
+## License
+
+MoliTutu is released under the [MoliTutu Noncommercial ShareAlike License 1.0](./LICENSE) (`LicenseRef-MoliTutu-NC-SA-1.0`):
+
+- **Free to use** — use, study, modify and share the software for noncommercial purposes: personal use, learning, teaching, research, and nonprofit work.
+- **No commercial use** — business or production use, selling or bundling, hosted/SaaS offerings, and paid services using the software all require a separate commercial license. Contact Gusi <czongxiao@gmail.com>.
+- **Share-alike** — any modified version or redistribution, as source or as a binary/app, must stay under this same license, publish its complete corresponding source, keep the original notices, and state what changed.
+- **Attribution** — keep the copyright and license notices, and credit the project and its repository.
+- **Not OSI open source** — this is a source-available license with a strong copyleft condition. The noncommercial restriction means it does not meet the OSI Open Source Definition.
+
+Third-party dependencies keep their own licenses (see `go.mod`). Earlier releases were published without a `LICENSE` file while the landing page said "MIT"; if you need those terms for a copy you already obtained, please open an issue.

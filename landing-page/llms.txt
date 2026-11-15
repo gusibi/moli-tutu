@@ -26,7 +26,7 @@ MoliTutu is a free, open-source native desktop application built with Go and myg
 - **Built With**: Go, mygo native UI, no WebView
 - **Supported OS**: macOS 12+, Windows 10+, Linux
 - **Storage**: Cloudflare R2 (S3-compatible API)
-- **License**: MIT Open Source
+- **License**: MoliTutu NC-SA 1.0 (noncommercial use, share-alike; source-available)
 
 ## Author
 - Name: Gusi

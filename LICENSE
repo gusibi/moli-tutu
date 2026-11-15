@@ -1,0 +1,293 @@
+MoliTutu Noncommercial ShareAlike License, Version 1.0
+(MoliTutu NC-SA 1.0)
+
+Copyright (c) 2026 Gusi (https://github.com/gusibi)
+Short identifier: LicenseRef-MoliTutu-NC-SA-1.0
+
+Everyone is permitted to use, study, modify and share this software free of
+charge for Noncommercial Purposes, provided that the conditions below are met.
+Commercial Use is not permitted. If you share the software or anything derived
+from it, you must keep it under this same license and make the corresponding
+source code available.
+
+This is a source-available license with a strong share-alike condition. It is
+not an OSI-approved open source license, because it restricts Commercial Use.
+If you need commercial rights, see Section 8.
+
+
+1. DEFINITIONS
+
+1.1 "Licensor" means the individual(s) or entity(ies) granting rights under
+    this License, identified in the copyright notice above.
+
+1.2 "You" means any person or entity exercising rights under this License,
+    including any entity on whose behalf you act.
+
+1.3 "Software" means the MoliTutu software made available under this License,
+    in source or compiled form, including all of its files, source code,
+    binary executables, application bundles, configuration, assets, artwork,
+    documentation and any part of the foregoing.
+
+1.4 "Source Code" means the form of the Software preferred for making
+    modifications, including all source files, build and packaging scripts,
+    project configuration, dependency manifests, generated code that is
+    required to build, and the assets needed to reproduce the Software.
+
+1.5 "Modified Version" means any work that is based on, derived from, or
+    incorporates all or a substantial portion of the Software, including
+    translations, adaptations, refactorings, ports, forks, and any work that
+    combines the Software with other material, whether the Software is
+    modified or merely included.
+
+1.6 "Corresponding Source" means the Source Code of the Software or of a
+    Modified Version, including everything needed to build, install and run
+    it, and, for a Modified Version, the complete source of all
+    modifications.
+
+1.7 "Share" means to distribute, publish, transmit, sublicense, sell, rent,
+    lend, or otherwise make the Software or a Modified Version available to
+    any third party, by any means, including by providing its functionality
+    over a network.
+
+1.8 "Noncommercial Purpose" means any use that is not a Commercial Use, and
+    in particular: personal use, learning, hobby projects, academic teaching
+    and research, use by nonprofit or charitable organizations for their
+    noncommercial mission, evaluation and testing, and contribution to the
+    Software's own development.
+
+1.9 "Commercial Use" means any use that is intended for or directed toward
+    commercial advantage or monetary compensation, including without
+    limitation:
+
+    (a) using the Software, or a Modified Version, in the operations of a
+        for-profit business, whether internally or in production;
+
+    (b) selling, licensing, renting or otherwise monetizing the Software or a
+        Modified Version, or bundling it with a paid product or service;
+
+    (c) providing the Software's functionality as a hosted, cloud or SaaS
+        service, whether paid or ad-supported;
+
+    (d) using the Software to deliver paid services or consulting to third
+        parties;
+
+    (e) using the Software to promote or operate a commercial offering,
+        including as part of a commercial product's distribution.
+
+    Internal use by a for-profit entity, including evaluation and development
+    of a commercial product, is a Commercial Use and requires a separate
+    license under Section 8.
+
+
+2. GRANT OF RIGHTS
+
+Subject to the terms of this License, the Licensor grants You a worldwide,
+royalty-free, non-exclusive, non-transferable license to:
+
+    (a) use and run the Software for Noncommercial Purposes;
+
+    (b) reproduce and install the Software;
+
+    (c) modify the Software and create Modified Versions; and
+
+    (d) Share the Software and Modified Versions,
+
+in each case only as permitted by Section 3.
+
+
+3. CONDITIONS
+
+3.1 Noncommercial only. You may exercise the rights in Section 2 only for
+    Noncommercial Purposes. Any Commercial Use requires a separate written
+    license from the Licensor (Section 8).
+
+3.2 Attribution. You must:
+
+    (a) keep all copyright, license and attribution notices intact in the
+        Software and in every Modified Version;
+
+    (b) identify the original project by name ("MoliTutu") and link to the
+        original repository (https://github.com/gusibi/moli-tutu);
+
+    (c) include a copy of this License with every copy of the Software or a
+        Modified Version that You Share; and
+
+    (d) for software with a user interface, display the above attribution and
+        license notice in an "About", "Credits" or equivalent screen.
+
+3.3 ShareAlike (copyleft). If You Share the Software or a Modified Version in
+    any form, You must:
+
+    (a) license the whole work, and every Modified Version of it, under this
+        exact license, without adding or imposing any different, narrower or
+        conflicting terms;
+
+    (b) make the Corresponding Source available to every recipient, free of
+        charge and under this License, either by providing it together with
+        the Shared copy or by a written offer, valid for at least three (3)
+        years, to provide it at no more than the cost of delivery;
+
+    (c) if You make the Software's or a Modified Version's functionality
+        available over a network, offer the Corresponding Source to the users
+        of that service in the same way; and
+
+    (d) not relicense the Software, in whole or in part, under any other
+        license, and not impose any additional legal or technical restriction
+        (including DRM, license terms or acceptable-use terms) that limits the
+        rights this License grants to recipients.
+
+3.4 Marking changes. Modified Versions must carry prominent notices stating
+    that they were changed, describing the changes, and giving the date of
+    each change.
+
+3.5 No sublicensing. You may not sublicense or assign the rights granted here
+    except as part of Sharing a Modified Version under this License, and any
+    attempt to do so is void.
+
+3.6 Combined works. You may combine the Software with other material,
+    including material under other licenses, provided that the resulting work
+    as a whole is licensed under this License and that You do not thereby
+    violate the other material's license. This License does not grant rights
+    in that other material.
+
+3.7 Your content. This License does not claim any rights in images, files or
+    other content that You process with the Software. Such content remains
+    entirely Yours.
+
+3.8 No endorsement. You may not state or imply that the Licensor endorses You
+    or Your Modified Version without prior written permission.
+
+
+4. PATENT LICENSE
+
+Each contributor grants You a non-exclusive, worldwide, royalty-free patent
+license, limited to Noncommercial Purposes, to make, have made, use, import,
+modify and Share the Software, where such license applies only to patent
+claims licensable by that contributor that are necessarily infringed by their
+contribution alone or by combination of their contribution with the Software.
+
+If You institute patent litigation against any entity alleging that the
+Software or a contribution incorporated within the Software infringes a
+patent, then any patent licenses granted to You under this License terminate
+as of the date such litigation is filed.
+
+
+5. TRADEMARK
+
+This License does not grant permission to use the trade names, trademarks,
+service marks, logos or product names of the Licensor, except as required for
+reasonable and customary use in describing the origin of the Software and
+reproducing the attribution required by Section 3.2. In particular, a Modified
+Version must not use the name "MoliTutu" or the project logo as its own
+product name or branding, and must make clear that it is a modified version.
+
+
+6. TERMINATION
+
+6.1 This License and the rights granted under it terminate automatically if
+    You breach any of its terms.
+
+6.2 If You receive written notice of a breach from the Licensor and cure it
+    within thirty (30) days of receiving that notice, the License is
+    reinstated as of the date the breach was cured.
+
+6.3 On termination You must stop all use and Sharing of the Software and
+    Modified Versions, and delete or destroy all copies in Your possession or
+    control, except that You may keep one copy for archival purposes only, and
+    except that rights of recipients who received the Software from You in
+    compliance with this License are not terminated.
+
+6.4 Sections 3.2, 3.3, 3.7, 4, 5, 7, 8, 9 and 10 survive termination.
+
+
+7. DISCLAIMER OF WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. THE ENTIRE RISK
+AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH YOU. SHOULD THE
+SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,
+REPAIR OR CORRECTION.
+
+
+8. COMMERCIAL LICENSING
+
+Commercial Use is not granted by this License. If You want to use the Software
+or a Modified Version for a Commercial Use, You must obtain a separate written
+commercial license from the Licensor. Requests can be sent to:
+
+    Gusi <czongxiao@gmail.com>
+    https://github.com/gusibi
+
+A commercial license, if granted, replaces Sections 2 and 3 of this License
+for the licensee, on the terms stated in that agreement.
+
+
+9. LIMITATION OF LIABILITY
+
+IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW, OR AS AGREED TO IN WRITING,
+WILL THE LICENSOR BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL,
+INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE
+THE SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA, LOSS OF BUSINESS, OR
+ANY OTHER LOSS), EVEN IF THE LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES. IN NO EVENT WILL THE LICENSOR'S TOTAL LIABILITY UNDER THIS
+LICENSE EXCEED THE AMOUNT YOU PAID FOR THE SOFTWARE, IF ANY.
+
+
+10. GENERAL
+
+10.1 Severability. If any provision of this License is held unenforceable, the
+     remaining provisions remain in full force, and the unenforceable
+     provision will be enforced to the maximum extent permitted by law.
+
+10.2 No waiver. Failure to enforce any provision is not a waiver of the right
+     to enforce it later.
+
+10.3 Entire agreement. This License is the entire agreement between You and
+     the Licensor regarding the Software, and supersedes any prior or
+     contemporaneous understanding on that subject.
+
+10.4 Interpretation. Headings are for convenience only. "Including" means
+     "including without limitation". If there is any conflict between a
+     translation of this License and the English text, the English text
+     controls.
+
+10.5 Versions. The Licensor may publish revised versions of this License. You
+     may use the Software under the version You received it with, or, at Your
+     option, under any later version published by the Licensor under the same
+     short identifier. No version grants Commercial Use except by the separate
+     agreement described in Section 8.
+
+
+-------------------------------------------------------------------------------
+HOW TO APPLY
+
+Attach the following notice to the source files of the Software, or to an
+"About" screen for compiled builds:
+
+    MoliTutu — https://github.com/gusibi/moli-tutu
+    Copyright (c) 2026 Gusi. All rights reserved.
+
+    Licensed under the MoliTutu Noncommercial ShareAlike License 1.0
+    (MoliTutu NC-SA 1.0). You may use, modify and share this software for
+    noncommercial purposes only. Modified versions and redistributions must
+    stay under this same license and make their source code available.
+    Commercial use requires a separate license. See the LICENSE file for the
+    full terms.
+
+
+-------------------------------------------------------------------------------
+中文摘要（仅供参考，以英文正文为准）
+
+- 你可以免费、自由地使用、学习、修改和分享本软件，包括个人使用、学习、教学
+  与研究、非营利组织用于其非商业宗旨的活动。
+- 禁止商用：包括在营利性企业的业务或生产环境中使用、销售或搭售、作为付费或
+  广告支撑的云服务/SaaS 提供、用于向第三方提供收费服务或咨询等。公司内部使用
+  与商业产品的开发评估同样属于商业用途，需另行取得商业授权。
+- 二次开发必须开源：任何修改版本或再分发（无论源码还是二进制、桌面应用还是
+  网络服务）都必须继续采用本许可证，向接收者免费提供完整的对应源代码，并保留
+  原有版权、许可证与署名声明，注明修改内容与日期。
+- 不得使用「MoliTutu」名称或标志作为修改版本的产品名或品牌。
+- 软件按「现状」提供，不附带任何担保；商用授权请联系作者。
+- 本许可证属于「源码可用 + 强传染」许可证，因限制商业用途，不属于 OSI 定义
+  的开源许可证。
