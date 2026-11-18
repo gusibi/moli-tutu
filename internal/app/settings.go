@@ -11,129 +11,139 @@ func (a *App) settingsView(c *ui.Context) {
 	a.pageHeader(c, a.tr("设置", "Settings"), a.tr("语言、主题、本地 API 代理和存储提供方。", "Language, theme, local API proxy and storage providers."))
 	ui.Box(c).Height(14)
 
-	a.settingsCard(c, a.tr("外观与语言", "Appearance and language"), func() {
-		langLabel := "中文"
-		if a.lang == "en" {
-			langLabel = "English"
-		}
-		if ui.Select(c, &langLabel, []string{"中文", "English"}).Label(a.tr("语言", "Language")).Changed() {
-			if langLabel == "English" {
-				a.setLanguage("en")
-			} else {
-				a.setLanguage("zh")
-			}
-		}
-		themeLabels := []string{a.tr("跟随系统", "Follow system"), a.tr("浅色", "Light"), a.tr("深色", "Dark")}
-		themeValues := []string{"system", "light", "dark"}
-		themeLabel := themeLabels[0]
-		for i, v := range themeValues {
-			if v == a.theme {
-				themeLabel = themeLabels[i]
-			}
-		}
-		if ui.Select(c, &themeLabel, themeLabels).Label(a.tr("主题", "Theme")).Changed() {
-			for i, label := range themeLabels {
-				if label == themeLabel {
-					a.setTheme(themeValues[i])
-					break
-				}
-			}
-		}
-	})
-
-	ui.Box(c).Height(12)
-	a.settingsCard(c, a.tr("本地 API 代理", "Local API proxy"), func() {
-		enabled := a.proxy.Enabled
-		if switchRow(c, a.tr("启用代理", "Enable proxy"), &enabled) && !a.proxyBusy {
-			port := uint16(a.proxyPort)
-			go a.setProxy(enabled, port)
-		}
-		ui.Row(c).Gap(10).AlignItems(ui.End).Children(func() {
-			port := a.proxyPort
-			if ui.NumberInput(c, &port, 1, 65535, 1).
-				Label(a.tr("端口", "Port")).Disabled(a.proxy.Running || a.proxyBusy).Changed() {
-				a.proxyPort = port
-				a.settings.APIProxyPort = uint16(port)
-				go func() { _ = a.svc.SaveSettings(a.settings) }()
-			}
-			ui.Column(c).Gap(2).Children(func() {
-				ui.Text(c, a.tr("端点", "Endpoint")).FontSize(11).TextColor(t.TextMuted)
-				ui.Text(c, "http://127.0.0.1:"+itoa(int(a.proxyPort))+"/upload").FontSize(12).TextColor(t.Accent)
-			})
-		})
-		status := a.tr("已停止", "Stopped")
-		if a.proxy.Running {
-			status = a.tr("运行中", "Running")
-		}
-		if a.proxyBusy {
-			status = a.tr("处理中…", "Working…")
-		}
-		ui.Text(c, a.tr("状态：", "Status: ")+status).FontSize(12).TextColor(t.TextMuted)
-		if a.proxyErr != "" {
-			ui.Text(c, a.proxyErr).FontSize(12).TextColor(t.Danger)
-		}
-		ui.Text(c, a.tr("仅监听 127.0.0.1，其他工具可向该端点 POST multipart 文件。", "Listens on 127.0.0.1 only; other tools can POST a multipart file to this endpoint.")).FontSize(12).TextColor(t.TextMuted)
-	})
-
-	ui.Box(c).Height(12)
-	ui.Row(c).AlignItems(ui.Center).Children(func() {
-		ui.Text(c, a.tr("存储提供方", "Storage providers")).FontSize(16).Bold().Grow(1)
-		if ui.PrimaryButton(c, a.tr("添加配置", "Add config")).Clicked() {
-			a.editing = model.NewStorageConfig(model.CloudflareR2)
-			a.editingNew = true
-			a.configErr = ""
-			a.configOpen = true
-		}
-	})
-	ui.Box(c).Height(8)
-	if len(a.configs.Configs) == 0 {
-		ui.Column(c).Padding(24).Radius(10).Background(t.Surface).AlignItems(ui.Center).Children(func() {
-			ui.Text(c, a.tr("还没有存储配置", "No storage configuration")).Bold()
-			ui.Text(c, a.tr("添加一个 Cloudflare R2、S3、Imgur、GitHub 等提供方。", "Add Cloudflare R2, S3, Imgur, GitHub or another provider.")).FontSize(12).TextColor(t.TextMuted)
-		})
-	} else {
-		for _, cfg := range a.configs.Configs {
-			cfg := cfg
-			active := cfg.ID == a.configs.ActiveID
-			ui.Row(c).Gap(10).Padding(12).Radius(10).Background(t.Surface).
-				Border(1, t.Border).AlignItems(ui.Center).Children(func() {
-				ui.Column(c).Gap(2).Grow(1).Children(func() {
-					ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
-						ui.Text(c, cfg.Name).Bold()
-						if active {
-							ui.Text(c, a.tr("当前", "Active")).FontSize(11).TextColor(t.Accent)
+	ui.Scroll(c).Grow(1).Children(func() {
+		ui.Column(c).Children(func() {
+			a.settingsCard(c, a.tr("外观与语言", "Appearance and language"), func() {
+				ui.Row(c).AlignItems(ui.Center).Gap(12).Children(func() {
+					ui.Text(c, a.tr("语言", "Language")).Grow(1)
+					langIdx := 0
+					if a.lang == "en" {
+						langIdx = 1
+					}
+					if ui.Segmented(c, &langIdx, "中文", "English").Label(a.tr("语言", "Language")).Changed() {
+						if langIdx == 1 {
+							a.setLanguage("en")
+						} else {
+							a.setLanguage("zh")
 						}
-					})
-					ui.Text(c, cfg.Kind.Label()).FontSize(12).TextColor(t.TextMuted)
-					if cfg.Endpoint != "" {
-						ui.Text(c, cfg.Endpoint).FontSize(11).TextColor(t.TextMuted).SingleLine()
 					}
 				})
-				if !active {
-					if ui.Button(c.Key(cfg.ID+":activate"), a.tr("启用", "Activate")).Clicked() {
-						go a.activateConfig(cfg.ID)
+				ui.Row(c).AlignItems(ui.Center).Gap(12).Children(func() {
+					ui.Text(c, a.tr("主题", "Theme")).Grow(1)
+					themeValues := []string{"system", "light", "dark"}
+					themeIdx := 0
+					for i, v := range themeValues {
+						if v == a.theme {
+							themeIdx = i
+							break
+						}
 					}
+					if ui.Segmented(c, &themeIdx, a.tr("跟随系统", "System"), a.tr("浅色", "Light"), a.tr("深色", "Dark")).
+						Label(a.tr("主题", "Theme")).Changed() {
+						a.setTheme(themeValues[themeIdx])
+					}
+				})
+			})
+
+			ui.Box(c).Height(12)
+			a.settingsCard(c, a.tr("本地 API 代理", "Local API proxy"), func() {
+				enabled := a.proxy.Enabled
+				if switchRow(c, a.tr("启用代理", "Enable proxy"), &enabled) && !a.proxyBusy {
+					port := uint16(a.proxyPort)
+					go a.setProxy(enabled, port)
 				}
-				if ui.Button(c.Key(cfg.ID+":edit"), a.tr("编辑", "Edit")).Clicked() {
-					a.editing = cfg
-					a.editingNew = false
+				ui.Row(c).Gap(10).AlignItems(ui.End).Children(func() {
+					port := a.proxyPort
+					if ui.NumberInput(c, &port, 1, 65535, 1).
+						Label(a.tr("端口", "Port")).Disabled(a.proxy.Running || a.proxyBusy).Changed() {
+						a.proxyPort = port
+						a.settings.APIProxyPort = uint16(port)
+						go func() { _ = a.svc.SaveSettings(a.settings) }()
+					}
+					ui.Column(c).Gap(2).Children(func() {
+						ui.Text(c, a.tr("端点", "Endpoint")).FontSize(11).LetterSpacing(0.15).TextColor(t.TextMuted)
+						ui.Text(c, "http://127.0.0.1:"+itoa(int(a.proxyPort))+"/upload").FontSize(12).LetterSpacing(0.1).TextColor(t.Accent)
+					})
+				})
+				status := a.tr("已停止", "Stopped")
+				if a.proxy.Running {
+					status = a.tr("运行中", "Running")
+				}
+				if a.proxyBusy {
+					status = a.tr("处理中…", "Working…")
+				}
+				ui.Text(c, a.tr("状态：", "Status: ")+status).FontSize(12).LetterSpacing(0.1).TextColor(t.TextMuted)
+				if a.proxyErr != "" {
+					ui.Text(c, a.proxyErr).FontSize(12).TextColor(t.Danger)
+				}
+				ui.Text(c, a.tr("仅监听 127.0.0.1，其他工具可向该端点 POST multipart 文件。", "Listens on 127.0.0.1 only; other tools can POST a multipart file to this endpoint.")).FontSize(12).LetterSpacing(0.1).TextColor(t.TextMuted)
+			})
+
+			ui.Box(c).Height(14)
+			ui.Row(c).AlignItems(ui.Center).Children(func() {
+				ui.Text(c, a.tr("存储提供方", "Storage providers")).FontSize(16).Bold().LetterSpacing(-0.2).Grow(1)
+				if ui.PrimaryButton(c, a.tr("添加配置", "Add config")).Clicked() {
+					a.editing = model.NewStorageConfig(model.CloudflareR2)
+					a.editingNew = true
 					a.configErr = ""
 					a.configOpen = true
 				}
-				if ui.Button(c.Key(cfg.ID+":delete"), a.tr("删除", "Delete")).Clicked() {
-					a.ask(a.tr("删除这个配置？", "Delete this configuration?"), cfg.Name, func() {
-						if _, err := a.svc.DeleteConfig(cfg.ID); err != nil {
-							a.pushError(err.Error())
-							return
-						}
-						a.loadConfigs()
-						a.pushToast(a.tr("配置已删除", "Configuration deleted"))
-					})
-				}
 			})
-			ui.Box(c).Height(6)
-		}
-	}
+			ui.Box(c).Height(8)
+			if len(a.configs.Configs) == 0 {
+				ui.Column(c).Padding(24).Radius(10).Background(t.Surface).Border(1, t.Border).AlignItems(ui.Center).Children(func() {
+					ui.Text(c, a.tr("还没有存储配置", "No storage configuration")).Bold()
+					ui.Text(c, a.tr("添加一个 Cloudflare R2、S3、Imgur、GitHub 等提供方。", "Add Cloudflare R2, S3, Imgur, GitHub or another provider.")).FontSize(12).LetterSpacing(0.1).TextColor(t.TextMuted)
+				})
+			} else {
+				for _, cfg := range a.configs.Configs {
+					cfg := cfg
+					active := cfg.ID == a.configs.ActiveID
+					borderColor := t.Border
+					if active {
+						borderColor = t.Accent.Alpha(0.6)
+					}
+					ui.Row(c).Gap(10).Padding(12).Radius(10).Background(t.Surface).
+						Border(1, borderColor).AlignItems(ui.Center).Children(func() {
+						ui.Column(c).Gap(2).Grow(1).Children(func() {
+							ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
+								ui.Text(c, cfg.Name).Bold()
+								if active {
+									ui.Badge(c, a.tr("当前", "Active"))
+								}
+							})
+							ui.Text(c, cfg.Kind.Label()).FontSize(12).LetterSpacing(0.1).TextColor(t.TextMuted)
+							if cfg.Endpoint != "" {
+								ui.Text(c, cfg.Endpoint).FontSize(11).LetterSpacing(0.15).TextColor(t.TextMuted).SingleLine()
+							}
+						})
+						if !active {
+							if ui.Button(c.Key(cfg.ID+":activate"), a.tr("启用", "Activate")).Clicked() {
+								go a.activateConfig(cfg.ID)
+							}
+						}
+						if ui.Button(c.Key(cfg.ID+":edit"), a.tr("编辑", "Edit")).Clicked() {
+							a.editing = cfg
+							a.editingNew = false
+							a.configErr = ""
+							a.configOpen = true
+						}
+						if ui.Button(c.Key(cfg.ID+":delete"), a.tr("删除", "Delete")).Clicked() {
+							a.ask(a.tr("删除这个配置？", "Delete this configuration?"), cfg.Name, a.tr("删除", "Delete"), func() {
+								if _, err := a.svc.DeleteConfig(cfg.ID); err != nil {
+									a.pushError(err.Error())
+									return
+								}
+								a.loadConfigs()
+								a.pushToast(a.tr("配置已删除", "Configuration deleted"))
+							})
+						}
+					})
+					ui.Box(c).Height(6)
+				}
+			}
+		})
+	})
 	a.configModal(c)
 }
 
@@ -190,7 +200,7 @@ func (a *App) configModal(c *ui.Context) {
 			if a.editingNew {
 				title = a.tr("添加配置", "Add configuration")
 			}
-			ui.Text(c, title).FontSize(18).Bold()
+			ui.Text(c, title).FontSize(18).Bold().LetterSpacing(-0.25)
 			ui.Field(c, a.tr("名称", "Name"), func() {
 				ui.TextInput(c, &a.editing.Name).Placeholder("My R2 / Production S3")
 			})

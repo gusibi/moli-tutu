@@ -15,6 +15,7 @@ func (a *App) compressHistoryView(c *ui.Context) {
 		if ui.Button(c, a.tr("清空", "Clear")).Clicked() {
 			a.ask(a.tr("清空压缩历史？", "Clear compression history?"),
 				a.tr("这会删除全部压缩记录和对应的本地文件。", "This removes every record and its local files."),
+				a.tr("清空", "Clear"),
 				func() {
 					if err := a.svc.ClearCompressHistory(); err != nil {
 						a.pushError(err.Error())
@@ -65,7 +66,7 @@ func (a *App) compressHistoryView(c *ui.Context) {
 					a.restoreCompress(rec)
 				}
 				if ui.Button(c.Key(rec.ID+":delete"), a.tr("删除", "Delete")).Clicked() {
-					a.ask(a.tr("删除这条压缩记录？", "Delete this compression?"), rec.OriginalName, func() {
+					a.ask(a.tr("删除这条压缩记录？", "Delete this compression?"), rec.OriginalName, a.tr("删除", "Delete"), func() {
 						if err := a.svc.DeleteCompressRecord(rec.ID); err != nil {
 							a.pushError(err.Error())
 							return
@@ -134,9 +135,9 @@ func (a *App) compressPreviewModal(c *ui.Context) {
 	t := c.Theme()
 	ui.Modal(c, &a.compPreviewOpen, func() {
 		ui.Column(c).Gap(10).Children(func() {
-			ui.Text(c, rec.OriginalName).FontSize(18).Bold().SingleLine()
+			ui.Text(c, rec.OriginalName).FontSize(18).Bold().LetterSpacing(-0.25).SingleLine()
 			ui.Text(c, formatSize(rec.OriginalSize)+" → "+formatSize(rec.CompressedSize)+" · "+ratioText(rec.CompressionRatio)).
-				FontSize(12).TextColor(t.TextMuted)
+				FontSize(12).LetterSpacing(0.1).TextColor(t.TextMuted)
 			ui.Split(c, &a.compPreviewSplit, func() {
 				a.previewPane(c, a.tr("原图", "Original"), a.compPreviewOrig)
 			}, func() {

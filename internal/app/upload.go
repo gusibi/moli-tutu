@@ -14,6 +14,7 @@ import (
 
 func (a *App) uploadView(c *ui.Context) {
 	t := c.Theme()
+	prefs := c.Preferences()
 	if c.Shortcut(ui.Cmd, ui.KeyO) {
 		go a.chooseImages()
 	}
@@ -21,98 +22,131 @@ func (a *App) uploadView(c *ui.Context) {
 		go a.pasteImage()
 	}
 	a.pageHeader(c, a.tr("图片上传", "Image upload"), a.tr("拖拽、选择、粘贴或输入图片链接，上传到当前启用的存储。", "Drop, pick, paste or enter an image URL. Uploads go to the active storage."))
-	ui.Box(c).Height(8)
+	ui.Box(c).Height(10)
 
-	if len(a.configs.Configs) == 0 {
-		ui.Row(c).Gap(12).Padding(14).Radius(10).Background(t.Accent.Alpha(0.10)).Children(func() {
-			ui.Text(c, a.tr("还没有配置存储提供方，先添加一个才能上传。", "No storage provider yet. Add one before uploading.")).Grow(1)
-			if ui.PrimaryButton(c, a.tr("去设置", "Open settings")).Clicked() {
-				a.page = pageSettings
-			}
-		})
-	}
-
-	zone := ui.Column(c).Height(190).Padding(24).Gap(12).Radius(12).Border(2, t.Border).
-		AlignItems(ui.Center).Justify(ui.Center).
-		Transition(ui.ElementTransition{Colors: true, Shadows: true, Duration: 160 * time.Millisecond})
-	if files := zone.DroppedFiles(); files != nil {
-		a.startUploadPaths(files)
-	}
-	if zone.FileDragOver() {
-		zone.Border(2, t.Accent).Shadow(0, 8, 22, 0, ui.RGBA(0, 0, 0, 0.22))
-	} else {
-		zone.Shadow(0, 2, 10, 0, ui.RGBA(0, 0, 0, 0.08))
-	}
-	zone.Children(func() {
-		ui.Text(c, a.tr("把图片拖到这里", "Drop images here")).FontSize(18).Bold()
-		ui.Text(c, a.tr("或选择一个/多个文件，也可以直接粘贴截图", "Or choose one or more files, or paste a screenshot")).FontSize(13).TextColor(t.TextMuted)
-		ui.Row(c).Gap(10).Children(func() {
-			if ui.PrimaryButton(c, a.tr("选择图片", "Choose images")).Tooltip("⌘O").Clicked() {
-				go a.chooseImages()
-			}
-			if ui.Button(c, a.tr("从剪贴板粘贴", "Paste from clipboard")).Tooltip("⇧⌘V").Clicked() {
-				go a.pasteImage()
-			}
-		})
-	})
-
-	ui.Box(c).Height(12)
-	ui.Row(c).Gap(10).AlignItems(ui.Center).Children(func() {
-		input := ui.TextInput(c, &a.urlInput).Placeholder(a.tr("粘贴图片 URL，回车上传", "Paste an image URL and press Enter")).Grow(1).Label("Image URL")
-		submit := ui.PrimaryButton(c, a.tr("上传链接", "Upload URL")).Disabled(strings.TrimSpace(a.urlInput) == "")
-		if (input.Submitted() || submit.Clicked()) && strings.TrimSpace(a.urlInput) != "" {
-			raw := a.urlInput
-			a.urlInput = ""
-			go a.uploadURL(raw)
-		}
-	})
-
-	if len(a.uploads) > 0 {
-		ui.Box(c).Height(12)
-		ui.Column(c).Gap(4).Padding(10).Radius(8).Background(t.Surface).Children(func() {
-			for i := range a.uploads {
-				u := &a.uploads[i]
-				row := ui.Row(c).Gap(8).AlignItems(ui.Center)
-				ui.Text(c, u.Name).Grow(1).SingleLine()
-				state := u.State
-				color := t.TextMuted
-				switch state {
-				case "done":
-					state, color = a.tr("完成", "Done"), t.Accent
-				case "error":
-					state, color = u.Error, t.Danger
-				case "uploading":
-					state = a.tr("上传中…", "Uploading…")
-					if u.Total > 0 {
-						state = itoa(int(u.Sent*100/u.Total)) + "%"
+	ui.Scroll(c).Grow(1).Children(func() {
+		ui.Column(c).Children(func() {
+			if len(a.configs.Configs) == 0 {
+				ui.Row(c).Gap(12).Padding(14).Radius(10).Background(t.Accent.Alpha(0.10)).
+					Border(1, t.Accent.Alpha(0.25)).AlignItems(ui.Center).Children(func() {
+					ui.Text(c, a.tr("还没有配置存储提供方，先添加一个才能上传。", "No storage provider yet. Add one before uploading.")).Grow(1)
+					if ui.PrimaryButton(c, a.tr("去设置", "Open settings")).Clicked() {
+						a.page = pageSettings
 					}
-				default:
-					state = a.tr("等待", "Waiting")
+				})
+				ui.Box(c).Height(10)
+			}
+
+			a.dropZone(c, 190,
+				a.tr("把图片拖到这里", "Drop images here"),
+				a.tr("或选择一个/多个文件，也可以直接粘贴截图", "Or choose one or more files, or paste a screenshot"),
+				a.tr("选择图片", "Choose images"), "⌘O", func() { go a.chooseImages() },
+				a.tr("从剪贴板粘贴", "Paste from clipboard"), "⇧⌘V", func() { go a.pasteImage() },
+				func(files []string) { a.startUploadPaths(files) },
+			)
+
+			ui.Box(c).Height(12)
+			ui.Row(c).Gap(10).AlignItems(ui.Center).Children(func() {
+				input := ui.TextInput(c, &a.urlInput).Placeholder(a.tr("粘贴图片 URL，回车上传", "Paste an image URL and press Enter")).Grow(1).Label("Image URL")
+				submit := ui.PrimaryButton(c, a.tr("上传链接", "Upload URL")).Disabled(strings.TrimSpace(a.urlInput) == "")
+				if (input.Submitted() || submit.Clicked()) && strings.TrimSpace(a.urlInput) != "" {
+					raw := a.urlInput
+					a.urlInput = ""
+					go a.uploadURL(raw)
 				}
-				ui.Text(c, formatSize(u.Size)).FontSize(11).TextColor(t.TextMuted)
-				ui.Text(c, state).FontSize(12).TextColor(color)
-				_ = row
+			})
+
+			if len(a.uploads) > 0 {
+				ui.Box(c).Height(12)
+				a.uploadQueueCard(c, prefs.ReduceMotion)
+			}
+
+			ui.Box(c).Height(20)
+			ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
+				ui.Text(c, a.tr("最近上传", "Recent uploads")).FontSize(16).Bold().LetterSpacing(-0.2).Grow(1)
+				if ui.Button(c, a.tr("刷新", "Refresh")).Tooltip("⌘R").Clicked() {
+					a.Refresh()
+					a.pushInfo(a.tr("已刷新", "Refreshed"))
+				}
+				if ui.Button(c, a.tr("查看全部", "View all")).Clicked() {
+					a.page = pageHistory
+				}
+			})
+			ui.Box(c).Height(8)
+			recent := a.history
+			if len(recent) > 10 {
+				recent = recent[:10]
+			}
+			a.historyTable(c, recent, true)
+		})
+	})
+}
+
+func (a *App) uploadQueueCard(c *ui.Context, reduceMotion bool) {
+	t := c.Theme()
+	hasFinished := false
+	for _, u := range a.uploads {
+		if u.State == "done" || u.State == "error" {
+			hasFinished = true
+			break
+		}
+	}
+	ui.Column(c).Gap(6).Padding(12).Radius(10).Background(t.Surface).Border(1, t.Border.Alpha(0.5)).Children(func() {
+		ui.Row(c).AlignItems(ui.Center).Children(func() {
+			ui.Text(c, a.tr("上传队列", "Upload queue")).FontSize(12).Bold().LetterSpacing(0.15).TextColor(t.TextMuted).Grow(1)
+			if hasFinished {
+				if ui.Button(c, a.tr("清除已完成", "Clear finished")).Clicked() {
+					kept := a.uploads[:0]
+					for _, u := range a.uploads {
+						if u.State != "done" && u.State != "error" {
+							kept = append(kept, u)
+						}
+					}
+					a.uploads = kept
+				}
 			}
 		})
-	}
-
-	ui.Box(c).Height(20)
-	ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
-		ui.Text(c, a.tr("最近上传", "Recent uploads")).FontSize(16).Bold().LetterSpacing(-0.2).Grow(1)
-		if ui.Button(c, a.tr("刷新", "Refresh")).Tooltip("⌘R").Clicked() {
-			a.Refresh()
-			a.pushInfo(a.tr("已刷新", "Refreshed"))
-		}
-		if ui.Button(c, a.tr("查看全部", "View all")).Clicked() {
-			a.page = pageHistory
+		for i := range a.uploads {
+			u := &a.uploads[i]
+			row := ui.Column(c.Key(u.Name)).Gap(4)
+			if !reduceMotion {
+				row.Transition(ui.ElementTransition{
+					Animation: &ui.Smooth,
+					Enter:     &ui.Motion{Collapse: true},
+					Exit:      &ui.Motion{Collapse: true},
+				})
+			}
+			row.Children(func() {
+				ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
+					ui.Text(c, u.Name).FontSize(13).Grow(1).SingleLine()
+					state := u.State
+					color := t.TextMuted
+					switch state {
+					case "done":
+						state, color = a.tr("完成", "Done"), t.Accent
+					case "error":
+						state, color = u.Error, t.Danger
+					case "uploading":
+						state = a.tr("上传中…", "Uploading…")
+						if u.Total > 0 {
+							state = itoa(int(u.Sent*100/u.Total)) + "%"
+						}
+					default:
+						state = a.tr("等待", "Waiting")
+					}
+					ui.Text(c, formatSize(u.Size)).FontSize(11).LetterSpacing(0.15).TextColor(t.TextMuted)
+					ui.Text(c, state).FontSize(12).LetterSpacing(0.1).TextColor(color)
+				})
+				if u.State == "uploading" {
+					pct := -1.0
+					if u.Total > 0 {
+						pct = float64(u.Sent) / float64(u.Total)
+					}
+					ui.Progress(c, pct).Height(3)
+				}
+			})
 		}
 	})
-	ui.Box(c).Height(8)
-	recent := a.history
-	if len(recent) > 10 {
-		recent = recent[:10]
-	}
-	a.historyTable(c, recent, true)
 }
 
 func (a *App) chooseImages() {

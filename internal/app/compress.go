@@ -28,26 +28,13 @@ func (a *App) compressView(c *ui.Context) {
 	a.pageHeader(c, a.tr("图片压缩", "Image compression"), a.tr("在本地压缩、缩放并预览，再保存或直接上传。", "Compress, resize and compare locally, then save or upload."))
 	ui.Box(c).Height(12)
 	if len(a.compOriginal) == 0 {
-		zone := ui.Column(c).Height(280).Padding(24).Gap(12).Radius(12).Border(2, t.Border).
-			AlignItems(ui.Center).Justify(ui.Center)
-		if files := zone.DroppedFiles(); files != nil && len(files) > 0 {
-			go a.loadCompressPath(files[0], "drag")
-		}
-		if zone.FileDragOver() {
-			zone.Border(2, t.Accent)
-		}
-		zone.Children(func() {
-			ui.Text(c, a.tr("拖入一张图片开始压缩", "Drop an image to compress")).FontSize(18).Bold()
-			ui.Text(c, a.tr("支持 JPEG、PNG、WebP、GIF、BMP", "JPEG, PNG, WebP, GIF and BMP are supported")).FontSize(13).TextColor(t.TextMuted)
-			ui.Row(c).Gap(10).Children(func() {
-				if ui.PrimaryButton(c, a.tr("选择图片", "Choose image")).Tooltip("⌘O").Clicked() {
-					go a.chooseCompressImage()
-				}
-				if ui.Button(c, a.tr("从剪贴板粘贴", "Paste from clipboard")).Tooltip("⇧⌘V").Clicked() {
-					go a.pasteCompressImage()
-				}
-			})
-		})
+		a.dropZone(c, 280,
+			a.tr("拖入一张图片开始压缩", "Drop an image to compress"),
+			a.tr("支持 JPEG、PNG、WebP、GIF、BMP", "JPEG, PNG, WebP, GIF and BMP are supported"),
+			a.tr("选择图片", "Choose image"), "⌘O", func() { go a.chooseCompressImage() },
+			a.tr("从剪贴板粘贴", "Paste from clipboard"), "⇧⌘V", func() { go a.pasteCompressImage() },
+			func(files []string) { go a.loadCompressPath(files[0], "drag") },
+		)
 		return
 	}
 
@@ -57,10 +44,11 @@ func (a *App) compressView(c *ui.Context) {
 				a.compressSettings(c)
 			})
 			ui.Box(c).Height(10)
-			ui.Row(c).Gap(8).Children(func() {
+			ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
 				if ui.Button(c, a.tr("重来", "Reset")).Clicked() {
 					a.resetCompress()
 				}
+				ui.Box(c).Grow(1)
 				if ui.Button(c, a.tr("保存", "Save")).Disabled(a.compResult == nil).Clicked() {
 					if res := a.compResult; res != nil {
 						name, original, cfg, source := a.compName, a.compOriginal, a.compCfg, a.compSource
@@ -122,7 +110,7 @@ func (a *App) previewPane(c *ui.Context, label string, src ui.ImageSource) {
 func (a *App) compressSettings(c *ui.Context) {
 	t := c.Theme()
 	ui.Column(c).Gap(10).Children(func() {
-		ui.Text(c, a.tr("格式", "Format")).FontSize(13).Bold()
+		ui.Text(c, a.tr("格式", "Format")).FontSize(13).Bold().LetterSpacing(-0.1)
 		label := formatLabels[0]
 		for i, v := range formatValues {
 			if v == a.compCfg.Format {
@@ -138,14 +126,18 @@ func (a *App) compressSettings(c *ui.Context) {
 			a.scheduleCompress(false)
 		}
 		if a.compCfg.Format != "oxipng" {
+			ui.Row(c).AlignItems(ui.Center).Children(func() {
+				ui.Text(c, a.tr("质量", "Quality")).FontSize(12).LetterSpacing(0.1).TextColor(t.TextMuted).Grow(1)
+				ui.Text(c, itoa(a.compCfg.Quality)+"%").FontSize(12).Bold().LetterSpacing(0.1).TextColor(t.Text)
+			})
 			q := float64(a.compCfg.Quality)
 			if ui.Slider(c, &q, 1, 100).Label(a.tr("质量", "Quality")).Changed() {
 				a.compCfg.Quality = int(q)
 				a.scheduleCompress(false)
 			}
-			ui.Text(c, itoa(a.compCfg.Quality)+"%").FontSize(12).TextColor(t.TextMuted)
 		}
-		ui.Text(c, a.tr("缩放", "Resize")).FontSize(13).Bold()
+		ui.Divider(c)
+		ui.Text(c, a.tr("缩放", "Resize")).FontSize(13).Bold().LetterSpacing(-0.1)
 		preset := a.compCfg.ResizePreset
 		if ui.Select(c, &preset, presetLabels).Label(a.tr("缩放预设", "Resize preset")).Changed() {
 			a.compCfg.ResizePreset = preset
@@ -171,9 +163,10 @@ func (a *App) compressSettings(c *ui.Context) {
 		if switchRow(c, a.tr("保持宽高比", "Keep aspect ratio"), &a.compCfg.MaintainAspectRatio) {
 			a.scheduleCompress(false)
 		}
-		ui.Text(c, dimsText(int(a.compWidth), int(a.compHeight))).FontSize(12).TextColor(t.TextMuted)
+		ui.Text(c, dimsText(int(a.compWidth), int(a.compHeight))).FontSize(12).LetterSpacing(0.1).TextColor(t.TextMuted)
 
-		ui.Text(c, a.tr("高级", "Advanced")).FontSize(13).Bold()
+		ui.Divider(c)
+		ui.Text(c, a.tr("高级", "Advanced")).FontSize(13).Bold().LetterSpacing(-0.1)
 		if switchRow(c, a.tr("预乘 Alpha", "Premultiply alpha"), &a.compCfg.PremultiplyAlpha) {
 			a.scheduleCompress(false)
 		}
@@ -195,7 +188,7 @@ func (a *App) compressSettings(c *ui.Context) {
 				}
 			}
 		}
-		ui.Text(c, a.compName).FontSize(11).TextColor(t.TextMuted).SingleLine()
+		ui.Text(c, a.compName).FontSize(11).LetterSpacing(0.15).TextColor(t.TextMuted).SingleLine()
 	})
 }
 

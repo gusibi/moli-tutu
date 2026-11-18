@@ -26,6 +26,7 @@ func (a *App) historyPageView(c *ui.Context) {
 		if ui.Button(c, a.tr("清空", "Clear")).Clicked() {
 			a.ask(a.tr("清空上传历史？", "Clear upload history?"),
 				a.tr("这会删除全部上传记录，但不会删除图床上的图片。", "This removes every upload record, not the images on the storage."),
+				a.tr("清空", "Clear"),
 				func() {
 					if err := a.svc.ClearHistory(); err != nil {
 						a.pushError(err.Error())
@@ -110,7 +111,7 @@ func (a *App) historyTable(c *ui.Context, records []model.UploadRecord, compact 
 	a.historyState.Key = func(i int) any { return records[i].ID }
 	a.historyState.Label = func(i int) string { return records[i].OriginalFilename }
 	tableCtx := c.Key("history-table-" + itoa(a.historyVersion))
-	ui.Table(tableCtx, &a.historyState, cols, len(records), func(row, col int) {
+	table := ui.Table(tableCtx, &a.historyState, cols, len(records), func(row, col int) {
 		rec := records[row]
 		switch col {
 		case 0:
@@ -137,7 +138,7 @@ func (a *App) historyTable(c *ui.Context, records []model.UploadRecord, compact 
 						a.svc.OpenURL(rec.URL)
 					}
 					if ui.Button(c.Key(rec.ID+":del"), a.tr("删除", "Delete")).Clicked() {
-						a.ask(a.tr("删除这条记录？", "Delete this record?"), rec.OriginalFilename, func() {
+						a.ask(a.tr("删除这条记录？", "Delete this record?"), rec.OriginalFilename, a.tr("删除", "Delete"), func() {
 							if err := a.svc.DeleteRecord(rec.ID); err != nil {
 								a.pushError(err.Error())
 								return
@@ -148,7 +149,19 @@ func (a *App) historyTable(c *ui.Context, records []model.UploadRecord, compact 
 				}
 			})
 		}
-	}).Grow(1).Label(a.tr("上传记录", "Uploads"))
+	}).Label(a.tr("上传记录", "Uploads"))
+	if compact {
+		h := float32(len(records)*46 + 44)
+		if h < 180 {
+			h = 180
+		}
+		if h > 380 {
+			h = 380
+		}
+		table.Height(h)
+	} else {
+		table.Grow(1)
+	}
 	a.previewModal(c)
 }
 
@@ -172,8 +185,8 @@ func (a *App) previewModal(c *ui.Context) {
 	t := c.Theme()
 	ui.Modal(c, &a.previewOpen, func() {
 		ui.Column(c).Gap(10).Children(func() {
-			ui.Text(c, rec.OriginalFilename).FontSize(18).Bold().SingleLine()
-			ui.Text(c, formatSize(int64(rec.FileSize))+" · "+formatTime(rec.UploadTime)).FontSize(12).TextColor(t.TextMuted)
+			ui.Text(c, rec.OriginalFilename).FontSize(18).Bold().LetterSpacing(-0.25).SingleLine()
+			ui.Text(c, formatSize(int64(rec.FileSize))+" · "+formatTime(rec.UploadTime)).FontSize(12).LetterSpacing(0.1).TextColor(t.TextMuted)
 			ui.Box(c).Height(360).Width(620).Background(t.Surface).Radius(8).Children(func() {
 				if a.thumbs != nil {
 					if src := a.thumbs.Get(rec.URL); src != nil {

@@ -92,6 +92,7 @@ type App struct {
 	confirmOpen    bool
 	confirmTitle   string
 	confirmMessage string
+	confirmLabel   string
 	confirmAction  func()
 
 	thumbs          *ThumbCache
@@ -115,7 +116,7 @@ func New(svc service.Service) *App {
 		settings:         svc.Settings(),
 		proxy:            svc.ProxyStatus(),
 		historyPage:      1,
-		compSplit:        180,
+		compSplit:        300,
 		compPreviewSplit: 350,
 		compCfg:          model.DefaultCompressConfig(),
 		editing:          model.NewStorageConfig(model.CloudflareR2),
@@ -329,22 +330,33 @@ func (a *App) View(c *ui.Context) {
 	for _, msg := range toasts {
 		c.AddToast(ui.Toast{Title: msg.Text, Type: msg.Type, Timeout: msg.Timeout})
 	}
+	prefs := c.Preferences()
 	bg := t.Background
-	if c.Vibrancy() {
+	if c.Vibrancy() && !prefs.ReduceTransparency {
 		c.Root().Background(ui.Transparent)
 		bg = ui.Transparent
 	}
+	dividerColor := t.Border.Alpha(0.35)
+	if prefs.HighContrast {
+		dividerColor = t.Border
+	}
 	ui.Row(c).Fill().AlignItems(ui.Stretch).Background(bg).Children(func() {
 		a.sidebar(c)
-		ui.Box(c).Width(1).Background(t.Border.Alpha(0.35))
+		ui.Box(c).Width(1).Background(dividerColor)
 		ui.Column(c).Grow(1).MinWidth(0).Background(t.Background).Children(func() {
 			a.titlebar(c)
 			page := ui.Column(c.Key(a.page)).Grow(1).Padding(24, 24).MinWidth(0)
-			page.Transition(ui.ElementTransition{
-				Animation: &ui.Snappy,
-				Enter:     &ui.Motion{Y: 8},
-				Exit:      &ui.Motion{Y: -6},
-			})
+			if prefs.ReduceMotion {
+				page.Transition(ui.ElementTransition{
+					Duration: 150 * time.Millisecond,
+				})
+			} else {
+				page.Transition(ui.ElementTransition{
+					Animation: &ui.Smooth,
+					Enter:     &ui.Motion{Y: 6},
+					Exit:      &ui.Motion{Y: -4},
+				})
+			}
 			page.Children(func() {
 				switch a.page {
 				case pageHistory:
@@ -366,22 +378,22 @@ func (a *App) View(c *ui.Context) {
 
 func (a *App) sidebar(c *ui.Context) {
 	t := c.Theme()
+	prefs := c.Preferences()
 	top := c.TitleBar().Height
 	if top < 12 {
 		top = 12
 	}
 	side := ui.Column(c).Width(220).Shrink(0)
-	if c.Vibrancy() {
+	if c.Vibrancy() && !prefs.ReduceTransparency {
 		// Enough tint to keep the sidebar readable while still showing the
 		// desktop through the window's Liquid Glass.
-		side.Background(t.Background.Alpha(0.45))
+		side.Background(t.Background.Alpha(0.55))
 	} else {
 		side.Background(t.Surface)
 	}
 	side.Children(func() {
 		ui.Row(c).Height(top+12).Padding(0, 16).AlignItems(ui.End).DragWindow().Children(func() {
-			ui.Text(c, "Moli TuTu").FontSize(18).Bold().LetterSpacing(-0.3).
-				TextShadow(0, 1, 5, ui.RGBA(0, 0, 0, 0.55))
+			ui.Text(c, "Moli TuTu").FontSize(18).Bold().LetterSpacing(-0.35).TextColor(t.Text)
 		})
 		navItems := []struct {
 			id, label string
@@ -390,42 +402,29 @@ func (a *App) sidebar(c *ui.Context) {
 			{pageUpload, a.tr("图片上传", "Upload"), iconUpload},
 			{pageHistory, a.tr("上传历史", "History"), iconHistory},
 			{pageCompress, a.tr("图片压缩", "Compress"), iconZap},
-			{pageCompressHistory, a.tr("压缩历史", "Compressed"), iconHistory},
+			{pageCompressHistory, a.tr("压缩历史", "Compressed"), iconArchive},
 		}
 		ui.Box(c).Height(12)
 		ui.Column(c).Grow(1).Padding(0, 10).Gap(4).Children(func() {
 			for _, item := range navItems {
-				row := ui.ButtonBase(c.Key(item.id)).Padding(7, 10).Gap(10).Radius(8).Label(item.label).
-					Transition(ui.ElementTransition{Colors: true, Duration: 140 * time.Millisecond})
-				scale := row.Animate("press", map[bool]float32{true: 0.985, false: 1}[row.Pressed()], 100*time.Millisecond)
-				row.Scale(scale, scale)
-				fg := t.Text
-				switch {
-				case a.page == item.id:
-					row.Background(t.Accent)
-					fg = t.AccentText
-				case row.Hovered():
-					row.Background(t.SurfaceHover.Alpha(0.45))
-				}
-				row.Children(func() {
-					ui.Icon(c, item.icon).FontSize(16).TextColor(fg)
-					ui.Text(c, item.label).FontSize(14).LetterSpacing(0.1).TextColor(fg).Grow(1)
-				})
-				if row.Clicked() && a.page != item.id {
-					a.page = item.id
-					a.Refresh()
-				}
+				a.sidebarNavItem(c, item.id, item.label, item.icon, prefs.ReduceMotion)
 			}
 		})
-		ui.Column(c).Padding(12).Gap(6).Children(func() {
-			ui.Row(c).Width(196).Gap(4).AlignItems(ui.Center).Children(func() {
+		ui.Column(c).Padding(10, 12).Gap(6).AlignItems(ui.Stretch).Children(func() {
+			ui.Row(c).Gap(4).AlignItems(ui.Center).Children(func() {
 				lang := a.tr("中文", "EN")
-				langBtn := ui.ButtonBase(c).Grow(1).Padding(5, 8).Radius(6).Label(a.tr("切换语言", "Switch language")).
-					Transition(ui.ElementTransition{Colors: true, Duration: 120 * time.Millisecond})
+				langBtn := ui.ButtonBase(c).Grow(1).Padding(6, 8).Radius(7).Label(a.tr("切换语言", "Switch language")).
+					Transition(ui.ElementTransition{Colors: true, Animation: &ui.Smooth})
+				a.pressSpring(langBtn, langBtn.Pressed(), prefs.ReduceMotion)
 				if langBtn.Hovered() {
-					langBtn.Background(t.SurfaceHover.Alpha(0.35))
+					langBtn.Background(t.SurfaceHover.Alpha(0.45))
 				}
-				langBtn.Children(func() { ui.Text(c, lang).Grow(1).TextAlign(ui.Center).FontSize(12).TextColor(t.Text) })
+				langBtn.Children(func() {
+					ui.Row(c).Grow(1).Gap(5).Justify(ui.Center).AlignItems(ui.Center).Children(func() {
+						ui.Icon(c, iconGlobe).FontSize(12).TextColor(t.Text)
+						ui.Text(c, lang).FontSize(12).LetterSpacing(0.15).TextColor(t.Text)
+					})
+				})
 				if langBtn.Clicked() {
 					if a.lang == "zh" {
 						a.setLanguage("en")
@@ -433,24 +432,28 @@ func (a *App) sidebar(c *ui.Context) {
 						a.setLanguage("zh")
 					}
 				}
-				themeIcon := iconMoon
-				if a.theme == "dark" {
+				themeIcon := iconMonitor
+				switch a.theme {
+				case "light":
 					themeIcon = iconSun
+				case "dark":
+					themeIcon = iconMoon
 				}
 				themeLabel := map[string]string{
 					"system": a.tr("系统", "System"),
 					"light":  a.tr("浅色", "Light"),
 					"dark":   a.tr("深色", "Dark"),
 				}[a.theme]
-				theme := ui.ButtonBase(c).Grow(1).Padding(5, 8).Radius(6).Label(a.tr("切换主题", "Switch theme")).
-					Transition(ui.ElementTransition{Colors: true, Duration: 120 * time.Millisecond})
+				theme := ui.ButtonBase(c).Grow(1).Padding(6, 8).Radius(7).Label(a.tr("切换主题", "Switch theme")).
+					Transition(ui.ElementTransition{Colors: true, Animation: &ui.Smooth})
+				a.pressSpring(theme, theme.Pressed(), prefs.ReduceMotion)
 				if theme.Hovered() {
-					theme.Background(t.SurfaceHover.Alpha(0.35))
+					theme.Background(t.SurfaceHover.Alpha(0.45))
 				}
 				theme.Children(func() {
 					ui.Row(c).Grow(1).Gap(5).Justify(ui.Center).AlignItems(ui.Center).Children(func() {
 						ui.Icon(c, themeIcon).FontSize(12).TextColor(t.Text)
-						ui.Text(c, themeLabel).FontSize(12).TextColor(t.Text)
+						ui.Text(c, themeLabel).FontSize(12).LetterSpacing(0.15).TextColor(t.Text)
 					})
 				})
 				if theme.Clicked() {
@@ -464,24 +467,91 @@ func (a *App) sidebar(c *ui.Context) {
 					}
 				}
 			})
-			settings := ui.ButtonBase(c).Width(196).Padding(6, 8).Radius(7).Label(a.tr("设置", "Settings")).
-				Transition(ui.ElementTransition{Colors: true, Duration: 120 * time.Millisecond})
-			if settings.Hovered() {
-				settings.Background(t.SurfaceHover.Alpha(0.35))
+			a.sidebarNavItem(c, pageSettings, a.tr("设置", "Settings"), iconSettings, prefs.ReduceMotion)
+		})
+	})
+}
+
+func (a *App) sidebarNavItem(c *ui.Context, id, label string, icon *ui.SVG, reduceMotion bool) {
+	t := c.Theme()
+	row := ui.ButtonBase(c.Key(id)).Padding(7, 10).Gap(10).Radius(8).Label(label).
+		Transition(ui.ElementTransition{Colors: true, Animation: &ui.Smooth})
+	a.pressSpring(row, row.Pressed(), reduceMotion)
+	fg := t.Text
+	active := a.page == id
+	switch {
+	case active:
+		row.Background(t.Accent.Alpha(0.15))
+		fg = t.Accent
+	case row.Hovered():
+		row.Background(t.SurfaceHover.Alpha(0.45))
+	}
+	row.Children(func() {
+		ui.Icon(c, icon).FontSize(16).TextColor(fg)
+		txt := ui.Text(c, label).FontSize(14).LetterSpacing(0.05).TextColor(fg).Grow(1)
+		if active {
+			txt.Bold()
+		}
+	})
+	if row.Clicked() && !active {
+		a.page = id
+		a.Refresh()
+	}
+}
+
+// pressSpring applies critically damped spring scale feedback on pointer-down.
+func (a *App) pressSpring(e ui.Element, pressed, reduceMotion bool) {
+	if reduceMotion {
+		return
+	}
+	target := float32(1)
+	if pressed {
+		target = 0.975
+	}
+	scale := e.Spring("press", target, ui.SpringOptions{Duration: 140 * time.Millisecond})
+	e.Scale(scale, scale)
+}
+
+// dropZone renders a unified drag-and-drop target with gesture-hinting feedback.
+func (a *App) dropZone(c *ui.Context, height float32, title, subtitle, primaryLabel, primaryTip string, onPrimary func(), secondaryLabel, secondaryTip string, onSecondary func(), onDrop func([]string)) {
+	t := c.Theme()
+	prefs := c.Preferences()
+	zone := ui.Column(c).Height(height).Padding(24).Gap(10).Radius(14).Border(1.5, t.Border).
+		Background(t.Surface.Alpha(0.5)).
+		AlignItems(ui.Center).Justify(ui.Center).
+		Transition(ui.ElementTransition{Colors: true, Shadows: true, Animation: &ui.Smooth})
+	if files := zone.DroppedFiles(); len(files) > 0 && onDrop != nil {
+		onDrop(files)
+	}
+	dragOver := zone.FileDragOver()
+	if !prefs.ReduceMotion {
+		target := float32(1)
+		if dragOver {
+			target = 1.01
+		}
+		scale := zone.Spring("drag", target, ui.SpringOptions{Duration: 180 * time.Millisecond})
+		zone.Scale(scale, scale)
+	}
+	if dragOver {
+		zone.Border(2, t.Accent).Background(t.Accent.Alpha(0.07)).
+			Shadow(0, 8, 24, 0, ui.RGBA(0, 0, 0, 0.18))
+	} else {
+		zone.Shadow(0, 2, 10, 0, ui.RGBA(0, 0, 0, 0.06))
+	}
+	zone.Children(func() {
+		ui.Column(c).Size(44, 44).Radius(22).Background(t.Accent.Alpha(0.12)).
+			AlignItems(ui.Center).Justify(ui.Center).Children(func() {
+			ui.Icon(c, iconUpload).FontSize(20).TextColor(t.Accent)
+		})
+		ui.Text(c, title).FontSize(18).Bold().LetterSpacing(-0.25).LineHeight(1.2)
+		ui.Text(c, subtitle).FontSize(13).LetterSpacing(0.05).TextColor(t.TextMuted)
+		ui.Box(c).Height(2)
+		ui.Row(c).Gap(10).Children(func() {
+			if ui.PrimaryButton(c, primaryLabel).Tooltip(primaryTip).Clicked() && onPrimary != nil {
+				onPrimary()
 			}
-			settings.Children(func() {
-				ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
-					fg := t.Text
-					if a.page == pageSettings {
-						fg = t.Accent
-					}
-					ui.Icon(c, iconSettings).FontSize(14).TextColor(fg)
-					ui.Text(c, a.tr("设置", "Settings")).FontSize(12).TextColor(fg)
-				})
-			})
-			if settings.Clicked() {
-				a.page = pageSettings
-				a.Refresh()
+			if ui.Button(c, secondaryLabel).Tooltip(secondaryTip).Clicked() && onSecondary != nil {
+				onSecondary()
 			}
 		})
 	})
@@ -521,17 +591,22 @@ func (a *App) confirmDialog(c *ui.Context) {
 	if !a.confirmOpen {
 		return
 	}
+	confirm := a.confirmLabel
+	if confirm == "" {
+		confirm = a.tr("确定", "Confirm")
+	}
 	if ui.AlertDialog(c, &a.confirmOpen, a.confirmTitle, a.confirmMessage,
-		a.tr("取消", "Cancel"), a.tr("确定", "Confirm")) == 1 {
+		a.tr("取消", "Cancel"), confirm) == 1 {
 		if a.confirmAction != nil {
 			a.confirmAction()
 		}
 	}
 }
 
-func (a *App) ask(title, message string, action func()) {
+func (a *App) ask(title, message, confirmLabel string, action func()) {
 	a.confirmTitle = title
 	a.confirmMessage = message
+	a.confirmLabel = confirmLabel
 	a.confirmAction = action
 	a.confirmOpen = true
 }
